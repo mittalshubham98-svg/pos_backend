@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&amp;family=Archivo+Narrow:wght@600&amp;display=swap">
+<link rel="stylesheet" href="_ds/modernist-e5d9df01-3bca-4c31-9a65-08f63bff19c6/styles.css">
+<script src="_ds/modernist-e5d9df01-3bca-4c31-9a65-08f63bff19c6/_ds_bundle.js"></script>
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  body{margin:0;background:#201e1d;font-family:"Archivo",system-ui,sans-serif;font-size:15px;line-height:1.55}
+  a{color:#ec3013;text-underline-offset:3px}
+  a:hover{color:#ae1800}
+  h1,h2,h3,h4,h5,h6{margin:0;font-family:"Archivo",system-ui,sans-serif;font-weight:800;line-height:1.12;letter-spacing:-0.015em}
+  input,textarea,button{font-family:inherit}
+  :focus{outline:none}
+  :focus-visible{outline:2px solid #ec3013;outline-offset:2px}
+  ::selection{background:rgba(236,48,19,.3)}
+  .noscroll::-webkit-scrollbar{width:0;height:0}
+  @keyframes drawerUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:40px 16px;background:#201e1d">
+
+<div style="width:430px;height:900px;background:#f3f2f2;color:#201e1d;position:relative;overflow:hidden;display:flex;flex-direction:column;border:2px solid #201e1d;box-shadow:0 12px 32px rgba(45,43,43,.22)">
+
+  <sc-if value="{{ showLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute;inset:0;background:#f3f2f2;display:flex;flex-direction:column;z-index:5">
+      <div style="background:#201e1d;color:#f3f2f2;padding:32px 24px 26px">
+        <div style="font-family:'Archivo Narrow',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.7;margin-bottom:8px">Customer sign in</div>
+        <div style="font-size:26px;font-weight:800;letter-spacing:-0.02em">Pilani Supply Co.</div>
+      </div>
+      <div style="flex:1;padding:28px 24px">
+        <div style="margin-bottom:16px">
+          <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">Customer ID</label>
+          <input value="{{ loginId }}" onChange="{{ onLoginId }}" placeholder="CUST-0418" style="width:100%;min-height:42px;padding:8px 12px;font-size:14px;font-family:'Archivo Narrow',monospace;letter-spacing:.04em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
+        </div>
+        <div style="margin-bottom:8px">
+          <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">Password</label>
+          <input type="password" value="{{ loginPw }}" onChange="{{ onLoginPw }}" placeholder="issued by the store" style="width:100%;min-height:42px;padding:8px 12px;font-size:14px;font-family:'Archivo Narrow',monospace;letter-spacing:.04em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
+        </div>
+        <sc-if value="{{ loginError }}" hint-placeholder-val="{{ false }}">
+          <div style="font-family:'Archivo Narrow',monospace;font-size:12px;color:#ae1800;margin-bottom:12px">{{ loginError }}</div>
+        </sc-if>
+        <button onClick="{{ doLogin }}" style="width:100%;text-align:left;padding:13px 14px;font-weight:800;font-size:15px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer;margin-top:8px">Sign in</button>
+        <div style="font-family:'Archivo Narrow',monospace;font-size:11px;color:rgba(32,30,29,.55);margin-top:18px;line-height:1.6">ID and password are issued by the store when your profile is created. Forgot yours? Ask the shopkeeper to look it up in the admin portal.</div>
+        <div style="font-family:'Archivo Narrow',monospace;font-size:11px;color:rgba(32,30,29,.4);margin-top:14px;line-height:1.6">Demo credentials: CUST-0418 / PILANI0418</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="flex:none;background:#f3f2f2;border-bottom:2px solid rgba(32,30,29,.4);padding:14px 16px 12px">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px">
+      <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Pilani Supply Co.</div>
+      <div style="font-family:'Archivo Narrow',monospace;font-size:11px;letter-spacing:.06em;color:rgba(32,30,29,.55)">{{ customerLabel }}</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:stretch">
+      <input class="input" placeholder="Search 4,750 items — atta, oil, dal…" value="{{ q }}" onChange="{{ onSearch }}" style="flex:1;min-height:38px;padding:6px 10px;font-size:14px;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0">
+      <button onClick="{{ clearSearch }}" style="flex:none;width:38px;height:38px;display:grid;place-items:center;background:transparent;border:1px solid rgba(32,30,29,.4);cursor:pointer;color:#201e1d" title="Clear">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <div style="flex:none;display:flex;gap:0;overflow-x:auto;border-bottom:2px solid rgba(32,30,29,.4)" class="noscroll">
+    <sc-for list="{{ cats }}" as="c" hint-placeholder-count="6">
+      <button onClick="{{ c.pick }}" style="{{ c.style }}">{{ c.name }}</button>
+    </sc-for>
+  </div>
+
+  <div style="flex:1;overflow-y:auto" class="noscroll">
+
+    <sc-if value="{{ showSpotlight }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#ec3013;color:#f3f2f2;padding:18px 16px 16px;border-bottom:2px solid rgba(32,30,29,.4)">
+        <div style="font-family:'Archivo Narrow',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.85;margin-bottom:6px">Spotlight this week</div>
+        <div style="font-size:27px;font-weight:800;line-height:1.05;letter-spacing:-0.02em;margin-bottom:12px">{{ spotHeadline }}</div>
+        <div style="display:flex;gap:8px;overflow-x:auto" class="noscroll">
+          <sc-for list="{{ spotlight }}" as="s" hint-placeholder-count="3">
+            <button onClick="{{ s.jump }}" style="flex:none;min-width:150px;text-align:left;background:#f3f2f2;color:#201e1d;border:0;padding:10px;cursor:pointer">
+              <div style="font-family:'Archivo Narrow',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:4px">{{ s.promo }}</div>
+              <div style="font-size:13px;font-weight:800;line-height:1.15;margin-bottom:6px">{{ s.name }}</div>
+              <div style="font-family:'Archivo Narrow',monospace;font-size:12px">{{ s.price }}</div>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showRepeat }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:16px 16px 18px;border-bottom:2px solid rgba(32,30,29,.4)">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Buy again</div>
+          <div style="font-family:'Archivo Narrow',monospace;font-size:11px;color:rgba(32,30,29,.55)">{{ repeatCount }} regular items</div>
+        </div>
+        <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px" class="noscroll">
+          <sc-for list="{{ repeats }}" as="r" hint-placeholder-count="4">
+            <div style="flex:none;width:132px;border:1px solid rgba(32,30,29,.4);background:#eae9e9;padding:8px;display:flex;flex-direction:column;gap:6px">
+              
+              <div style="font-size:12px;font-weight:800;line-height:1.2;min-height:29px">{{ r.name }}</div><div style="font-family:'Archivo Narrow',monospace;font-size:12px">{{ r.price }}</div>
+              <button onClick="{{ r.add }}" style="width:100%;text-align:left;padding:6px 8px;font-weight:800;font-size:12px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">{{ r.cta }}</button>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="padding:16px 16px 8px;display:flex;align-items:baseline;justify-content:space-between">
+      <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">{{ listTitle }}</div>
+      <div style="font-family:'Archivo Narrow',monospace;font-size:11px;color:rgba(32,30,29,.55)">{{ resultLabel }}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:rgba(32,30,29,.4);border-top:2px solid rgba(32,30,29,.4);border-bottom:2px solid rgba(32,30,29,.4)">
+      <sc-for list="{{ items }}" as="it" hint-placeholder-count="8">
+        <div style="background:#f3f2f2;padding:10px;display:flex;flex-direction:column;gap:7px">
+          <div style="position:relative;height:88px;background:repeating-linear-gradient(135deg,#e3e0e0 0 6px,#d7d3d3 6px 12px);display:grid;place-items:center;filter:grayscale(1) contrast(1.08)">
+            <span style="font-family:'Archivo Narrow',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;text-align:center;padding:0 6px">{{ it.slug }}</span>
+          </div>
+          <sc-if value="{{ it.hasPromo }}" hint-placeholder-val="{{ true }}">
+            <div style="font-family:'Archivo Narrow',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#f3f2f2;background:#ec3013;padding:2px 5px;align-self:flex-start">{{ it.promo }}</div>
+          </sc-if>
+          <div style="font-size:13px;font-weight:800;line-height:1.2">{{ it.name }}</div>
+          <div style="font-family:'Archivo Narrow',monospace;font-size:11px;color:rgba(32,30,29,.55)">{{ it.spec }}</div>
+          <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap">
+            <sc-if value="{{ it.showMrp }}" hint-placeholder-val="{{ true }}">
+              <span style="font-family:'Archivo Narrow',monospace;font-size:12px;color:rgba(32,30,29,.55);text-decoration:line-through">{{ it.mrpLabel }}</span>
+            </sc-if>
+            <span style="font-size:16px;font-weight:800;letter-spacing:-0.01em">{{ it.priceLabel }}</span>
+          </div>
+          <sc-if value="{{ showTaxBreakdown }}" hint-placeholder-val="{{ false }}">
+            <div style="font-family:'Archivo Narrow',monospace;font-size:10px;color:#7d7979;line-height:1.4;border-top:1px solid rgba(32,30,29,.4);padding-top:4px">{{ it.taxNote }}</div>
+          </sc-if>
+          <div style="margin-top:auto">
+            <sc-if value="{{ it.inCart }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;border:1px solid #ec3013">
+                <button onClick="{{ it.dec }}" style="flex:none;width:34px;height:34px;display:grid;place-items:center;background:#f3f2f2;color:#ec3013;border:0;cursor:pointer;font-weight:800;font-size:16px">−</button>
+                <div style="flex:1;display:grid;place-items:center;font-family:'Archivo Narrow',monospace;font-size:13px;background:#f3f2f2">{{ it.qtyLabel }}</div>
+                <button onClick="{{ it.inc }}" style="flex:none;width:34px;height:34px;display:grid;place-items:center;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer;font-weight:800;font-size:16px">+</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ it.notInCart }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ it.inc }}" style="width:100%;text-align:left;padding:8px 10px;font-weight:800;font-size:13px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer;min-height:34px">{{ it.addLabel }}</button>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:28px 16px;text-align:left">
+        <div style="font-size:20px;font-weight:800;margin-bottom:6px">Nothing matched “{{ q }}”</div>
+        <div style="font-size:13px;color:rgba(32,30,29,.55);margin-bottom:12px">Add it as an unlisted item below and we will source it.</div>
+      </div>
+    </sc-if>
+
+    <div style="padding:18px 16px 24px">
+      <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">Not in the list?</div>
+      <div style="font-size:12px;color:rgba(32,30,29,.55);margin-bottom:8px">One item per line. Brand, size, quantity.</div>
+      <textarea value="{{ unlisted }}" onChange="{{ onUnlisted }}" placeholder="Kabuli chana 1kg — 5 packet
+Any brand hing 50g — 2 pc" style="width:100%;min-height:88px;resize:vertical;padding:8px 10px;font-size:13px;font-family:'Archivo Narrow',monospace;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"></textarea>
+      <div style="font-family:'Archivo Narrow',monospace;font-size:11px;color:rgba(32,30,29,.55);margin-top:6px">{{ unlistedCount }}</div>
+    </div>
+
+    <div style="height:80px"></div>
+  </div>
+
+  <sc-if value="{{ hasCart }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;background:#201e1d;color:#f3f2f2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:2px solid #201e1d">
+      <div>
+        <div style="font-family:'Archivo Narrow',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.7">{{ cartMeta }}</div>
+        <div style="font-size:19px;font-weight:800;letter-spacing:-0.01em">{{ cartTotal }}</div>
+      </div>
+      <button onClick="{{ openCart }}" style="flex:none;display:flex;align-items:center;gap:8px;padding:10px 14px;font-weight:800;font-size:14px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">
+        Review order
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+      </button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ cartOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(32,30,29,.55);display:flex;flex-direction:column;justify-content:flex-end">
+      <div style="max-height:94%;background:#f3f2f2;border-top:2px solid #201e1d;display:flex;flex-direction:column;animation:drawerUp .22s ease-out">
+        <div style="flex:none;display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:2px solid rgba(32,30,29,.4)">
+          <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Your order</div>
+          <button onClick="{{ closeCart }}" style="width:32px;height:32px;display:grid;place-items:center;background:transparent;border:1px solid rgba(32,30,29,.4);cursor:pointer;color:#201e1d">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+          </button>
+        </div>
+
+        <div style="flex:1;overflow-y:auto" class="noscroll">
+          <sc-for list="{{ lines }}" as="l" hint-placeholder-count="3">
+            <div style="display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid rgba(32,30,29,.4)">
+              <div style="flex:1;min-width:0">
+                <div style="font-size:13px;font-weight:800;line-height:1.2">{{ l.name }}</div>
+                <div style="font-family:'Archivo Narrow',monospace;font-size:11px;color:rgba(32,30,29,.55);margin-top:2px">{{ l.detail }}</div>
+              </div>
+              <div style="flex:none;display:flex;align-items:center;border:1px solid rgba(32,30,29,.4)">
+                <button onClick="{{ l.dec }}" style="width:28px;height:28px;display:grid;place-items:center;background:transparent;border:0;cursor:pointer;font-weight:800;color:#ec3013">−</button>
+                <div style="min-width:34px;text-align:center;font-family:'Archivo Narrow',monospace;font-size:12px">{{ l.qty }}</div>
+                <button onClick="{{ l.inc }}" style="width:28px;height:28px;display:grid;place-items:center;background:transparent;border:0;cursor:pointer;font-weight:800;color:#ec3013">+</button>
+              </div>
+              <div style="flex:none;width:74px;text-align:right;font-size:14px;font-weight:800">{{ l.amount }}</div>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ hasUnlisted }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:12px 16px;border-bottom:1px solid rgba(32,30,29,.4);background:#eae9e9">
+              <div style="font-family:'Archivo Narrow',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#ae1800;margin-bottom:4px">Unlisted request — to be priced</div>
+              <div style="font-family:'Archivo Narrow',monospace;font-size:12px;white-space:pre-wrap;line-height:1.5">{{ unlisted }}</div>
+            </div>
+          </sc-if>
+
+          <div style="padding:14px 16px;border-bottom:2px solid rgba(32,30,29,.4)">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
+              <span style="color:rgba(32,30,29,.55)">{{ itemCountLabel }}</span><span style="font-family:'Archivo Narrow',monospace">{{ cartTotal }}</span>
+            </div>
+            <sc-if value="{{ savings }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;color:#ae1800">
+                <span>Saved against MRP</span><span style="font-family:'Archivo Narrow',monospace">{{ savingsLabel }}</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ showTaxBreakdown }}" hint-placeholder-val="{{ false }}">
+              <div style="font-family:'Archivo Narrow',monospace;font-size:11px;color:#7d7979;line-height:1.6;border-top:1px solid rgba(32,30,29,.4);margin-top:8px;padding-top:6px">{{ taxSummary }}</div>
+            </sc-if>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;border-top:2px solid rgba(32,30,29,.4);margin-top:10px;padding-top:10px">
+              <span style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Payable</span>
+              <span style="font-size:26px;font-weight:800;letter-spacing:-0.02em">{{ cartTotal }}</span>
+            </div>
+          </div>
+
+          <div style="padding:16px">
+            <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Pay &amp; confirm</div>
+            <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:12px">
+              <div style="flex:none;width:112px">
+                <div style="width:112px;height:112px;border:2px solid #201e1d;background:repeating-linear-gradient(135deg,#e3e0e0 0 5px,#cfcbcb 5px 10px);display:grid;place-items:center">
+                  <span style="font-family:'Archivo Narrow',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#605d5d;text-align:center">UPI QR<br>uploaded by<br>admin</span>
+                </div>
+              </div>
+              <div style="flex:1;min-width:0">
+                <div style="font-family:'Archivo Narrow',monospace;font-size:11px;line-height:1.6;color:rgba(32,30,29,.7)">Scan and pay now, then enter the 12-digit UTR from your bank app. Or leave the UTR blank to buy on account — the amount goes to your balance due and can be settled against the invoice.</div>
+                <div style="font-family:'Archivo Narrow',monospace;font-size:11px;margin-top:8px;letter-spacing:.04em">pilanisupply@upi</div>
+              </div>
+            </div>
+            <div style="margin-bottom:12px">
+              <label style="display:block;font-size:12px;margin-bottom:5px;color:rgba(32,30,29,.7)">UTR / reference number (optional)</label>
+              <input value="{{ utr }}" onChange="{{ onUtr }}" placeholder="12 digits" style="width:100%;min-height:38px;padding:6px 10px;font-size:14px;font-family:'Archivo Narrow',monospace;letter-spacing:.1em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0">
+              <div style="font-family:'Archivo Narrow',monospace;font-size:11px;margin-top:5px;color:{{ utrColor }}">{{ utrNote }}</div>
+            </div>
+            <button onClick="{{ placeOrder }}" disabled="{{ cannotPlace }}" style="{{ placeStyle }}">
+              {{ placeLabel }}
+            </button>
+            <div style="font-family:'Archivo Narrow',monospace;font-size:11px;color:rgba(32,30,29,.55);margin-top:8px;line-height:1.5">Order enters the store as PO_RECEIVED. Final tax invoice follows after picking.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ placed }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:#f3f2f2;display:flex;flex-direction:column">
+      <div style="background:#ec3013;color:#f3f2f2;padding:28px 20px 24px">
+        <div style="font-family:'Archivo Narrow',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.85;margin-bottom:8px">Order received</div>
+        <div style="font-size:38px;font-weight:800;line-height:1;letter-spacing:-0.03em">{{ poNumber }}</div>
+      </div>
+      <div style="padding:20px;flex:1">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:rgba(32,30,29,.4);border:2px solid rgba(32,30,29,.4);margin-bottom:18px">
+          <div style="background:#f3f2f2;padding:12px">
+            <div style="font-family:'Archivo Narrow',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(32,30,29,.55);margin-bottom:4px">Lines</div>
+            <div style="font-size:22px;font-weight:800">{{ placedLines }}</div>
+          </div>
+          <div style="background:#f3f2f2;padding:12px">
+            <div style="font-family:'Archivo Narrow',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(32,30,29,.55);margin-bottom:4px">{{ placedPayLabel }}</div>
+            <div style="font-size:22px;font-weight:800">{{ placedTotal }}</div>
+            <div style="font-family:'Archivo Narrow',monospace;font-size:10px;color:rgba(32,30,29,.55);margin-top:3px">{{ placedTotalNote }}</div>
+          </div>
+          <div style="background:#f3f2f2;padding:12px;grid-column:1/-1">
+            <div style="font-family:'Archivo Narrow',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(32,30,29,.55);margin-bottom:4px">UTR</div>
+            <div style="font-family:'Archivo Narrow',monospace;font-size:15px;letter-spacing:.1em">{{ placedUtr }}</div>
+          </div>
+        </div>
+        <div style="font-size:13px;line-height:1.6;color:rgba(32,30,29,.7);margin-bottom:20px">The store is picking your order now. Unlisted requests will be priced and added before the invoice is generated.</div>
+        <button onClick="{{ startNew }}" style="width:100%;text-align:left;padding:12px 14px;font-weight:800;font-size:14px;background:#201e1d;color:#f3f2f2;border:0;cursor:pointer">Start another order</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:510,&quot;height&quot;:990},&quot;customerLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Kirana · CUST-0418&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Account&quot;},&quot;orderUnit&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Piece&quot;,&quot;Case&quot;],&quot;default&quot;:&quot;Piece&quot;,&quot;tsType&quot;:&quot;\&quot;Piece\&quot; | \&quot;Case\&quot;&quot;,&quot;section&quot;:&quot;Ordering&quot;},&quot;showSpotlight&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Ordering&quot;},&quot;showTaxBreakdown&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Ordering&quot;}}">
+const GST_ALLOWED = [0, 3, 5, 18, 28, 40];
+
+const CATALOG = [
+  { id: 1,  name: "Chakki Atta 5 kg",            cat: "Atta & Flour",  size: "5 kg",   caseSize: 10, mrp: 285,  taxable: 244,  gst: 5,  taxType: "Exclusive",     promo: "",         disc: 4,  daily: false, freq: 1 },
+  { id: 2,  name: "Maida 5 kg",                  cat: "Atta & Flour",  size: "5 kg",   caseSize: 10, mrp: 230,  taxable: 196,  gst: 5,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 1 },
+  { id: 3,  name: "Sooji 500 g",                 cat: "Atta & Flour",  size: "500 g",  caseSize: 24, mrp: 42,   taxable: 36,   gst: 5,  taxType: "Inclusive_MRP", promo: "",         disc: 0,  daily: false, freq: 0 },
+  { id: 4,  name: "Refined Soyabean Oil 1 L",    cat: "Oil & Ghee",    size: "1 L",    caseSize: 12, mrp: 165,  taxable: 145,  gst: 5,  taxType: "Exclusive",     promo: "DISCOUNT", disc: 6,  daily: false, freq: 1 },
+  { id: 5,  name: "Mustard Oil 1 L",             cat: "Oil & Ghee",    size: "1 L",    caseSize: 12, mrp: 178,  taxable: 158,  gst: 5,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 1 },
+  { id: 6,  name: "Vanaspati 1 kg",              cat: "Oil & Ghee",    size: "1 kg",   caseSize: 15, mrp: 152,  taxable: 133,  gst: 5,  taxType: "Inclusive_MRP", promo: "",         disc: 0,  daily: false, freq: 0 },
+  { id: 7,  name: "Desi Ghee 1 L Tin",           cat: "Oil & Ghee",    size: "1 L",    caseSize: 6,  mrp: 720,  taxable: 640,  gst: 5,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 0 },
+  { id: 8,  name: "Sona Masoori Rice 25 kg",     cat: "Rice & Pulses", size: "25 kg",  caseSize: 1,  mrp: 1350, taxable: 1285, gst: 0,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: true,  freq: 1 },
+  { id: 9,  name: "Basmati Rice 5 kg",           cat: "Rice & Pulses", size: "5 kg",   caseSize: 6,  mrp: 640,  taxable: 590,  gst: 5,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 0 },
+  { id: 10, name: "Toor Dal 1 kg",               cat: "Rice & Pulses", size: "1 kg",   caseSize: 30, mrp: 168,  taxable: 160,  gst: 0,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: true,  freq: 1 },
+  { id: 11, name: "Chana Dal 1 kg",              cat: "Rice & Pulses", size: "1 kg",   caseSize: 30, mrp: 96,   taxable: 91,   gst: 0,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: true,  freq: 1 },
+  { id: 12, name: "Rajma 1 kg",                  cat: "Rice & Pulses", size: "1 kg",   caseSize: 25, mrp: 152,  taxable: 145,  gst: 0,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 0 },
+  { id: 13, name: "Sugar 50 kg Bag",             cat: "Sugar & Salt",  size: "50 kg",  caseSize: 1,  mrp: 2450, taxable: 2280, gst: 5,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: true,  freq: 1 },
+  { id: 14, name: "Iodised Salt 1 kg",           cat: "Sugar & Salt",  size: "1 kg",   caseSize: 24, mrp: 28,   taxable: 26,   gst: 5,  taxType: "Inclusive_MRP", promo: "",         disc: 0,  daily: false, freq: 1 },
+  { id: 15, name: "Red Chilli Powder 500 g",     cat: "Spices",        size: "500 g",  caseSize: 20, mrp: 148,  taxable: 132,  gst: 5,  taxType: "Exclusive",     promo: "NEW",      disc: 0,  daily: false, freq: 1 },
+  { id: 16, name: "Turmeric Powder 500 g",       cat: "Spices",        size: "500 g",  caseSize: 20, mrp: 118,  taxable: 105,  gst: 5,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 1 },
+  { id: 17, name: "Garam Masala 100 g",          cat: "Spices",        size: "100 g",  caseSize: 40, mrp: 92,   taxable: 78,   gst: 5,  taxType: "Inclusive_MRP", promo: "NEW",      disc: 0,  daily: false, freq: 0 },
+  { id: 18, name: "Tea Leaf 1 kg",               cat: "Beverages",     size: "1 kg",   caseSize: 10, mrp: 480,  taxable: 428,  gst: 5,  taxType: "Exclusive",     promo: "DISCOUNT", disc: 8,  daily: false, freq: 1 },
+  { id: 19, name: "Instant Coffee 200 g",        cat: "Beverages",     size: "200 g",  caseSize: 12, mrp: 495,  taxable: 400,  gst: 18, taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 0 },
+  { id: 20, name: "Aerated Drink 750 ml",        cat: "Beverages",     size: "750 ml", caseSize: 24, mrp: 45,   taxable: 35,   gst: 28, taxType: "Inclusive_MRP", promo: "",         disc: 0,  daily: false, freq: 1 },
+  { id: 21, name: "Milk Powder 1 kg",            cat: "Dairy",         size: "1 kg",   caseSize: 10, mrp: 545,  taxable: 486,  gst: 5,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 0 },
+  { id: 22, name: "Paneer 1 kg",                 cat: "Dairy",         size: "1 kg",   caseSize: 8,  mrp: 420,  taxable: 400,  gst: 0,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: true,  freq: 1 },
+  { id: 23, name: "Butter 500 g",                cat: "Dairy",         size: "500 g",  caseSize: 20, mrp: 285,  taxable: 254,  gst: 5,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 1 },
+  { id: 24, name: "Salted Biscuit 800 g",        cat: "Snacks",        size: "800 g",  caseSize: 12, mrp: 130,  taxable: 110,  gst: 18, taxType: "Inclusive_MRP", promo: "",         disc: 0,  daily: false, freq: 1 },
+  { id: 25, name: "Namkeen Mixture 1 kg",        cat: "Snacks",        size: "1 kg",   caseSize: 8,  mrp: 260,  taxable: 220,  gst: 18, taxType: "Exclusive",     promo: "",         disc: 5,  daily: false, freq: 1 },
+  { id: 26, name: "Potato Chips 165 g",          cat: "Snacks",        size: "165 g",  caseSize: 24, mrp: 60,   taxable: 51,   gst: 18, taxType: "Inclusive_MRP", promo: "NEW",      disc: 0,  daily: false, freq: 0 },
+  { id: 27, name: "Detergent Powder 4 kg",       cat: "Cleaning",      size: "4 kg",   caseSize: 4,  mrp: 420,  taxable: 356,  gst: 18, taxType: "Exclusive",     promo: "DISCOUNT", disc: 7,  daily: false, freq: 1 },
+  { id: 28, name: "Dishwash Bar 300 g",          cat: "Cleaning",      size: "300 g",  caseSize: 30, mrp: 25,   taxable: 21,   gst: 18, taxType: "Inclusive_MRP", promo: "",         disc: 0,  daily: false, freq: 1 },
+  { id: 29, name: "Floor Cleaner 1 L",           cat: "Cleaning",      size: "1 L",    caseSize: 12, mrp: 185,  taxable: 150,  gst: 18, taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 0 },
+  { id: 30, name: "Toilet Soap 100 g",           cat: "Cleaning",      size: "100 g",  caseSize: 48, mrp: 45,   taxable: 38,   gst: 18, taxType: "Inclusive_MRP", promo: "",         disc: 0,  daily: false, freq: 1 },
+  { id: 31, name: "Onion 10 kg",                 cat: "Vegetables",    size: "10 kg",  caseSize: 1,  mrp: 320,  taxable: 320,  gst: 0,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: true,  freq: 1 },
+  { id: 32, name: "Tomato 10 kg",                cat: "Vegetables",    size: "10 kg",  caseSize: 1,  mrp: 480,  taxable: 480,  gst: 0,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: true,  freq: 1 },
+  { id: 33, name: "Potato 10 kg",                cat: "Vegetables",    size: "10 kg",  caseSize: 1,  mrp: 260,  taxable: 260,  gst: 0,  taxType: "Exclusive",     promo: "",         disc: 0,  daily: true,  freq: 1 },
+  { id: 34, name: "Paper Napkin 100 pc",         cat: "Disposables",   size: "100 pc", caseSize: 20, mrp: 65,   taxable: 52,   gst: 18, taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 0 },
+  { id: 35, name: "Disposable Glass 100 pc",     cat: "Disposables",   size: "100 pc", caseSize: 20, mrp: 95,   taxable: 80,   gst: 18, taxType: "Exclusive",     promo: "",         disc: 0,  daily: false, freq: 1 }
+];
+
+const CATS = ["All", "Atta & Flour", "Oil & Ghee", "Rice & Pulses", "Sugar & Salt", "Spices", "Dairy", "Beverages", "Snacks", "Cleaning", "Vegetables", "Disposables"];
+
+/* Dual GST engine — the single source of price truth for one unit of an item.
+   Exclusive:     discounted base rate is taxable; GST is added on top.
+   Inclusive_MRP: discounted MRP is the selling value; GST is reverse-derived.
+   Total GST always splits equally into CGST + SGST. */
+function priceUnit(it) {
+  const rate = GST_ALLOWED.indexOf(it.gst) === -1 ? 0 : it.gst;
+  const disc = Math.min(Math.max(Number(it.disc) || 0, 0), 100);
+  let taxable, gst, selling;
+  if (it.taxType === "Inclusive_MRP") {
+    selling = (Number(it.mrp) || 0) * (1 - disc / 100);
+    taxable = selling / (1 + rate / 100);
+    gst = selling - taxable;
+  } else {
+    taxable = (Number(it.taxable) || 0) * (1 - disc / 100);
+    gst = taxable * rate / 100;
+    selling = taxable + gst;
+  }
+  const half = gst / 2;
+  return { rate: rate, taxable: taxable, gst: gst, cgst: half, sgst: half, selling: selling };
+}
+
+function inr(n) {
+  return "\u20b9" + (Math.round((Number(n) || 0) * 100) / 100).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function inr0(n) {
+  return "\u20b9" + Math.round(Number(n) || 0).toLocaleString("en-IN");
+}
+function slugOf(name) {
+  return name.toLowerCase().replace(/[^a-z0-9 ]/g, "").split(" ").slice(0, 3).join(" ");
+}
+
+class Component extends DCLogic {
+  state = { cart: {}, cat: "All", q: "", cartOpen: false, unlisted: "", utr: "", placed: null, poSeq: 1184, loggedIn: false, loginId: "", loginPw: "", loginError: "" };
+
+  static CREDS = { "CUST-0418": "PILANI0418" };
+
+  login() {
+    const id = this.state.loginId.trim().toUpperCase();
+    const pw = this.state.loginPw.trim();
+    if (!id || !pw) { this.setState({ loginError: "Enter your customer ID and password" }); return; }
+    if (Component.CREDS[id] === pw) { this.setState({ loggedIn: true, loginError: "" }); }
+    else { this.setState({ loginError: "ID or password not recognised" }); }
+  }
+
+  bump(id, delta) {
+    this.setState(s => {
+      const cart = Object.assign({}, s.cart);
+      const next = (cart[id] || 0) + delta;
+      if (next <= 0) { delete cart[id]; } else { cart[id] = next; }
+      return { cart: cart };
+    });
+  }
+
+  lineOf(it) {
+    const u = priceUnit(it);
+    const qty = this.state.cart[it.id] || 0;
+    const mul = (this.props.orderUnit === "Case") ? (it.caseSize || 1) : 1;
+    const pieces = qty * mul;
+    return {
+      it: it, u: u, qty: qty, mul: mul, pieces: pieces,
+      selling: u.selling * pieces,
+      taxable: u.taxable * pieces,
+      gst: u.gst * pieces,
+      mrpTotal: (Number(it.mrp) || 0) * pieces
+    };
+  }
+
+  renderVals() {
+    const st = this.state;
+    const byCase = this.props.orderUnit === "Case";
+    const showTax = this.props.showTaxBreakdown === true;
+    const q = st.q.trim().toLowerCase();
+
+    const filtered = CATALOG.filter(it => {
+      const catOk = st.cat === "All" || it.cat === st.cat;
+      const qOk = !q || it.name.toLowerCase().indexOf(q) !== -1 || it.cat.toLowerCase().indexOf(q) !== -1;
+      return catOk && qOk;
+    });
+
+    const items = filtered.map(it => {
+      const u = priceUnit(it);
+      const mul = byCase ? (it.caseSize || 1) : 1;
+      const sell = u.selling * mul;
+      const mrpRef = (Number(it.mrp) || 0) * mul;
+      const qty = st.cart[it.id] || 0;
+      return {
+        name: it.name,
+        slug: slugOf(it.name),
+        spec: byCase
+          ? it.size + " \u00b7 case of " + it.caseSize
+          : it.size + " \u00b7 " + it.caseSize + "/case",
+        hasPromo: !!it.promo,
+        promo: it.promo,
+        showMrp: mrpRef - sell > 0.5,
+        mrpLabel: inr0(mrpRef),
+        priceLabel: inr(sell),
+        taxNote: "taxable " + inr(u.taxable * mul) + " \u00b7 cgst " + inr(u.cgst * mul) + " \u00b7 sgst " + inr(u.sgst * mul) + " \u00b7 " + it.taxType.toLowerCase() + " @" + u.rate + "%",
+        inCart: qty > 0,
+        notInCart: qty === 0,
+        qtyLabel: byCase ? (qty + " case \u00b7 " + qty * it.caseSize + " pc") : (qty + " pc"),
+        addLabel: byCase ? "Add case" : "Add",
+        inc: () => this.bump(it.id, 1),
+        dec: () => this.bump(it.id, -1)
+      };
+    });
+
+    const spotSrc = CATALOG.filter(it => it.promo);
+    const spotlight = spotSrc.slice(0, 6).map(it => {
+      const u = priceUnit(it);
+      const mul = byCase ? (it.caseSize || 1) : 1;
+      return {
+        name: it.name, promo: it.promo, price: inr(u.selling * mul),
+        jump: () => this.setState({ cat: it.cat, q: "" })
+      };
+    });
+
+    const repeatSrc = CATALOG.filter(it => it.freq === 1);
+    const repeats = repeatSrc.map(it => {
+      const u = priceUnit(it);
+      const mul = byCase ? (it.caseSize || 1) : 1;
+      const qty = st.cart[it.id] || 0;
+      return {
+        name: it.name, price: inr(u.selling * mul),
+        cta: qty > 0 ? ("In cart \u00b7 " + qty) : (byCase ? "Add case" : "Add"),
+        add: () => this.bump(it.id, 1)
+      };
+    });
+
+    const lineData = Object.keys(st.cart).map(id => {
+      const it = CATALOG.filter(x => String(x.id) === String(id))[0];
+      return it ? this.lineOf(it) : null;
+    }).filter(Boolean);
+
+    const total = lineData.reduce((a, l) => a + l.selling, 0);
+    const totalTaxable = lineData.reduce((a, l) => a + l.taxable, 0);
+    const totalGst = lineData.reduce((a, l) => a + l.gst, 0);
+    const totalMrp = lineData.reduce((a, l) => a + l.mrpTotal, 0);
+    const saved = totalMrp - total;
+    const count = lineData.length;
+
+    const utrClean = st.utr.replace(/\D/g, "");
+    const utrOk = utrClean.length === 12;
+    const canPlace = count > 0 && (utrClean.length === 0 || utrOk);
+
+    const lines = lineData.map(l => ({
+      name: l.it.name,
+      detail: byCase
+        ? (l.qty + " case \u00d7 " + l.it.caseSize + " \u00b7 " + inr(l.u.selling) + "/pc")
+        : (l.qty + " pc \u00d7 " + inr(l.u.selling)),
+      qty: byCase ? (l.qty + "c") : String(l.qty),
+      amount: inr(l.selling),
+      inc: () => this.bump(l.it.id, 1),
+      dec: () => this.bump(l.it.id, -1)
+    }));
+
+    const catChips = CATS.map(name => {
+      const on = st.cat === name;
+      return {
+        name: name,
+        pick: () => this.setState({ cat: name }),
+        style: "flex:none;padding:9px 13px;font-size:12px;font-weight:800;letter-spacing:.02em;white-space:nowrap;cursor:pointer;border:0;border-right:1px solid rgba(32,30,29,.4);" +
+          (on ? "background:#201e1d;color:#f3f2f2;" : "background:transparent;color:#201e1d;")
+      };
+    });
+
+    const unlistedLines = st.unlisted.split("\n").map(s => s.trim()).filter(Boolean);
+    const placed = st.placed;
+
+    return {
+      showLogin: !st.loggedIn,
+      loginId: st.loginId,
+      loginPw: st.loginPw,
+      onLoginId: e => this.setState({ loginId: e.target.value }),
+      onLoginPw: e => this.setState({ loginPw: e.target.value }),
+      loginError: st.loginError,
+      doLogin: () => this.login(),
+      customerLabel: this.props.customerLabel ?? "Kirana \u00b7 CUST-0418",
+      showSpotlight: (this.props.showSpotlight ?? true) && spotlight.length > 0 && !q,
+      showTaxBreakdown: showTax,
+      spotHeadline: spotSrc.length + " items newly listed or on rate cut",
+      spotlight: spotlight,
+      showRepeat: st.cat === "All" && !q && repeats.length > 0,
+      repeats: repeats,
+      repeatCount: repeatSrc.length,
+      cats: catChips,
+      q: st.q,
+      onSearch: e => this.setState({ q: e.target.value }),
+      clearSearch: () => this.setState({ q: "", cat: "All" }),
+      listTitle: st.cat === "All" ? "Full catalogue" : st.cat,
+      resultLabel: byCase ? (items.length + " items \u00b7 case rate") : (items.length + " items \u00b7 piece rate"),
+      items: items,
+      noResults: items.length === 0,
+      unlisted: st.unlisted,
+      onUnlisted: e => this.setState({ unlisted: e.target.value }),
+      unlistedCount: unlistedLines.length === 0 ? "no unlisted requests" : (unlistedLines.length + " unlisted request" + (unlistedLines.length === 1 ? "" : "s") + " will be priced by the store"),
+      hasUnlisted: unlistedLines.length > 0,
+      hasCart: count > 0 && !st.cartOpen && !placed,
+      cartMeta: count + (count === 1 ? " line" : " lines") + " \u00b7 incl. GST",
+      cartTotal: inr(total),
+      itemCountLabel: count + (count === 1 ? " line" : " lines") + " incl. GST",
+      savings: saved > 0.5,
+      savingsLabel: "\u2212 " + inr(saved),
+      taxSummary: "taxable " + inr(totalTaxable) + "  \u00b7  cgst " + inr(totalGst / 2) + "  \u00b7  sgst " + inr(totalGst / 2) + "  \u00b7  total gst " + inr(totalGst),
+      openCart: () => this.setState({ cartOpen: true }),
+      closeCart: () => this.setState({ cartOpen: false }),
+      cartOpen: st.cartOpen && !placed,
+      lines: lines,
+      utr: st.utr,
+      onUtr: e => this.setState({ utr: e.target.value.replace(/[^0-9]/g, "").slice(0, 12) }),
+      utrNote: utrClean.length === 0 ? "optional \u2014 leave blank to buy on account" : (utrOk ? "valid \u00b7 12 digits" : utrClean.length + " of 12 digits"),
+      utrColor: utrOk ? "#ae1800" : "rgba(32,30,29,.55)",
+      cannotPlace: !canPlace,
+      placeLabel: count === 0 ? "Cart is empty" : (utrOk ? "Submit paid order \u00b7 " + inr(total) : (utrClean.length === 0 ? "Submit on account \u00b7 " + inr(total) : "Complete the 12-digit UTR")),
+      placeStyle: "width:100%;text-align:left;padding:13px 14px;font-weight:800;font-size:15px;border:0;border-radius:0;" +
+        (canPlace ? "background:#ec3013;color:#f3f2f2;cursor:pointer;" : "background:#ec3013;color:#f3f2f2;opacity:.45;cursor:not-allowed;"),
+      placeOrder: () => {
+        if (!canPlace) return;
+        const po = "PO-" + st.poSeq;
+        try {
+          const now = new Date();
+          const hh = String(now.getHours()).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0");
+          const payload = {
+            po: po,
+            cust: this.props.customerLabel ?? "Kirana \u00b7 CUST-0418",
+            custId: "CUST-0418",
+            time: hh,
+            status: "PO_RECEIVED",
+            utr: utrClean,
+            unlisted: st.unlisted.trim(),
+            lines: lineData.map(l => ({
+              qty: l.pieces,
+              custom: {
+                name: l.it.name,
+                rate: Math.round((l.it.taxType === "Inclusive_MRP" ? l.u.selling : l.u.taxable) * 100) / 100,
+                gst: l.u.rate,
+                taxType: l.it.taxType,
+                mrp: l.it.mrp
+              }
+            }))
+          };
+          const key = "pilani_b2b_orders_v1";
+          const prev = JSON.parse(window.localStorage.getItem(key) || "[]");
+          window.localStorage.setItem(key, JSON.stringify([payload].concat(Array.isArray(prev) ? prev : []).slice(0, 40)));
+        } catch (err) { /* storage unavailable — order still confirms locally */ }
+        this.setState(s => ({
+          placed: { po: po, lines: count, total: inr(total), utr: utrClean, paid: utrOk },
+          poSeq: s.poSeq + 1,
+          cartOpen: false
+        }));
+      },
+      placed: !!placed,
+      poNumber: placed ? placed.po : "",
+      placedLines: placed ? placed.lines : 0,
+      placedTotal: placed ? placed.total : "",
+      placedPayLabel: placed ? (placed.paid ? "Paid" : "On account") : "",
+      placedTotalNote: placed ? (placed.paid ? "settled by UPI" : "added to your balance due") : "",
+      placedUtr: placed ? (placed.utr || "not paid yet \u2014 pay on delivery or against the invoice") : "",
+      startNew: () => this.setState({ placed: null, cart: {}, unlisted: "", utr: "", cat: "All", q: "" })
+    };
+  }
+}
+
+</script>
+</body>
+</html>
