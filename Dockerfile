@@ -2,7 +2,7 @@
 # pytesseract (parchi OCR) needs the tesseract binary; opencv-python-headless still links
 # against libGL/libglib on some distros even in headless mode; python-Levenshtein may need
 # to compile from source if no matching wheel exists for this base image.
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpango-1.0-0 \
