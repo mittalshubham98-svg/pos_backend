@@ -155,3 +155,10 @@ def customer_app() -> FileResponse:
 @app.get("/admin")
 def admin_portal() -> FileResponse:
     return FileResponse(settings.STATIC_DIR / "admin.html")
+
+
+@app.get("/sw.js")
+def service_worker() -> FileResponse:
+    """Top-level route (not /static/sw.js) so the worker's default scope is the whole
+    app ("/"), not just "/static/" — it must control navigations to "/" and "/admin"."""
+    return FileResponse(settings.STATIC_DIR / "sw.js", media_type="application/javascript")

@@ -93,3 +93,62 @@ function errorMessage(err) {
   }
   return err && err.message ? err.message : String(err);
 }
+
+/* Lightweight "Add to Home Screen" prompt, shared by both customer.html and admin.html.
+   Appended straight to <body> (not into #app) so it isn't wiped out by each page's own
+   render() re-render cycle — same reasoning as why the toast pattern in each HTML file is
+   careful about where it lives, just outside the SPA's own DOM subtree here instead.
+
+   appName    — shown in the banner copy, e.g. "Pilani Supply Co." or "Pilani Supply Co. — Admin"
+   dismissKey — localStorage key remembering a dismissal for 7 days; distinct per app so
+                dismissing the customer app's banner doesn't suppress the admin one */
+function initPwaInstallPrompt({ appName, dismissKey }) {
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  if (isStandalone) return;
+
+  const dismissedAt = Number(localStorage.getItem(dismissKey) || 0);
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+  if (dismissedAt && Date.now() - dismissedAt < SEVEN_DAYS_MS) return;
+
+  const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  function dismiss(banner) {
+    localStorage.setItem(dismissKey, String(Date.now()));
+    banner.remove();
+  }
+
+  function showBanner(bodyHtml, onInstallClick) {
+    const banner = document.createElement("div");
+    banner.style.cssText = "position:fixed;left:16px;right:16px;bottom:16px;max-width:398px;margin:0 auto;background:#201e1d;color:#f3f2f2;padding:14px 16px;font-family:'Archivo',system-ui,sans-serif;box-shadow:0 12px 32px rgba(45,43,43,.35);z-index:99999;animation:drawerUp .22s ease-out;border:1px solid rgba(243,242,242,.15)";
+    banner.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div style="flex:1">
+          <div style="font-family:'Archivo Narrow',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#ec3013;margin-bottom:4px">Install ${esc(appName)}</div>
+          <div style="font-size:13px;line-height:1.5;color:rgba(243,242,242,.85)">${bodyHtml}</div>
+        </div>
+        <button data-pwa-dismiss style="background:none;border:0;color:rgba(243,242,242,.6);font-size:18px;line-height:1;cursor:pointer;padding:2px 4px">×</button>
+      </div>
+      ${onInstallClick ? `<button data-pwa-install style="margin-top:10px;width:100%;text-align:left;padding:9px 12px;font-weight:800;font-size:13px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">Install now</button>` : ""}
+    `;
+    document.body.appendChild(banner);
+    banner.querySelector("[data-pwa-dismiss]").onclick = () => dismiss(banner);
+    if (onInstallClick) banner.querySelector("[data-pwa-install]").onclick = () => onInstallClick(banner);
+  }
+
+  if (isIos) {
+    showBanner("Tap the Share button ⎋ and select “Add to Home Screen” ➕ for the full-screen app.");
+    return;
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    let deferredPrompt = event;
+    showBanner("Add this to your home screen for one-tap access, even offline.", async (banner) => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      dismiss(banner);
+    });
+  });
+}

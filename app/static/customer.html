@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pilani Supply Co. — Customer</title>
+<link rel="manifest" href="/static/customer-manifest.json">
+<meta name="theme-color" content="#ec3013">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pilani Supply">
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@600&display=swap">
 <style>
@@ -654,6 +660,13 @@ function wire() {
 
 render();
 if (state.token) bootAuthed();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => { /* offline shell unavailable; app still works online */ });
+  });
+}
+initPwaInstallPrompt({ appName: "Pilani Supply Co.", dismissKey: "pilani_pwa_dismiss_customer" });
 </script>
 </body>
 </html>

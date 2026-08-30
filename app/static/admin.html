@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pilani Supply Co. — Admin</title>
+<link rel="manifest" href="/static/admin-manifest.json">
+<meta name="theme-color" content="#ec3013">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pilani Admin">
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@600&display=swap">
 <style>
@@ -17,6 +23,7 @@
   :focus-visible{outline:2px solid #ec3013;outline-offset:2px}
   ::selection{background:rgba(236,48,19,.3)}
   .mono{font-family:"Archivo Narrow","Archivo",monospace}
+  @keyframes drawerUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
   .noscroll::-webkit-scrollbar{width:0;height:0}
   .thumb{width:32px;height:32px;filter:grayscale(1) contrast(1.08);background:repeating-linear-gradient(135deg,#e3e0e0 0 4px,#d7d3d3 4px 8px);background-size:cover;background-position:center;overflow:hidden}
   .thumb img{width:100%;height:100%;object-fit:cover}
@@ -1443,6 +1450,13 @@ function wire() {
 
 render();
 if (state.token) bootAuthed();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => { /* offline shell unavailable; app still works online */ });
+  });
+}
+initPwaInstallPrompt({ appName: "Pilani Supply Co. — Admin", dismissKey: "pilani_pwa_dismiss_admin" });
 </script>
 </body>
 </html>
