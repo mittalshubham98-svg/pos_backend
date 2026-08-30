@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 16mm 14mm; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; color: #201e1d; font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    font-size: 11px; line-height: 1.5;
+  }
+  .mono { font-family: "Archivo Narrow", "Consolas", monospace; }
+  table { border-collapse: collapse; width: 100%; }
+  .muted { color: #7d7979; }
+  .dim { color: #605d5d; }
+  .right { text-align: right; }
+  .center { text-align: center; }
+  .b8 { border-bottom: 1px solid rgba(32,30,29,.4); }
+  .b8-thick { border-bottom: 2px solid #201e1d; }
+  h1, h2 { margin: 0; font-weight: 800; letter-spacing: -0.01em; }
+
+  .draft-banner {
+    background: #ec3013; color: #f3f2f2; padding: 6px 10px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .08em; font-size: 10px; margin-bottom: 10px;
+  }
+
+  .letterhead { display: table; width: 100%; padding-bottom: 12px; border-bottom: 2px solid #201e1d; margin-bottom: 10px; }
+  .letterhead .col { display: table-cell; vertical-align: top; }
+  .letterhead .col.right { text-align: right; }
+  .store-name { font-size: 17px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+  .doc-title { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; text-transform: uppercase; }
+
+  .meta-grid { display: table; width: 100%; border-bottom: 2px solid #201e1d; margin-bottom: 10px; }
+  .meta-grid .col { display: table-cell; width: 50%; vertical-align: top; padding: 10px 0; }
+  .meta-grid .col.left { padding-right: 16px; border-right: 1px solid rgba(32,30,29,.4); }
+  .meta-grid .col.right { padding-left: 16px; }
+  .label-sm { font-size: 8px; letter-spacing: .12em; text-transform: uppercase; color: #7d7979; margin-bottom: 5px; }
+  .cust-name { font-size: 13px; font-weight: 800; }
+
+  table.items th {
+    text-align: left; padding: 7px 5px 6px 0; font-size: 8px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: #7d7979; border-bottom: 2px solid #201e1d;
+  }
+  table.items th.r, table.items td.r { text-align: right; }
+  table.items td { padding: 6px 5px 6px 0; border-bottom: 1px solid rgba(32,30,29,.4); vertical-align: top; }
+  table.items tr:last-child td { border-bottom: 2px solid #201e1d; }
+  .item-name { font-size: 11px; font-weight: 700; line-height: 1.25; }
+  .item-note { display: block; font-size: 8px; font-weight: 400; color: #7d7979; }
+  .item-note.unlisted { color: #ae1800; }
+  .line-total { font-size: 11px; font-weight: 700; }
+
+  .foot-grid { display: table; width: 100%; margin-top: 14px; }
+  .foot-grid .col { display: table-cell; vertical-align: top; }
+  .foot-grid .col.left { width: 62%; padding-right: 20px; }
+  .foot-grid .col.right { width: 38%; }
+
+  table.slab th { text-align: left; padding: 0 5px 4px 0; font-size: 8px; font-weight: 400; letter-spacing: .08em;
+    text-transform: uppercase; color: #7d7979; border-bottom: 1px solid rgba(32,30,29,.4); }
+  table.slab th.r, table.slab td.r { text-align: right; }
+  table.slab td { padding: 4px 5px 4px 0; border-bottom: 1px solid rgba(32,30,29,.4); }
+
+  .words { margin-top: 12px; }
+  .words .amt { font-size: 12px; font-weight: 800; line-height: 1.3; }
+
+  .totals-table td { padding: 3px 0; font-size: 11px; }
+  .totals-table td.lbl { color: #7d7979; }
+  .totals-table td.r { text-align: right; }
+  .totals-table tr.rule td { border-bottom: 1px solid rgba(32,30,29,.4); }
+
+  .grand { background: #201e1d; color: #f3f2f2; padding: 10px 12px; margin-top: 8px; }
+  .grand .lbl { font-size: 8px; letter-spacing: .12em; text-transform: uppercase; opacity: .7; margin-bottom: 3px; }
+  .grand .val { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+
+  .payment-box { margin-top: 10px; }
+
+  .terms-grid { display: table; width: 100%; margin-top: 20px; padding-top: 14px; border-top: 2px solid #201e1d; }
+  .terms-grid .col { display: table-cell; vertical-align: top; }
+  .terms-grid .col.terms { width: 68%; padding-right: 16px; color: #444141; font-size: 9px; line-height: 1.7; }
+  .terms-grid .col.sign { width: 32%; text-align: right; }
+  .sign-line { border-top: 1px solid #201e1d; margin-top: 46px; padding-top: 5px; }
+</style>
+</head>
+<body>
+
+{% if invoice.is_draft %}
+<div class="draft-banner">Draft preview — this PO has not been converted to a sale bill yet</div>
+{% endif %}
+
+<div class="letterhead">
+  <div class="col">
+    <div class="store-name">{{ store.name }}</div>
+    <div class="mono muted" style="font-size:9px;line-height:1.7;margin-top:5px">
+      {{ store.address }}<br>
+      GSTIN {{ store.gstin }} &nbsp;·&nbsp; FSSAI {{ store.fssai }} &nbsp;·&nbsp; {{ store.phone }}
+    </div>
+  </div>
+  <div class="col right">
+    <div class="doc-title">Tax Invoice</div>
+    <div class="mono muted" style="font-size:9px;margin-top:3px">Original for recipient</div>
+  </div>
+</div>
+
+<div class="meta-grid">
+  <div class="col left">
+    <div class="label-sm">Billed to</div>
+    <div class="cust-name">{{ customer.name }}</div>
+    <div class="mono muted" style="font-size:9px;line-height:1.8;margin-top:3px">
+      {{ customer.cust_code }} &nbsp;·&nbsp; {{ customer.phone }}<br>
+      {{ customer.address }}<br>
+      GSTIN {{ customer.gstin }}
+    </div>
+  </div>
+  <div class="col right">
+    <div class="label-sm">Invoice details</div>
+    <table class="mono" style="font-size:9px">
+      <tr><td class="muted" style="padding:2px 0">Invoice no.</td><td class="right" style="padding:2px 0;font-weight:700;font-size:10px">{{ invoice.number }}</td></tr>
+      <tr><td class="muted" style="padding:2px 0">Invoice date</td><td class="right" style="padding:2px 0">{{ invoice.date }}</td></tr>
+      <tr><td class="muted" style="padding:2px 0">Against PO</td><td class="right" style="padding:2px 0">{{ invoice.po_number }}{% if invoice.po_time %} · {{ invoice.po_time }}{% endif %}</td></tr>
+      <tr><td class="muted" style="padding:2px 0">Place of supply</td><td class="right" style="padding:2px 0">{{ invoice.place_of_supply }}</td></tr>
+      <tr><td class="muted" style="padding:2px 0">Reverse charge</td><td class="right" style="padding:2px 0">No</td></tr>
+    </table>
+  </div>
+</div>
+
+<table class="items">
+  <thead>
+    <tr>
+      <th style="width:20px">#</th>
+      <th>Item</th>
+      <th style="width:44px">HSN</th>
+      <th class="r" style="width:50px">MRP</th>
+      <th class="r" style="width:34px">Qty</th>
+      <th class="r" style="width:52px">Rate</th>
+      <th class="r" style="width:62px">Taxable</th>
+      <th class="r" style="width:36px">GST</th>
+      <th class="r" style="width:52px">CGST</th>
+      <th class="r" style="width:52px">SGST</th>
+      <th class="r" style="width:60px">Total</th>
+    </tr>
+  </thead>
+  <tbody class="mono">
+    {% for l in lines %}
+    <tr>
+      <td class="muted">{{ l.idx }}</td>
+      <td style="font-family:'Archivo','Helvetica Neue',sans-serif">
+        <span class="item-name">{{ l.name }}</span>
+        <span class="item-note {{ 'unlisted' if 'unlisted' in l.note else '' }}">{{ l.note }}</span>
+      </td>
+      <td class="dim">{{ l.hsn }}</td>
+      <td class="r muted">{% if l.mrp %}{{ '{:,.2f}'.format(l.mrp) }}{% else %}—{% endif %}</td>
+      <td class="r">{{ l.qty|round(2) }}</td>
+      <td class="r">{{ '%.2f'|format(l.rate) }}</td>
+      <td class="r">{{ '{:,.2f}'.format(l.taxable) }}</td>
+      <td class="r muted">{% if l.gst_rate %}{{ l.gst_rate|int }}%{% else %}—{% endif %}</td>
+      <td class="r">{% if l.gst_rate %}{{ '%.2f'|format(l.cgst) }}{% else %}—{% endif %}</td>
+      <td class="r">{% if l.gst_rate %}{{ '%.2f'|format(l.sgst) }}{% else %}—{% endif %}</td>
+      <td class="r line-total">{{ '{:,.2f}'.format(l.total) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="foot-grid">
+  <div class="col left">
+    <div class="label-sm">GST summary by slab</div>
+    <table class="slab mono">
+      <thead>
+        <tr><th>Slab</th><th class="r">Taxable</th><th class="r">CGST</th><th class="r">SGST</th></tr>
+      </thead>
+      <tbody>
+        {% for s in slab_summary %}
+        <tr>
+          <td>{{ s.rate|int }}% {% if s.rate == 0 %}(nil rated){% else %}({{ s.half_label }} + {{ s.half_label }}){% endif %}</td>
+          <td class="r">{{ '{:,.2f}'.format(s.taxable) }}</td>
+          <td class="r">{% if s.rate %}{{ '%.2f'|format(s.cgst) }}{% else %}—{% endif %}</td>
+          <td class="r">{% if s.rate %}{{ '%.2f'|format(s.sgst) }}{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="words">
+      <div class="label-sm">Amount in words</div>
+      <div class="amt">{{ amount_in_words }}</div>
+    </div>
+  </div>
+  <div class="col right">
+    <table class="totals-table">
+      <tr><td class="lbl">Total taxable value</td><td class="r mono">{{ '{:,.2f}'.format(totals.taxable) }}</td></tr>
+      <tr><td class="lbl">CGST</td><td class="r mono">{{ '%.2f'|format(totals.cgst) }}</td></tr>
+      <tr class="rule"><td class="lbl">SGST</td><td class="r mono">{{ '%.2f'|format(totals.sgst) }}</td></tr>
+      <tr><td class="lbl" style="padding-top:6px">Round off</td><td class="r mono" style="padding-top:6px">{{ '%+.2f'|format(totals.round_off) }}</td></tr>
+    </table>
+    <div class="grand">
+      <div class="lbl">Invoice total</div>
+      <div class="val">{{ totals.grand_total|inr0 }}</div>
+    </div>
+    <div class="payment-box">
+      <div class="label-sm">Payment</div>
+      <div class="mono" style="font-size:10px;line-height:1.8">
+        {% if payment.paid %}
+          UPI · UTR {{ payment.utr }}<br>{{ payment.amount|inr }} &nbsp;·&nbsp; balance due nil
+        {% else %}
+          On account · no UTR recorded<br>{{ payment.amount|inr }} added to customer balance due
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="terms-grid">
+  <div class="col terms">
+    Goods once sold are not returnable unless damaged in transit and reported within 24 hours.<br>
+    Interest at 18% p.a. is chargeable on balances outstanding beyond 15 days.<br>
+    Certified that the particulars given above are true and correct, and the amount indicated represents the price actually charged.
+  </div>
+  <div class="col sign">
+    <div class="sign-line">
+      <div class="mono muted" style="font-size:9px">For {{ store.name }}</div>
+      <div style="font-size:10px;font-weight:800;margin-top:2px">Authorised signatory</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

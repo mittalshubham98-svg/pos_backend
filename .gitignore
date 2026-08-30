@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env
+app/static/images/*.jpg
+app/static/images/*.jpeg
+app/static/images/*.png
+!app/static/images/.gitkeep
+.pytest_cache/
+*.egg-info/
