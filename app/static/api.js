@@ -84,6 +84,43 @@ async function apiDownload(path, token, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 
+/* Native voice-to-text for search boxes. Uses the browser's built-in SpeechRecognition API
+   rather than a bundled SDK, so it transparently picks up whichever engine the device
+   already provides: webkitSpeechRecognition on Chrome/Android is backed by Google's speech
+   service, while SpeechRecognition on Safari/iOS is backed by Apple's on-device recognizer.
+   No API key or network call of our own is involved either way. */
+function voiceInputSupported() {
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+
+function startVoiceInput({ onResult, onStart, onEnd, onError, lang = "en-IN" } = {}) {
+  const SpeechRecognitionImpl = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognitionImpl) {
+    if (onError) onError(new Error("Voice search isn't supported in this browser — try Chrome or Safari."));
+    return null;
+  }
+  const recognition = new SpeechRecognitionImpl();
+  recognition.lang = lang;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  if (onStart) recognition.onstart = onStart;
+  if (onEnd) recognition.onend = onEnd;
+  recognition.onerror = e => { if (onError) onError(new Error(e.error || "Voice search failed")); };
+  recognition.onresult = e => {
+    const transcript = e.results[0] && e.results[0][0] ? e.results[0][0].transcript.trim() : "";
+    if (onResult) onResult(transcript);
+  };
+  try {
+    recognition.start();
+  } catch (err) {
+    if (onError) onError(err);
+    return null;
+  }
+  return recognition;
+}
+
+const MIC_ICON_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>';
+
 function errorMessage(err) {
   if (err instanceof ApiError) {
     if (Array.isArray(err.detail)) {

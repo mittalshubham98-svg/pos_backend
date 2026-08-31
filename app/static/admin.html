@@ -65,7 +65,7 @@ const state = {
   confirmResetPwId: null, resetPwInput: "", resetCred: "",
   adminCurPw: "", adminNewPw: "", adminPwBusy: false,
 
-  catalog: [], catQ: "",
+  catalog: [], catQ: "", voiceListeningFor: null,
   importOpen: false, importFile: null, importFileName: "", importResult: null, importBusy: false,
   addItemOpen: false, addItemBusy: false,
   newItemName: "", newItemCategory: "", newItemSize: "", newItemCase: "1",
@@ -321,6 +321,20 @@ function addCustomLine() {
     add_custom_lines: [{ custom_name: name, qty: Math.max(num(state.customQty, 1), 0.01), rate_override: num(state.customRate, 0), gst_override: num(state.customGst, 0) }],
   });
   setState({ customName: "", customQty: "1", customRate: "" });
+}
+function startVoiceFieldInput(target) {
+  if (state.voiceListeningFor) return;
+  startVoiceInput({
+    lang: "en-IN",
+    onStart: () => { state.voiceListeningFor = target; render(); },
+    onEnd: () => { state.voiceListeningFor = null; render(); },
+    onResult: text => {
+      if (!text) return;
+      if (target === "catQ") { state.catQ = text; render(); loadCatalog().then(render); }
+      else if (target === "itemSearchQ") { searchItemsForPo(text); }
+    },
+    onError: err => { state.voiceListeningFor = null; render(); showToast(errorMessage(err)); },
+  });
 }
 async function searchItemsForPo(q) {
   state.itemSearchQ = q;
@@ -775,7 +789,13 @@ function poDetailPanel(po, emptyMessage) {
       ${!locked ? `
       <div style="padding:14px 0;border-bottom:1px solid rgba(32,30,29,.4)">
         <label style="display:block;font-size:12px;margin-bottom:5px;color:rgba(32,30,29,.7)">Add item from catalogue</label>
-        <input id="itemSearchQ" value="${esc(st.itemSearchQ)}" placeholder="Search item master by name…" style="width:100%;max-width:420px;min-height:34px;padding:5px 9px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
+        <div style="display:flex;gap:8px;align-items:stretch;max-width:420px">
+          <input id="itemSearchQ" value="${esc(st.itemSearchQ)}" placeholder="Search item master by name…" style="flex:1;min-height:34px;padding:5px 9px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
+          ${voiceInputSupported() ? `
+          <button data-action="voiceInput" data-target="itemSearchQ" style="flex:none;width:34px;height:34px;display:grid;place-items:center;background:${st.voiceListeningFor === "itemSearchQ" ? "#ec3013" : "transparent"};border:1px solid rgba(32,30,29,.4);cursor:pointer;color:${st.voiceListeningFor === "itemSearchQ" ? "#f3f2f2" : "#201e1d"}" title="Search by voice">
+            ${MIC_ICON_SVG}
+          </button>` : ""}
+        </div>
         ${st.itemSearchBusy ? `<div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-top:6px">Searching…</div>` : (st.itemSearchResults.length ? `
         <div style="border:1px solid rgba(32,30,29,.4);max-width:420px;margin-top:6px">
           ${st.itemSearchResults.map(it => `
@@ -992,6 +1012,10 @@ function catalogTpl() {
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <input id="catQ" value="${esc(st.catQ)}" placeholder="Filter items…" style="width:220px;min-height:34px;padding:5px 9px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
+        ${voiceInputSupported() ? `
+        <button data-action="voiceInput" data-target="catQ" style="flex:none;width:34px;height:34px;display:grid;place-items:center;background:${st.voiceListeningFor === "catQ" ? "#ec3013" : "transparent"};border:1px solid rgba(32,30,29,.4);cursor:pointer;color:${st.voiceListeningFor === "catQ" ? "#f3f2f2" : "#201e1d"}" title="Search by voice">
+          ${MIC_ICON_SVG}
+        </button>` : ""}
         <a href="/api/items/template.csv" download style="padding:9px 13px;font-size:13px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer;text-decoration:none;display:inline-block">Download CSV template</a>
         <button data-action="openImport" style="padding:9px 13px;font-size:13px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer">Import CSV</button>
         <button data-action="openAddItem" style="padding:9px 13px;font-size:13px;font-weight:800;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">Add item</button>
@@ -1390,6 +1414,7 @@ function wire() {
     const id = btn.getAttribute("data-id");
     if (action === "login") doLogin();
     else if (action === "logout") logout();
+    else if (action === "voiceInput") startVoiceFieldInput(btn.getAttribute("data-target"));
     else if (action === "tab") switchTab(btn.getAttribute("data-tab"));
     else if (action === "goOcr") switchTab("ocr");
     else if (action === "goImport") { switchTab("catalog").then(() => setState({ importOpen: true })); }
