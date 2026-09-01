@@ -1245,6 +1245,7 @@ function catalogTpl() {
       <div style="padding:7px 8px 7px 0;border-bottom:1px solid rgba(32,30,29,.4)">
         <div style="font-size:13px;font-weight:800;line-height:1.25">${esc(it.item_name)}</div>
         <div class="mono" style="font-size:10px;color:rgba(32,30,29,.55)">image: ${it.image_source === "manual" ? "manual upload" : it.image_source === "auto" ? "auto-fetched" : "fetch failed — placeholder"}</div>
+        ${!it.mrp && !it.taxable_value ? `<div class="mono" style="font-size:10px;font-weight:800;color:#ec3013;margin-top:2px">NO PRICE SET</div>` : ""}
       </div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;color:rgba(32,30,29,.7)">${esc(it.category || "")}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;color:rgba(32,30,29,.7)">${esc(it.brand || "")}</div>

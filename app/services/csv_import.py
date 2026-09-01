@@ -86,19 +86,19 @@ def validate_row(row: Dict[str, str]) -> Tuple[Optional[dict], Optional[str]]:
     if mrp == "INVALID" or taxable_value == "INVALID":
         return None, "MRP/Taxable_Value is not numeric — row skipped"
 
-    if tax_type == "Inclusive_MRP" and not mrp:
-        return None, "MRP blank and Tax_Type = Inclusive_MRP — cannot derive selling value, row skipped"
-    if tax_type == "Exclusive" and not taxable_value:
-        return None, "Taxable_Value blank and Tax_Type = Exclusive — cannot derive selling value, row skipped"
-
     if mrp is not None and mrp > MRP_SANITY_CEILING:
         return None, f"MRP {mrp:g} exceeds sanity ceiling of {MRP_SANITY_CEILING} — held for review, row skipped"
 
     warning = None
+    if tax_type == "Inclusive_MRP" and not mrp:
+        warning = "MRP blank — item imported at ₹0 selling value, set it manually before selling"
+    elif tax_type == "Exclusive" and not taxable_value:
+        warning = "Taxable_Value blank — item imported at ₹0 selling value, set it manually before selling"
 
     case_size_raw = _num(row.get("Case_Size"))
     if case_size_raw == "INVALID" or case_size_raw is None or case_size_raw < 1:
-        warning = f"Case_Size {row.get('Case_Size')!r} — coerced to 1"
+        prior = warning
+        warning = (prior + "; " if prior else "") + f"Case_Size {row.get('Case_Size')!r} — coerced to 1"
         case_size = 1
     else:
         case_size = int(case_size_raw)

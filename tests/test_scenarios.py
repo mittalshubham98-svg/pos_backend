@@ -167,17 +167,18 @@ def test_scenario_3_csv_import_bad_rows_reported_good_rows_commit(client, admin_
     assert r.status_code == 200, r.text
     dry = r.json()
     assert dry["dry_run"] is True
-    # Good Item A, Zero Case Item (coerced, not skipped), Dup Name Item (later row wins) = 3
-    assert dry["valid_rows"] == 3
-    assert dry["new_skus"] == 3
-    assert len(dry["warnings"]) >= 3  # bad MRP, bad GST, coerced case size, + duplicate note
+    # Good Item A, Bad MRP Item (blank MRP imported at ₹0, not skipped), Zero Case Item
+    # (coerced, not skipped), Dup Name Item (later row wins) = 4
+    assert dry["valid_rows"] == 4
+    assert dry["new_skus"] == 4
+    assert len(dry["warnings"]) >= 3  # blank MRP, bad GST, coerced case size, + duplicate note
 
     files = {"file": ("items.csv", _CSV_BODY, "text/csv")}
     r = client.post("/api/items/import", params={"dry_run": False}, files=files, headers=admin_headers)
     assert r.status_code == 200, r.text
     commit = r.json()
     assert commit["dry_run"] is False
-    assert commit["committed"] == 3
+    assert commit["committed"] == 4
 
     r = client.get("/api/items", headers=admin_headers)
     items_by_name = {i["item_name"]: i for i in r.json()}
@@ -186,7 +187,10 @@ def test_scenario_3_csv_import_bad_rows_reported_good_rows_commit(client, admin_
     assert items_by_name["Zero Case Item"]["case_size"] == 1  # coerced from 0
     assert "Dup Name Item" in items_by_name
     assert items_by_name["Dup Name Item"]["mrp"] == 200  # later duplicate row wins
-    assert "Bad MRP Item" not in items_by_name
+    # Blank MRP no longer skips the row — item is imported with a ₹0 selling value so it
+    # still shows up in the catalogue, ready for the admin to fill in the price manually.
+    assert "Bad MRP Item" in items_by_name
+    assert items_by_name["Bad MRP Item"]["mrp"] == 0
     assert "Bad GST Item" not in items_by_name
 
 
