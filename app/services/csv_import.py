@@ -136,13 +136,20 @@ def validate_row(row: Dict[str, str]) -> Tuple[Optional[dict], Optional[str]]:
     return data, warning
 
 
+def _sku_key(item_name: str, brand: Optional[str]) -> Tuple[str, str]:
+    """A SKU is identified by (name, brand) together, not name alone — two rows with the
+    same Item_Name but different Brand are different products (e.g. "Chakki Atta 5 kg" from
+    Aashirvaad vs. Patanjali) and must both be kept, not have one overwrite the other."""
+    return (item_name.strip().lower(), (brand or "").strip().lower())
+
+
 def process_csv(db: Session, csv_text: str, dry_run: bool) -> dict:
     reader = csv.DictReader(io.StringIO(csv_text))
     if reader.fieldnames is None:
         return {"valid_rows": 0, "warnings": [{"row": 0, "message": "CSV appears to be empty"}], "new_skus": 0, "committed": 0}
 
-    valid: Dict[str, dict] = {}
-    order: List[str] = []
+    valid: Dict[Tuple[str, str], dict] = {}
+    order: List[Tuple[str, str]] = []
     warnings: List[dict] = []
 
     for i, row in enumerate(reader, start=2):  # row 1 is the header
@@ -150,16 +157,20 @@ def process_csv(db: Session, csv_text: str, dry_run: bool) -> dict:
         if data is None:
             warnings.append({"row": i, "message": warning or "row skipped"})
             continue
-        key = data["item_name"].strip().lower()
+        key = _sku_key(data["item_name"], data["brand"])
         if key in valid:
-            warnings.append({"row": i, "message": f"Item_Name {data['item_name']!r} duplicates an earlier row — later row wins"})
+            brand_note = f" (brand {data['brand']!r})" if data["brand"] else ""
+            warnings.append({"row": i, "message": f"Item_Name {data['item_name']!r}{brand_note} duplicates an earlier row — later row wins"})
         else:
             order.append(key)
         valid[key] = data
         if warning:
             warnings.append({"row": i, "message": warning})
 
-    existing = {name.lower(): item_id for name, item_id in db.query(Item.item_name, Item.id).all()}
+    existing = {
+        _sku_key(name, brand): item_id
+        for name, brand, item_id in db.query(Item.item_name, Item.brand, Item.id).all()
+    }
     new_skus = sum(1 for k in valid if k not in existing)
 
     result = {"valid_rows": len(valid), "warnings": warnings, "new_skus": new_skus, "committed": 0, "new_item_ids": []}

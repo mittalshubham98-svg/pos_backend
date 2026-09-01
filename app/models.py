@@ -74,6 +74,7 @@ class Item(Base):
         CheckConstraint("discount_rate >= 0 AND discount_rate <= 100", name="ck_items_discount_rate"),
         CheckConstraint("image_source IN ('auto','manual','none')", name="ck_items_image_source"),
         Index("ix_items_item_name", "item_name"),
+        Index("ix_items_item_name_brand", "item_name", "brand"),
         Index("ix_items_is_daily_rate_change", "is_daily_rate_change"),
     )
 

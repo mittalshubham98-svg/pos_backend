@@ -74,6 +74,11 @@ const state = {
   newItemPromo: "", newItemDisc: "0", newItemDaily: false, newItemAisle: "", newItemHsn: "",
   confirmDeleteItemId: null,
 
+  editItemId: null, editItemBusy: false,
+  editItemName: "", editItemCategory: "", editItemBrand: "", editItemSize: "", editItemCase: "1",
+  editItemMrp: "", editItemTaxable: "", editItemGst: "5", editItemTaxType: "Exclusive",
+  editItemPromo: "", editItemDisc: "0", editItemDaily: false, editItemAisle: "", editItemHsn: "",
+
   ocrFile: null, ocrFileName: "", ocrState: "idle", ocrError: "", ocrRows: [],
 
   settings: null, ledgerRows: [], ledgerBusy: false, qrImageOk: false,
@@ -266,6 +271,56 @@ async function createItemManual() {
     render();
   } catch (err) {
     setState({ addItemBusy: false });
+    showToast(errorMessage(err));
+  }
+}
+
+function openEditItem(id) {
+  const it = state.catalog.filter(x => x.id === Number(id))[0];
+  if (!it) return;
+  setState({
+    editItemId: it.id,
+    editItemName: it.item_name || "", editItemCategory: it.category || "", editItemBrand: it.brand || "",
+    editItemSize: it.item_size || "", editItemCase: String(it.case_size || 1),
+    editItemMrp: String(it.mrp || ""), editItemTaxable: String(it.taxable_value || ""),
+    editItemGst: String(it.total_gst_rate), editItemTaxType: it.tax_type,
+    editItemPromo: it.promo_status || "", editItemDisc: String(it.discount_rate || 0),
+    editItemDaily: !!it.is_daily_rate_change, editItemAisle: it.aisle || "", editItemHsn: it.hsn_code || "",
+    editItemBusy: false,
+  });
+}
+function closeEditItem() {
+  setState({ editItemId: null });
+}
+async function saveEditItem() {
+  const name = state.editItemName.trim();
+  if (!name) { showToast("Item name is required"); return; }
+  const payload = {
+    item_name: name,
+    category: state.editItemCategory.trim() || null,
+    brand: state.editItemBrand.trim() || null,
+    item_size: state.editItemSize.trim() || null,
+    case_size: Math.max(Math.round(num(state.editItemCase, 1)), 1),
+    mrp: num(state.editItemMrp, 0),
+    taxable_value: num(state.editItemTaxable, 0),
+    total_gst_rate: num(state.editItemGst, 0),
+    tax_type: state.editItemTaxType,
+    promo_status: state.editItemPromo,
+    discount_rate: num(state.editItemDisc, 0),
+    is_daily_rate_change: state.editItemDaily,
+    aisle: state.editItemAisle.trim() || null,
+    hsn_code: state.editItemHsn.trim() || null,
+  };
+  const id = state.editItemId;
+  setState({ editItemBusy: true });
+  try {
+    await authedApi("/api/items/" + id, { method: "PATCH", json: payload });
+    showToast(name + " updated");
+    setState({ editItemId: null });
+    await loadCatalog();
+    render();
+  } catch (err) {
+    setState({ editItemBusy: false });
     showToast(errorMessage(err));
   }
 }
@@ -1031,7 +1086,7 @@ function catalogTpl() {
   const catHeads = [
     ["", HEAD_STYLE], ["Item name", HEAD_STYLE], ["Category", HEAD_STYLE], ["Brand", HEAD_STYLE], ["Size", HEAD_STYLE],
     ["Case", HEAD_R], ["MRP", HEAD_R], ["Taxable", HEAD_R], ["GST", HEAD_R],
-    ["Tax type", HEAD_STYLE], ["Disc", HEAD_R], ["Selling", HEAD_R], ["Daily / img / del", HEAD_STYLE],
+    ["Tax type", HEAD_STYLE], ["Disc", HEAD_R], ["Selling", HEAD_R], ["Daily / edit / img / del", HEAD_STYLE],
   ];
   return `
   <div style="padding:22px 32px 40px">
@@ -1103,6 +1158,57 @@ function catalogTpl() {
       </div>
     </div>` : ""}
 
+    ${st.editItemId != null ? `
+    <div style="border:2px solid #ec3013;margin-bottom:18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(32,30,29,.4)">
+        <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Edit item</div>
+        <button data-action="closeEditItem" style="width:28px;height:28px;display:grid;place-items:center;background:transparent;border:1px solid rgba(32,30,29,.4);cursor:pointer;color:#201e1d">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <div style="padding:16px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+        <div style="grid-column:span 2">${miniField("editItemName", "Item name", st.editItemName, { mono: false, placeholder: "Chakki Atta 5 kg" })}</div>
+        <div>${miniField("editItemCategory", "Category", st.editItemCategory, { mono: false, placeholder: "Atta & Flour" })}</div>
+        <div>${miniField("editItemBrand", "Brand", st.editItemBrand, { mono: false, placeholder: "Aashirvaad" })}</div>
+        <div>${miniField("editItemSize", "Size", st.editItemSize, { mono: false, placeholder: "5 kg" })}</div>
+        <div>${miniField("editItemCase", "Case size", st.editItemCase)}</div>
+        <div>${miniField("editItemMrp", "MRP", st.editItemMrp)}</div>
+        <div>${miniField("editItemTaxable", "Taxable value", st.editItemTaxable)}</div>
+        <div>
+          <label style="display:block;font-size:11px;margin-bottom:5px;color:rgba(32,30,29,.7)">GST %</label>
+          <select id="editItemGst" class="mono" style="width:100%;min-height:32px;padding:5px 7px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d">
+            ${GST_ALLOWED.map(g => `<option value="${g}" ${String(g) === st.editItemGst ? "selected" : ""}>${g}%</option>`).join("")}
+          </select>
+        </div>
+        <div>
+          <label style="display:block;font-size:11px;margin-bottom:5px;color:rgba(32,30,29,.7)">Tax type</label>
+          <select id="editItemTaxType" class="mono" style="width:100%;min-height:32px;padding:5px 7px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d">
+            <option value="Exclusive" ${st.editItemTaxType === "Exclusive" ? "selected" : ""}>Exclusive</option>
+            <option value="Inclusive_MRP" ${st.editItemTaxType === "Inclusive_MRP" ? "selected" : ""}>Inclusive MRP</option>
+          </select>
+        </div>
+        <div>${miniField("editItemDisc", "Discount %", st.editItemDisc)}</div>
+        <div>
+          <label style="display:block;font-size:11px;margin-bottom:5px;color:rgba(32,30,29,.7)">Promo</label>
+          <select id="editItemPromo" class="mono" style="width:100%;min-height:32px;padding:5px 7px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d">
+            <option value="" ${st.editItemPromo === "" ? "selected" : ""}>none</option>
+            <option value="NEW" ${st.editItemPromo === "NEW" ? "selected" : ""}>NEW</option>
+            <option value="DISCOUNT" ${st.editItemPromo === "DISCOUNT" ? "selected" : ""}>DISCOUNT</option>
+          </select>
+        </div>
+        <div>${miniField("editItemAisle", "Aisle", st.editItemAisle, { mono: false, placeholder: "A1 · 03" })}</div>
+        <div>${miniField("editItemHsn", "HSN code", st.editItemHsn, { mono: false })}</div>
+        <div style="display:flex;align-items:flex-end;gap:8px;padding-bottom:2px">
+          <button data-action="toggleEditItemDaily" title="Is_Daily_Rate_Change" style="flex:none;width:32px;height:32px;display:grid;place-items:center;font-size:11px;font-weight:800;cursor:pointer;border:1px solid rgba(32,30,29,.4);${st.editItemDaily ? "background:#ec3013;color:#f3f2f2;border-color:#ec3013;" : "background:transparent;color:rgba(32,30,29,.45);"}">D</button>
+          <span class="mono" style="font-size:10px;color:rgba(32,30,29,.55);line-height:1.3">daily rate<br/>watchlist</span>
+        </div>
+      </div>
+      <div style="padding:0 16px 16px;display:flex;gap:8px">
+        <button data-action="saveEditItem" ${st.editItemBusy ? "disabled" : ""} style="padding:9px 13px;font-size:13px;font-weight:800;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">${st.editItemBusy ? "Saving…" : "Save changes"}</button>
+        <button data-action="closeEditItem" style="padding:9px 13px;font-size:13px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer">Cancel</button>
+      </div>
+    </div>` : ""}
+
     ${st.importOpen ? `
     <div style="border:2px solid rgba(32,30,29,.4);margin-bottom:18px">
       <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(32,30,29,.4)">
@@ -1132,7 +1238,7 @@ function catalogTpl() {
       </div>`}
     </div>` : ""}
 
-    <div style="display:grid;grid-template-columns:44px 1fr 130px 110px 84px 66px 84px 84px 56px 130px 66px 106px 132px;border-top:2px solid rgba(32,30,29,.4)">
+    <div style="display:grid;grid-template-columns:44px 1fr 130px 110px 84px 66px 84px 84px 56px 130px 66px 106px 176px;border-top:2px solid rgba(32,30,29,.4)">
       ${catHeads.map(h => `<div style="${h[1]}">${h[0]}</div>`).join("")}
       ${st.catalog.map(it => `
       <div style="padding:6px 6px 6px 0;border-bottom:1px solid rgba(32,30,29,.4);display:flex;align-items:center">${thumbHtml(it)}</div>
@@ -1152,6 +1258,7 @@ function catalogTpl() {
       <div style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:13px;font-weight:800;text-align:right">${inr(it.pricing.selling)}</div>
       <div style="padding:5px 6px 5px 8px;border-bottom:1px solid rgba(32,30,29,.4);display:flex;align-items:center;gap:4px">
         <button data-action="toggleDaily" data-id="${it.id}" title="Is_Daily_Rate_Change" style="flex:none;width:26px;height:26px;display:grid;place-items:center;font-size:11px;font-weight:800;cursor:pointer;border:1px solid rgba(32,30,29,.4);${it.is_daily_rate_change ? "background:#ec3013;color:#f3f2f2;border-color:#ec3013;" : "background:transparent;color:rgba(32,30,29,.45);"}">D</button>
+        <button data-action="openEditItem" data-id="${it.id}" title="Edit item" style="flex:1;padding:4px 4px;font-size:10px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer">EDIT</button>
         <button data-action="uploadImage" data-id="${it.id}" title="Upload image" style="flex:1;padding:4px 4px;font-size:10px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer">IMG</button>
         ${st.confirmDeleteItemId === it.id
           ? `<button data-action="confirmDeleteItem" data-id="${it.id}" title="Click to confirm delete" style="flex:none;padding:4px 6px;font-size:10px;font-weight:800;background:#ec3013;color:#f3f2f2;border:1px solid #ec3013;cursor:pointer">Sure?</button>`
@@ -1412,6 +1519,16 @@ function wire() {
     else if (id === "newItemDisc") state.newItemDisc = e.target.value;
     else if (id === "newItemAisle") state.newItemAisle = e.target.value;
     else if (id === "newItemHsn") state.newItemHsn = e.target.value;
+    else if (id === "editItemName") state.editItemName = e.target.value;
+    else if (id === "editItemCategory") state.editItemCategory = e.target.value;
+    else if (id === "editItemBrand") state.editItemBrand = e.target.value;
+    else if (id === "editItemSize") state.editItemSize = e.target.value;
+    else if (id === "editItemCase") state.editItemCase = e.target.value;
+    else if (id === "editItemMrp") state.editItemMrp = e.target.value;
+    else if (id === "editItemTaxable") state.editItemTaxable = e.target.value;
+    else if (id === "editItemDisc") state.editItemDisc = e.target.value;
+    else if (id === "editItemAisle") state.editItemAisle = e.target.value;
+    else if (id === "editItemHsn") state.editItemHsn = e.target.value;
   };
   app.onchange = e => {
     const el = e.target;
@@ -1426,6 +1543,9 @@ function wire() {
     else if (el.id === "newItemGst") state.newItemGst = el.value;
     else if (el.id === "newItemTaxType") state.newItemTaxType = el.value;
     else if (el.id === "newItemPromo") state.newItemPromo = el.value;
+    else if (el.id === "editItemGst") state.editItemGst = el.value;
+    else if (el.id === "editItemTaxType") state.editItemTaxType = el.value;
+    else if (el.id === "editItemPromo") state.editItemPromo = el.value;
     else if (el.id === "invPrefix" || el.id === "invSeq") {
       const patch = {};
       if (state.invPrefixDraft.trim()) patch.invoice_prefix = state.invPrefixDraft.trim();
@@ -1469,6 +1589,10 @@ function wire() {
     else if (action === "closeAddItem") setState({ addItemOpen: false });
     else if (action === "toggleNewItemDaily") setState({ newItemDaily: !state.newItemDaily });
     else if (action === "createItemManual") createItemManual();
+    else if (action === "openEditItem") openEditItem(id);
+    else if (action === "closeEditItem") closeEditItem();
+    else if (action === "toggleEditItemDaily") setState({ editItemDaily: !state.editItemDaily });
+    else if (action === "saveEditItem") saveEditItem();
     else if (action === "deleteItem") armDeleteItem(id);
     else if (action === "confirmDeleteItem") confirmDeleteItem(id);
     else if (action === "uploadImage") pickImageFor(id);
