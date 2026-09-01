@@ -51,6 +51,11 @@ class Item(Base):
     promo_status: Mapped[str] = mapped_column(String, nullable=False, default="")
     discount_rate: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     is_daily_rate_change: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Additive, nullable-free with a default of "shown" — lets the admin hide a discontinued
+    # or out-of-stock item from the customer app's catalogue without deleting it (deleting is
+    # blocked anyway once an item has been ordered; see delete_item's 409). The admin portal
+    # itself still lists and can edit hidden items.
+    is_active: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     image_path: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     image_source: Mapped[str] = mapped_column(String, nullable=False, default="none")
     # Additive, nullable — warehouse aisle/bin (e.g. "A1 · 03") for the picking sheet.
@@ -76,6 +81,7 @@ class Item(Base):
         Index("ix_items_item_name", "item_name"),
         Index("ix_items_item_name_brand", "item_name", "brand"),
         Index("ix_items_is_daily_rate_change", "is_daily_rate_change"),
+        Index("ix_items_is_active", "is_active"),
     )
 
 

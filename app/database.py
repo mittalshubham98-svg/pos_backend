@@ -50,10 +50,16 @@ def _add_missing_columns() -> None:
         if "brand" not in existing:
             with engine.begin() as conn:
                 conn.execute(text("ALTER TABLE items ADD COLUMN brand VARCHAR"))
+        if "is_active" not in existing:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE items ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1"))
         existing_indexes = {idx["name"] for idx in inspector.get_indexes("items")}
         if "ix_items_item_name_brand" not in existing_indexes:
             with engine.begin() as conn:
                 conn.execute(text("CREATE INDEX ix_items_item_name_brand ON items (item_name, brand)"))
+        if "ix_items_is_active" not in existing_indexes:
+            with engine.begin() as conn:
+                conn.execute(text("CREATE INDEX ix_items_is_active ON items (is_active)"))
 
     if "customers" in table_names:
         existing = {col["name"] for col in inspector.get_columns("customers")}

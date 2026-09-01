@@ -215,6 +215,7 @@ class ItemBase(BaseModel):
     promo_status: str = ""
     discount_rate: float = 0
     is_daily_rate_change: bool = False
+    is_active: bool = True
     aisle: Optional[str] = None
     hsn_code: Optional[str] = None
 
@@ -280,6 +281,7 @@ class ItemUpdateIn(BaseModel):
     promo_status: Optional[str] = None
     discount_rate: Optional[float] = None
     is_daily_rate_change: Optional[bool] = None
+    is_active: Optional[bool] = None
     aisle: Optional[str] = None
     hsn_code: Optional[str] = None
 

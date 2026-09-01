@@ -36,6 +36,7 @@ def _item_dict(item: Item) -> dict:
         "promo_status": item.promo_status,
         "discount_rate": item.discount_rate,
         "is_daily_rate_change": bool(item.is_daily_rate_change),
+        "is_active": bool(item.is_active),
         "image_path": item.image_path,
         "image_source": item.image_source,
         "aisle": item.aisle,
@@ -64,9 +65,12 @@ def list_items(
     q: Optional[str] = Query(default=None),
     category: Optional[str] = Query(default=None),
     daily_only: bool = Query(default=False),
+    include_inactive: bool = Query(default=False, description="Admin portal only — also return items hidden from the customer app"),
     db: Session = Depends(get_db),
 ):
     query = db.query(Item)
+    if not include_inactive:
+        query = query.filter(Item.is_active == 1)
     if q:
         like = f"%{q.strip()}%"
         query = query.filter(or_(Item.item_name.ilike(like), Item.category.ilike(like), Item.brand.ilike(like)))
