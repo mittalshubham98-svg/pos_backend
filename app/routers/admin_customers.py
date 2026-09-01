@@ -172,6 +172,31 @@ def get_customer(customer_id: int, db: Session = Depends(get_db), _admin=Depends
     }
 
 
+@router.delete("/{customer_id}")
+def delete_customer(customer_id: int, db: Session = Depends(get_db), _admin=Depends(get_current_admin)):
+    customer = db.get(Customer, customer_id)
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+
+    order_count = db.query(func.count(PurchaseOrder.id)).filter(PurchaseOrder.customer_id == customer_id).scalar()
+    if order_count:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot delete — referenced by {order_count} existing order(s) for this customer",
+        )
+
+    ledger_count = db.query(func.count(LedgerEntry.id)).filter(LedgerEntry.customer_id == customer_id).scalar()
+    if ledger_count:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Cannot delete — customer has {ledger_count} ledger entries on record",
+        )
+
+    db.delete(customer)
+    db.commit()
+    return {"deleted": True, "id": customer_id}
+
+
 @router.post("/{customer_id}/payments", status_code=201)
 def record_payment(
     customer_id: int,

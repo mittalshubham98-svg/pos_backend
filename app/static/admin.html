@@ -63,6 +63,7 @@ const state = {
   newName: "", newPhone: "", newPassword: "", newCred: "",
   paymentAmount: "", paymentNote: "",
   confirmResetPwId: null, resetPwInput: "", resetCred: "",
+  confirmDeleteCustomerId: null,
   adminCurPw: "", adminNewPw: "", adminPwBusy: false,
 
   catalog: [], catQ: "", voiceListeningFor: null,
@@ -96,7 +97,7 @@ function logout(message) {
   Object.assign(state, {
     token: null, booting: false, loginError: message || "", loginPw: "",
     orders: [], watchItems: [], customers: [], customerDetail: null, catalog: [], settings: null,
-    resetCred: "", confirmResetPwId: null, resetPwInput: "",
+    resetCred: "", confirmResetPwId: null, resetPwInput: "", confirmDeleteCustomerId: null,
     adminCurPw: "", adminNewPw: "", adminPwBusy: false,
   });
   render();
@@ -414,6 +415,25 @@ async function confirmResetPw(id) {
     const res = await authedApi("/api/admin/customers/" + id + "/reset-password", { method: "POST", json: { password: chosen || null } });
     setState({ resetPwInput: "", resetCred: "id: " + res.cust_code + "\nnew password: " + res.password });
     showToast("New password set for " + res.cust_code + " — give it to them now, it won't be shown again");
+  } catch (err) { showToast(errorMessage(err)); render(); }
+}
+
+function armDeleteCustomer(id) {
+  state.confirmDeleteCustomerId = Number(id);
+  render();
+  clearTimeout(armDeleteCustomer._t);
+  armDeleteCustomer._t = setTimeout(() => {
+    if (state.confirmDeleteCustomerId === Number(id)) { state.confirmDeleteCustomerId = null; render(); }
+  }, 4000);
+}
+async function confirmDeleteCustomer(id) {
+  state.confirmDeleteCustomerId = null;
+  try {
+    await authedApi("/api/admin/customers/" + id, { method: "DELETE" });
+    showToast("Customer deleted");
+    if (state.selectedCustomerId === Number(id)) { state.selectedCustomerId = null; state.customerDetail = null; }
+    await loadCustomers();
+    render();
   } catch (err) { showToast(errorMessage(err)); render(); }
 }
 
@@ -924,6 +944,9 @@ function customersTpl() {
         <div style="text-align:right">
           <div class="mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(32,30,29,.55);margin-bottom:4px">Balance due</div>
           <div style="font-size:24px;font-weight:800;color:${detail.balance_due ? "#ae1800" : "#201e1d"}">${detail.balance_due ? inr0(detail.balance_due) : "settled"}</div>
+          ${st.confirmDeleteCustomerId === detail.id
+            ? `<button data-action="confirmDeleteCustomer" data-id="${detail.id}" style="margin-top:10px;padding:6px 10px;font-size:11px;font-weight:800;background:#ec3013;color:#f3f2f2;border:1px solid #ec3013;cursor:pointer">Confirm delete?</button>`
+            : `<button data-action="deleteCustomer" data-id="${detail.id}" style="margin-top:10px;padding:6px 10px;font-size:11px;font-weight:800;background:transparent;color:#ae1800;border:1px solid rgba(174,24,0,.5);cursor:pointer">Delete customer</button>`}
         </div>
       </div>
 
@@ -1467,6 +1490,8 @@ function wire() {
     else if (action === "recordPayment") recordPayment(Number(id));
     else if (action === "resetPw") armResetPw(id);
     else if (action === "confirmResetPw") confirmResetPw(id);
+    else if (action === "deleteCustomer") armDeleteCustomer(id);
+    else if (action === "confirmDeleteCustomer") confirmDeleteCustomer(id);
     else if (action === "createCustomer") createCustomer();
     else if (action === "changeAdminPassword") changeAdminPassword();
     else if (action === "toggleDaily") {
