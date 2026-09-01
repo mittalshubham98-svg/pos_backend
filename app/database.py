@@ -1,6 +1,6 @@
 """Engine/session setup. SQLite in WAL mode so the admin portal and customer app can read
 and write concurrently without locking each other out (per the handoff spec, section 1)."""
-from sqlalchemy import create_engine, event
+from sqlalchemy import create_engine, event, inspect, text
 from sqlalchemy.orm import sessionmaker
 
 from .config import settings
@@ -38,9 +38,23 @@ DEFAULT_SETTINGS = {
 }
 
 
+def _add_missing_columns() -> None:
+    """`create_all` only creates tables that don't exist yet — it never alters an existing
+    table's columns. Additive model fields (aisle, hsn_code, brand, ...) therefore need an
+    explicit ALTER TABLE for databases that predate them. Safe to call every startup."""
+    inspector = inspect(engine)
+    if "items" not in inspector.get_table_names():
+        return
+    existing = {col["name"] for col in inspector.get_columns("items")}
+    if "brand" not in existing:
+        with engine.begin() as conn:
+            conn.execute(text("ALTER TABLE items ADD COLUMN brand VARCHAR"))
+
+
 def init_db() -> None:
     """Create tables if missing and seed default settings rows. Safe to call every startup."""
     Base.metadata.create_all(bind=engine)
+    _add_missing_columns()
     with SessionLocal() as db:
         existing = {row.key for row in db.query(Setting).all()}
         added = False

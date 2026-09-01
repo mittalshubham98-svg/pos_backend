@@ -15,6 +15,7 @@ from ..tax_engine import ALLOWED_GST_RATES, TAX_TYPES
 TEMPLATE_COLUMNS = [
     "Item_Name",
     "Category",
+    "Brand",
     "Item_Size",
     "Case_Size",
     "MRP",
@@ -36,7 +37,7 @@ def template_csv_bytes() -> bytes:
     writer = csv.writer(buf)
     writer.writerow(TEMPLATE_COLUMNS)
     writer.writerow(
-        ["Chakki Atta 5 kg", "Atta & Flour", "5 kg", "10", "285", "244", "5", "Exclusive", "", "4", "0", "A1 · 03", "1101"]
+        ["Chakki Atta 5 kg", "Atta & Flour", "Aashirvaad", "5 kg", "10", "285", "244", "5", "Exclusive", "", "4", "0", "A1 · 03", "1101"]
     )
     return buf.getvalue().encode("utf-8")
 
@@ -119,6 +120,7 @@ def validate_row(row: Dict[str, str]) -> Tuple[Optional[dict], Optional[str]]:
     data = {
         "item_name": name,
         "category": (row.get("Category") or "").strip() or None,
+        "brand": (row.get("Brand") or "").strip() or None,
         "item_size": (row.get("Item_Size") or "").strip() or None,
         "case_size": case_size,
         "mrp": mrp or 0,

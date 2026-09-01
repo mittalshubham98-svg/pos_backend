@@ -4,6 +4,7 @@ extensions the prototype's UI needs that the given DDL doesn't provide for:
 
 - `items.aisle` (nullable) — the picking sheet's aisle/bin column.
 - `items.hsn_code` (nullable) — the tax invoice's HSN column.
+- `items.brand` (nullable) — manufacturer/brand name for catalogue search and CSV import.
 - `sale_bill_lines` (a whole new table) — a frozen per-line snapshot taken at billing time;
   see its own docstring below for why this one isn't just a nice-to-have.
 
@@ -38,6 +39,9 @@ class Item(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     item_name: Mapped[str] = mapped_column(String, nullable=False)
     category: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    # Additive, nullable — manufacturer/brand name (e.g. "Tata", "Amul") for catalogue
+    # search/filtering and CSV import; not in the original DDL.
+    brand: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     item_size: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     case_size: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     mrp: Mapped[float] = mapped_column(Float, nullable=False, default=0)

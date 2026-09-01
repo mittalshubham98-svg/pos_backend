@@ -172,6 +172,7 @@ class CustomerOut(BaseModel):
 class ItemBase(BaseModel):
     item_name: str = Field(min_length=1)
     category: Optional[str] = None
+    brand: Optional[str] = None
     item_size: Optional[str] = None
     case_size: int = 1
     mrp: float = 0
@@ -236,6 +237,7 @@ class ItemUpdateIn(BaseModel):
 
     item_name: Optional[str] = Field(default=None, min_length=1)
     category: Optional[str] = None
+    brand: Optional[str] = None
     item_size: Optional[str] = None
     case_size: Optional[int] = None
     mrp: Optional[float] = None
@@ -290,6 +292,7 @@ class ItemOut(BaseModel):
     id: int
     item_name: str
     category: Optional[str] = None
+    brand: Optional[str] = None
     item_size: Optional[str] = None
     case_size: int
     mrp: float

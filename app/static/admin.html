@@ -68,7 +68,7 @@ const state = {
   catalog: [], catQ: "", voiceListeningFor: null,
   importOpen: false, importFile: null, importFileName: "", importResult: null, importBusy: false,
   addItemOpen: false, addItemBusy: false,
-  newItemName: "", newItemCategory: "", newItemSize: "", newItemCase: "1",
+  newItemName: "", newItemCategory: "", newItemBrand: "", newItemSize: "", newItemCase: "1",
   newItemMrp: "", newItemTaxable: "", newItemGst: "5", newItemTaxType: "Exclusive",
   newItemPromo: "", newItemDisc: "0", newItemDaily: false, newItemAisle: "", newItemHsn: "",
   confirmDeleteItemId: null,
@@ -230,7 +230,7 @@ async function patchItem(id, patch, reload) {
 
 function resetNewItemForm(patch) {
   Object.assign(state, {
-    newItemName: "", newItemCategory: "", newItemSize: "", newItemCase: "1",
+    newItemName: "", newItemCategory: "", newItemBrand: "", newItemSize: "", newItemCase: "1",
     newItemMrp: "", newItemTaxable: "", newItemGst: "5", newItemTaxType: "Exclusive",
     newItemPromo: "", newItemDisc: "0", newItemDaily: false, newItemAisle: "", newItemHsn: "",
     addItemOpen: false, addItemBusy: false,
@@ -243,6 +243,7 @@ async function createItemManual() {
   const payload = {
     item_name: name,
     category: state.newItemCategory.trim() || null,
+    brand: state.newItemBrand.trim() || null,
     item_size: state.newItemSize.trim() || null,
     case_size: Math.max(Math.round(num(state.newItemCase, 1)), 1),
     mrp: num(state.newItemMrp, 0),
@@ -677,7 +678,7 @@ function dashTpl() {
           <div style="padding:7px 6px;border-bottom:1px solid rgba(32,30,29,.4);display:flex;align-items:center">${thumbHtml(it)}</div>
           <div style="padding:7px 6px;border-bottom:1px solid rgba(32,30,29,.4);display:flex;flex-direction:column;justify-content:center">
             <div style="font-size:13px;font-weight:800;line-height:1.2">${esc(it.item_name)}</div>
-            <div class="mono" style="font-size:10px;color:rgba(32,30,29,.55)">${esc(it.category || "")} · ${esc(it.item_size || "")} · GST ${it.total_gst_rate}% ${it.tax_type === "Inclusive_MRP" ? "incl. mrp" : "excl."}</div>
+            <div class="mono" style="font-size:10px;color:rgba(32,30,29,.55)">${esc(it.brand ? it.brand + " · " : "")}${esc(it.category || "")} · ${esc(it.item_size || "")} · GST ${it.total_gst_rate}% ${it.tax_type === "Inclusive_MRP" ? "incl. mrp" : "excl."}</div>
           </div>
           <div style="padding:5px 6px;border-bottom:1px solid rgba(32,30,29,.4);display:flex;align-items:center">
             <input data-action="setMrp" data-id="${it.id}" value="${it.mrp}" class="mono" style="width:100%;min-height:30px;padding:4px 7px;font-size:13px;text-align:right;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
@@ -999,7 +1000,7 @@ function miniField(id, label, value, opts) {
 function catalogTpl() {
   const st = state;
   const catHeads = [
-    ["", HEAD_STYLE], ["Item name", HEAD_STYLE], ["Category", HEAD_STYLE], ["Size", HEAD_STYLE],
+    ["", HEAD_STYLE], ["Item name", HEAD_STYLE], ["Category", HEAD_STYLE], ["Brand", HEAD_STYLE], ["Size", HEAD_STYLE],
     ["Case", HEAD_R], ["MRP", HEAD_R], ["Taxable", HEAD_R], ["GST", HEAD_R],
     ["Tax type", HEAD_STYLE], ["Disc", HEAD_R], ["Selling", HEAD_R], ["Daily / img / del", HEAD_STYLE],
   ];
@@ -1033,6 +1034,7 @@ function catalogTpl() {
       <div style="padding:16px;display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
         <div style="grid-column:span 2">${miniField("newItemName", "Item name", st.newItemName, { mono: false, placeholder: "Chakki Atta 5 kg" })}</div>
         <div>${miniField("newItemCategory", "Category", st.newItemCategory, { mono: false, placeholder: "Atta & Flour" })}</div>
+        <div>${miniField("newItemBrand", "Brand", st.newItemBrand, { mono: false, placeholder: "Aashirvaad" })}</div>
         <div>${miniField("newItemSize", "Size", st.newItemSize, { mono: false, placeholder: "5 kg" })}</div>
         <div>${miniField("newItemCase", "Case size", st.newItemCase)}</div>
         <div>${miniField("newItemMrp", "MRP", st.newItemMrp)}</div>
@@ -1101,7 +1103,7 @@ function catalogTpl() {
       </div>`}
     </div>` : ""}
 
-    <div style="display:grid;grid-template-columns:44px 1fr 130px 84px 66px 84px 84px 56px 130px 66px 106px 132px;border-top:2px solid rgba(32,30,29,.4)">
+    <div style="display:grid;grid-template-columns:44px 1fr 130px 110px 84px 66px 84px 84px 56px 130px 66px 106px 132px;border-top:2px solid rgba(32,30,29,.4)">
       ${catHeads.map(h => `<div style="${h[1]}">${h[0]}</div>`).join("")}
       ${st.catalog.map(it => `
       <div style="padding:6px 6px 6px 0;border-bottom:1px solid rgba(32,30,29,.4);display:flex;align-items:center">${thumbHtml(it)}</div>
@@ -1110,6 +1112,7 @@ function catalogTpl() {
         <div class="mono" style="font-size:10px;color:rgba(32,30,29,.55)">image: ${it.image_source === "manual" ? "manual upload" : it.image_source === "auto" ? "auto-fetched" : "fetch failed — placeholder"}</div>
       </div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;color:rgba(32,30,29,.7)">${esc(it.category || "")}</div>
+      <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;color:rgba(32,30,29,.7)">${esc(it.brand || "")}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;color:rgba(32,30,29,.7)">${esc(it.item_size || "")}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;text-align:right;color:rgba(32,30,29,.7)">${it.case_size}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right">${inr0(it.mrp)}</div>
@@ -1372,6 +1375,7 @@ function wire() {
     }
     else if (id === "newItemName") state.newItemName = e.target.value;
     else if (id === "newItemCategory") state.newItemCategory = e.target.value;
+    else if (id === "newItemBrand") state.newItemBrand = e.target.value;
     else if (id === "newItemSize") state.newItemSize = e.target.value;
     else if (id === "newItemCase") state.newItemCase = e.target.value;
     else if (id === "newItemMrp") state.newItemMrp = e.target.value;

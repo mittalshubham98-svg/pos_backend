@@ -26,6 +26,7 @@ def _item_dict(item: Item) -> dict:
         "id": item.id,
         "item_name": item.item_name,
         "category": item.category,
+        "brand": item.brand,
         "item_size": item.item_size,
         "case_size": item.case_size,
         "mrp": item.mrp,
@@ -68,7 +69,7 @@ def list_items(
     query = db.query(Item)
     if q:
         like = f"%{q.strip()}%"
-        query = query.filter(or_(Item.item_name.ilike(like), Item.category.ilike(like)))
+        query = query.filter(or_(Item.item_name.ilike(like), Item.category.ilike(like), Item.brand.ilike(like)))
     if category and category.strip().lower() != "all":
         query = query.filter(Item.category == category)
     if daily_only:

@@ -454,7 +454,7 @@ function mainTpl() {
           ${thumbHtml(it)}
           ${it.promo_status ? `<div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#f3f2f2;background:#ec3013;padding:2px 5px;align-self:flex-start">${esc(it.promo_status)}</div>` : ""}
           <div style="font-size:13px;font-weight:800;line-height:1.2">${esc(it.item_name)}</div>
-          <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55)">${esc(it.item_size || "")} · ${it.case_size}/case</div>
+          <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55)">${esc(it.brand ? it.brand + " · " : "")}${esc(it.item_size || "")} · ${it.case_size}/case</div>
           <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap">
             ${showMrp ? `<span class="mono" style="font-size:12px;color:rgba(32,30,29,.55);text-decoration:line-through">${inr0(it.mrp)}</span>` : ""}
             <span style="font-size:16px;font-weight:800;letter-spacing:-0.01em">${inr(it.pricing.selling)}</span>
