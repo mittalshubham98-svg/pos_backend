@@ -20,6 +20,7 @@ from app.database import SessionLocal, init_db  # noqa: E402
 from app.models import Customer, Item, LedgerEntry, PoLine, PurchaseOrder, SaleBill, SaleBillLine  # noqa: E402
 from app.security import hash_password  # noqa: E402
 from app.services.billing import convert_po_to_bill  # noqa: E402
+from app.utils import gen_cust_code  # noqa: E402
 
 # A representative subset of the prototype's CATALOG (Customer App.dc.html), covering both
 # tax types, all non-zero GST slabs, daily-rate items, and a couple of promoted items.
@@ -67,7 +68,7 @@ CUSTOMERS = [
          gstin="08XYZAB5678K2Z1", kind="Kirana shop", password="PILANI0418"),
     dict(name="Annapurna Caterers", phone="98290 61143", address="Vidyavihar Road, Pilani 333031",
          gstin="", kind="Catering agency", password="PILANI0371"),
-    dict(name="Birla Vidya Niketan Mess", phone="", address="Campus Mess, BITS Pilani 333031",
+    dict(name="Birla Vidya Niketan Mess", phone="91660 82204", address="Campus Mess, BITS Pilani 333031",
          gstin="08MESS4321L1Z9", kind="Institution mess", password="PILANI0209"),
 ]
 
@@ -98,11 +99,17 @@ def seed(force: bool = False) -> None:
         db.flush()
 
         customers = []
+        existing_codes = set()
         for row in CUSTOMERS:
             plain_password = row.pop("password")
-            digits = "".join(ch for ch in row.get("phone", "") if ch.isdigit()) or "0418"
-            cust_code = f"CUST-{digits[-4:].rjust(4, '0')}"
-            customer = Customer(cust_code=cust_code, password_hash=hash_password(plain_password), **row)
+            cust_code = gen_cust_code(row.get("name"), existing_codes)
+            existing_codes.add(cust_code)
+            customer = Customer(
+                cust_code=cust_code,
+                password_hash=hash_password(plain_password),
+                password_plain=plain_password,
+                **row,
+            )
             db.add(customer)
             customers.append((customer, plain_password))
         db.commit()

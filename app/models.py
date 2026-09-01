@@ -84,11 +84,22 @@ class Customer(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     cust_code: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
+    # Additive — mirrors password_hash in reversible form so the admin portal can display a
+    # customer's current password on request (shop owner looks it up / reads it out over a
+    # call). password_hash remains the only thing ever checked at login; this column is
+    # display-only and is kept in sync wherever password_hash is set.
+    password_plain: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     address: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     gstin: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     kind: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    # Additive — a short-lived numeric OTP for the mobile-number self-service password reset
+    # flow (see /api/customer/otp/*). Stored in plaintext (unlike password_hash) because it's
+    # single-use and expires in minutes, and because with no SMS gateway wired up, the admin
+    # portal is what surfaces it to the shopkeeper to read out to the customer over a call.
+    otp_code: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    otp_expires_at: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     created_at: Mapped[str] = mapped_column(String, nullable=False, default=_now)
 
     orders: Mapped[List["PurchaseOrder"]] = relationship(back_populates="customer")

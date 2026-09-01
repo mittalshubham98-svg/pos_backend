@@ -5,6 +5,7 @@ Pydantic itself rejects malformed JSON shapes before a handler ever runs, and
 app/main.py's exception handler turns those failures into 400s (see the module docstring
 there for why 400 rather than FastAPI's default 422).
 """
+import re
 from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -88,15 +89,29 @@ class CustomerSetPasswordIn(BaseModel):
         return _clean_optional_password(v)
 
 
-class CustomerForgotPasswordIn(BaseModel):
-    """Self-service reset: a customer proves ownership of the account by supplying the
-    mobile number on file for their cust_code (no email/SMS gateway exists to verify any
-    other way). On a match, either the customer's own chosen new_password is set, or (if
-    left blank) a fresh random password is generated immediately — same
-    generate-and-show-once mechanism as customer creation and the admin-triggered reset."""
+def _digits_only(v: str) -> str:
+    return re.sub(r"\D", "", v or "")
+
+
+class CustomerRequestOtpIn(BaseModel):
+    """Step 1 of self-service password reset: a customer proves ownership of the account by
+    supplying the mobile number on file for their cust_code (no SMS gateway exists to verify
+    any other way). On a match, a short-lived OTP is generated and stored — surfaced to the
+    shopkeeper in the admin portal to read out over a call, since there's no SMS/WhatsApp
+    gateway to deliver it directly."""
 
     cust_code: str
     phone: str
+
+
+class CustomerResetWithOtpIn(BaseModel):
+    """Step 2: cust_code + phone (same as the request step) plus the OTP the shopkeeper
+    read out, and either the customer's own chosen new_password or (if left blank) a fresh
+    random one — same generate-and-show-once mechanism as customer creation."""
+
+    cust_code: str
+    phone: str
+    otp: str
     new_password: Optional[str] = None
 
     @field_validator("new_password")
@@ -112,15 +127,33 @@ class TokenOut(BaseModel):
 
 
 class CustomerCreateIn(BaseModel):
-    """Every field but the server-generated cust_code/password is optional and nullable —
-    per the handoff spec, section 4 and the prototype's 'Create customer' panel."""
+    """name and phone are compulsory: the customer ID is generated from the name (a short
+    form of it, e.g. "Ramesh Kumar" -> RAMESH01) and the mobile number is what powers
+    self-service password reset — a customer with no phone on file has no way to reset their
+    own password. Every other field stays optional/nullable."""
 
-    name: Optional[str] = None
-    phone: Optional[str] = None
+    name: str = Field(min_length=1)
+    phone: str
     address: Optional[str] = None
     gstin: Optional[str] = None
     kind: Optional[str] = None
     password: Optional[str] = None
+
+    @field_validator("name")
+    @classmethod
+    def _name_valid(cls, v):
+        v = (v or "").strip()
+        if not v:
+            raise ValueError("name is required")
+        return v
+
+    @field_validator("phone")
+    @classmethod
+    def _phone_valid(cls, v):
+        v = (v or "").strip()
+        if len(_digits_only(v)) < 10:
+            raise ValueError("phone must have at least 10 digits")
+        return v
 
     @field_validator("password")
     @classmethod
@@ -129,8 +162,8 @@ class CustomerCreateIn(BaseModel):
 
 
 class CustomerCredentialsOut(BaseModel):
-    """Returned once, in plaintext, right after creation — the only time the password is
-    ever shown."""
+    """Returned in plaintext right after creation or a reset. The password stays visible
+    afterwards too, via the admin portal's customer directory (CustomerOut.password)."""
 
     cust_code: str
     password: str

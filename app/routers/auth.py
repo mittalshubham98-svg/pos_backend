@@ -2,6 +2,7 @@
 (handoff spec section 4: "Never 500 on bad credentials; return 401")."""
 import re
 import secrets
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -15,16 +16,30 @@ from ..schemas import (
     AdminLoginIn,
     CustomerChangePasswordIn,
     CustomerCredentialsOut,
-    CustomerForgotPasswordIn,
     CustomerLoginIn,
+    CustomerRequestOtpIn,
+    CustomerResetWithOtpIn,
     TokenOut,
 )
 from ..security import create_token, hash_password, verify_password
-from ..utils import gen_password
+from ..utils import gen_otp, gen_password
 
 router = APIRouter(prefix="/api", tags=["auth"])
 
 _ADMIN_PASSWORD_HASH_KEY = "admin_password_hash"
+OTP_TTL_MINUTES = 5
+
+
+def _find_customer_by_code_and_phone(db: Session, cust_code: str, phone: str) -> Customer:
+    """Shared lookup for both OTP steps: a generic 401 either way (never revealing which of
+    cust_code/phone was wrong) so the endpoint can't be used to enumerate valid accounts."""
+    cust_code = cust_code.strip().upper()
+    phone_digits = re.sub(r"\D", "", phone or "")
+    customer = db.query(Customer).filter(Customer.cust_code == cust_code).first()
+    on_file_digits = re.sub(r"\D", "", customer.phone) if (customer and customer.phone) else ""
+    if not customer or not phone_digits or not on_file_digits or not secrets.compare_digest(phone_digits, on_file_digits):
+        raise HTTPException(status_code=401, detail="Customer ID and mobile number don't match our records")
+    return customer
 
 
 def _admin_password_ok(raw_password: str, db: Session) -> bool:
@@ -73,24 +88,48 @@ def customer_login(payload: CustomerLoginIn, db: Session = Depends(get_db)):
     return TokenOut(token=token, role="customer", expires_in_minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
 
-@router.post("/customer/forgot-password", response_model=CustomerCredentialsOut)
-def customer_forgot_password(payload: CustomerForgotPasswordIn, db: Session = Depends(get_db)):
-    """Self-service reset by cust_code + mobile number on file — no OTP/SMS gateway exists,
-    so a verified match is issued a password directly in the response, the same
-    generate-and-show-once mechanism used everywhere else in this app. If the customer
-    supplied their own new_password it's used as-is (so they can pick something memorable);
-    otherwise a fresh random one is generated. A non-match gets one generic 401 (never
-    revealing which of the two fields was wrong) so the endpoint can't be used to enumerate
-    valid cust_codes or phone numbers."""
-    cust_code = payload.cust_code.strip().upper()
-    phone_digits = re.sub(r"\D", "", payload.phone or "")
-    customer = db.query(Customer).filter(Customer.cust_code == cust_code).first()
-    on_file_digits = re.sub(r"\D", "", customer.phone) if (customer and customer.phone) else ""
-    if not customer or not phone_digits or not on_file_digits or not secrets.compare_digest(phone_digits, on_file_digits):
-        raise HTTPException(status_code=401, detail="Customer ID and mobile number don't match our records")
+@router.post("/customer/otp/request")
+def customer_request_otp(payload: CustomerRequestOtpIn, db: Session = Depends(get_db)):
+    """Step 1 of self-service password reset, usable anytime (no login needed): a customer
+    proves ownership of the account with cust_code + the mobile number on file. On a match a
+    fresh 6-digit OTP is generated, valid for 5 minutes. There's no SMS/WhatsApp gateway
+    wired up to text it to the customer directly, so it isn't returned here — instead it
+    shows up next to that customer in the admin portal for the shopkeeper to read out over a
+    call, the same "no gateway, so make it visible where a human can relay it" approach the
+    rest of this app takes for credentials."""
+    customer = _find_customer_by_code_and_phone(db, payload.cust_code, payload.phone)
+    customer.otp_code = gen_otp()
+    customer.otp_expires_at = (datetime.now(timezone.utc) + timedelta(minutes=OTP_TTL_MINUTES)).strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+    db.commit()
+    return {"ok": True, "message": f"OTP sent — ask the store for the code, it's valid for {OTP_TTL_MINUTES} minutes"}
+
+
+@router.post("/customer/otp/reset", response_model=CustomerCredentialsOut)
+def customer_reset_with_otp(payload: CustomerResetWithOtpIn, db: Session = Depends(get_db)):
+    """Step 2: cust_code + phone (re-checked) plus the OTP from step 1. A verified match is
+    issued a password directly in the response, the same generate-and-show-once mechanism
+    used everywhere else in this app. If the customer supplied their own new_password it's
+    used as-is (so they can pick something memorable); otherwise a fresh random one is
+    generated."""
+    customer = _find_customer_by_code_and_phone(db, payload.cust_code, payload.phone)
+
+    otp_valid = False
+    if customer.otp_code and customer.otp_expires_at and secrets.compare_digest(payload.otp.strip(), customer.otp_code):
+        try:
+            expires = datetime.strptime(customer.otp_expires_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            otp_valid = expires > datetime.now(timezone.utc)
+        except ValueError:
+            otp_valid = False
+    if not otp_valid:
+        raise HTTPException(status_code=401, detail="OTP is incorrect or has expired")
 
     new_password = payload.new_password or gen_password()
     customer.password_hash = hash_password(new_password)
+    customer.password_plain = new_password
+    customer.otp_code = None
+    customer.otp_expires_at = None
     db.commit()
     return CustomerCredentialsOut(
         cust_code=customer.cust_code,
@@ -114,5 +153,6 @@ def customer_change_password(
     if not verify_password(payload.current_password, customer.password_hash):
         raise HTTPException(status_code=401, detail="Current password is incorrect")
     customer.password_hash = hash_password(payload.new_password)
+    customer.password_plain = payload.new_password
     db.commit()
     return {"ok": True}

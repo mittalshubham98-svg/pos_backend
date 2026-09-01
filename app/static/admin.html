@@ -418,10 +418,13 @@ async function confirmResetPw(id) {
 }
 
 async function createCustomer() {
+  const name = state.newName.trim();
+  const phone = state.newPhone.trim();
+  if (!name || !phone) { showToast("Name and phone are both required"); return; }
   try {
     const res = await authedApi("/api/admin/customers", {
       method: "POST",
-      json: { name: state.newName.trim() || null, phone: state.newPhone.trim() || null, password: state.newPassword.trim() || null },
+      json: { name, phone, password: state.newPassword.trim() || null },
     });
     setState({
       newName: "", newPhone: "", newPassword: "",
@@ -939,7 +942,10 @@ function customersTpl() {
         </div>
         <div style="background:#f3f2f2;padding:12px 16px">
           <div class="mono" style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:rgba(32,30,29,.55);margin-bottom:4px">Login credentials</div>
-          <div class="mono" style="font-size:12px;line-height:1.6;margin-bottom:8px">${esc(detail.cust_code)}<br/>password is stored hashed — not recoverable, only reset</div>
+          <div class="mono" style="font-size:12px;line-height:1.6;margin-bottom:8px">id: ${esc(detail.cust_code)}<br/>password: ${esc(detail.password || "(not set)")}</div>
+          ${detail.otp_code
+            ? `<div class="mono" style="font-size:12px;line-height:1.6;margin-bottom:8px;background:#eae9e9;padding:8px 10px;border-left:2px solid #ec3013">active OTP: ${esc(detail.otp_code)}<br/><span style="color:rgba(32,30,29,.55)">read this out to the customer — expires ${esc(detail.otp_expires_at)} UTC</span></div>`
+            : ""}
           ${st.confirmResetPwId === detail.id
             ? `<div style="display:flex;gap:6px;align-items:center">
                  <input id="resetPwInput" value="${esc(st.resetPwInput)}" placeholder="leave blank for random" class="mono" style="flex:1;min-height:28px;padding:4px 8px;font-size:11px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
@@ -1292,15 +1298,15 @@ function reportsTpl() {
 
       <div style="border-top:1px solid rgba(32,30,29,.4);padding:16px 0">
         <div style="font-size:15px;font-weight:800;margin-bottom:2px">Create customer</div>
-        <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-bottom:10px">Every field except the generated ID is optional and nullable — leave password blank for a random one.</div>
+        <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-bottom:10px">Name and phone are required — the ID is a short form of the name, and the phone powers self-service password reset by OTP. Leave password blank for a random one.</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:460px;margin-bottom:10px">
           <div>
-            <label style="display:block;font-size:12px;margin-bottom:5px;color:rgba(32,30,29,.7)">Name (optional)</label>
-            <input id="newName" value="${esc(st.newName)}" placeholder="leave blank" style="width:100%;min-height:34px;padding:5px 9px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
+            <label style="display:block;font-size:12px;margin-bottom:5px;color:rgba(32,30,29,.7)">Name</label>
+            <input id="newName" value="${esc(st.newName)}" placeholder="e.g. Ramesh Kumar" style="width:100%;min-height:34px;padding:5px 9px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
           </div>
           <div>
-            <label style="display:block;font-size:12px;margin-bottom:5px;color:rgba(32,30,29,.7)">Phone (optional)</label>
-            <input id="newPhone" value="${esc(st.newPhone)}" placeholder="leave blank" class="mono" style="width:100%;min-height:34px;padding:5px 9px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
+            <label style="display:block;font-size:12px;margin-bottom:5px;color:rgba(32,30,29,.7)">Phone</label>
+            <input id="newPhone" value="${esc(st.newPhone)}" placeholder="10-digit mobile number" class="mono" style="width:100%;min-height:34px;padding:5px 9px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
           </div>
           <div style="grid-column:1/-1">
             <label style="display:block;font-size:12px;margin-bottom:5px;color:rgba(32,30,29,.7)">Password (optional — pick one they'll remember, or leave blank to auto-generate)</label>

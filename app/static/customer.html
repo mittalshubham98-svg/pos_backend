@@ -43,7 +43,8 @@ const state = {
   token: localStorage.getItem(TOKEN_KEY) || null,
   custCode: null,
   loginId: "", loginPw: "", loginError: "", loginBusy: false,
-  forgotOpen: false, forgotId: "", forgotPhone: "", forgotNewPw: "", forgotError: "", forgotBusy: false, forgotResult: null,
+  forgotOpen: false, forgotStep: "request", forgotId: "", forgotPhone: "", forgotOtp: "", forgotNewPw: "",
+  forgotError: "", forgotBusy: false, forgotResult: null,
   accountOpen: false, curPw: "", newPw: "", pwError: "", pwBusy: false, pwDone: false,
   booting: !!localStorage.getItem(TOKEN_KEY),
   allItems: [], items: [], cats: ["All"], cat: "All", q: "", voiceListening: false,
@@ -152,22 +153,41 @@ async function doLogin() {
 }
 
 function openForgot() {
-  setState({ forgotOpen: true, forgotId: state.loginId, forgotPhone: "", forgotNewPw: "", forgotError: "", forgotResult: null });
+  setState({
+    forgotOpen: true, forgotStep: "request", forgotId: state.loginId, forgotPhone: "",
+    forgotOtp: "", forgotNewPw: "", forgotError: "", forgotResult: null,
+  });
 }
 function closeForgot() {
-  setState({ forgotOpen: false, forgotError: "", forgotResult: null, forgotBusy: false });
+  setState({ forgotOpen: false, forgotStep: "request", forgotError: "", forgotResult: null, forgotBusy: false });
 }
-async function doForgotPassword() {
+async function doRequestOtp() {
   const id = state.forgotId.trim().toUpperCase();
   const phone = state.forgotPhone.trim();
-  const newPassword = state.forgotNewPw.trim();
   if (!id || !phone) { setState({ forgotError: "Enter your customer ID and the mobile number on file" }); return; }
   setState({ forgotBusy: true, forgotError: "" });
   try {
-    const res = await api("/api/customer/forgot-password", { method: "POST", json: { cust_code: id, phone, new_password: newPassword || null } });
-    setState({ forgotBusy: false, forgotResult: res });
+    await api("/api/customer/otp/request", { method: "POST", json: { cust_code: id, phone } });
+    setState({ forgotBusy: false, forgotStep: "verify" });
   } catch (err) {
     setState({ forgotBusy: false, forgotError: errorMessage(err) || "ID and mobile number don't match our records" });
+  }
+}
+async function doResetWithOtp() {
+  const id = state.forgotId.trim().toUpperCase();
+  const phone = state.forgotPhone.trim();
+  const otp = state.forgotOtp.trim();
+  const newPassword = state.forgotNewPw.trim();
+  if (!otp) { setState({ forgotError: "Enter the OTP the store gave you" }); return; }
+  setState({ forgotBusy: true, forgotError: "" });
+  try {
+    const res = await api("/api/customer/otp/reset", {
+      method: "POST",
+      json: { cust_code: id, phone, otp, new_password: newPassword || null },
+    });
+    setState({ forgotBusy: false, forgotResult: res });
+  } catch (err) {
+    setState({ forgotBusy: false, forgotError: errorMessage(err) || "OTP is incorrect or has expired" });
   }
 }
 
@@ -294,7 +314,7 @@ function loginTpl() {
     <div style="flex:1;padding:28px 24px">
       <div style="margin-bottom:16px">
         <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">Customer ID</label>
-        <input id="loginId" value="${esc(state.loginId)}" placeholder="CUST-0418" style="width:100%;min-height:42px;padding:8px 12px;font-size:14px;font-family:'Archivo Narrow',monospace;letter-spacing:.04em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
+        <input id="loginId" value="${esc(state.loginId)}" placeholder="e.g. RAMESH01" style="width:100%;min-height:42px;padding:8px 12px;font-size:14px;font-family:'Archivo Narrow',monospace;letter-spacing:.04em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
       </div>
       <div style="margin-bottom:8px">
         <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">Password</label>
@@ -320,25 +340,43 @@ function forgotTpl() {
       <button data-action="closeForgot" style="width:100%;text-align:left;padding:10px 12px;font-weight:800;font-size:13px;background:#201e1d;color:#f3f2f2;border:0;cursor:pointer;margin-top:10px">Back to sign in</button>
     </div>`;
   }
+
+  if (st.forgotStep === "verify") {
+    return `
+    <div style="margin-top:16px;border:1px solid rgba(32,30,29,.4);padding:14px">
+      <div style="font-size:13px;font-weight:800;margin-bottom:2px">Enter the OTP</div>
+      <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-bottom:12px;line-height:1.6">Call the store — they can read your one-time code off the admin portal. It's valid for 5 minutes.</div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">OTP</label>
+        <input id="forgotOtp" value="${esc(st.forgotOtp)}" placeholder="6-digit code" class="mono" style="width:100%;min-height:38px;padding:8px 10px;font-size:13px;letter-spacing:.1em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">New password (optional — pick one you'll remember, or leave blank for a random one)</label>
+        <input id="forgotNewPw" value="${esc(st.forgotNewPw)}" placeholder="leave blank for a random password" style="width:100%;min-height:38px;padding:8px 10px;font-size:13px;font-family:'Archivo Narrow',monospace;letter-spacing:.04em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
+      </div>
+      ${st.forgotError ? `<div class="mono" style="font-size:12px;color:#ae1800;margin-bottom:10px">${esc(st.forgotError)}</div>` : ""}
+      <div style="display:flex;gap:8px">
+        <button data-action="doResetWithOtp" ${st.forgotBusy ? "disabled" : ""} style="flex:1;text-align:left;padding:10px 12px;font-weight:800;font-size:13px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">${st.forgotBusy ? "Checking…" : "Reset password"}</button>
+        <button data-action="closeForgot" style="padding:10px 12px;font-weight:800;font-size:13px;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer">Cancel</button>
+      </div>
+    </div>`;
+  }
+
   return `
   <div style="margin-top:16px;border:1px solid rgba(32,30,29,.4);padding:14px">
     <div style="font-size:13px;font-weight:800;margin-bottom:2px">Reset your password</div>
-    <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-bottom:12px;line-height:1.6">Enter your customer ID and the mobile number on file with the store — if they match, we'll reset it right here.</div>
+    <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-bottom:12px;line-height:1.6">Enter your customer ID and the mobile number on file with the store — if they match, we'll send an OTP to the store for you to collect.</div>
     <div style="margin-bottom:10px">
       <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">Customer ID</label>
-      <input id="forgotId" value="${esc(st.forgotId)}" placeholder="CUST-0418" style="width:100%;min-height:38px;padding:8px 10px;font-size:13px;font-family:'Archivo Narrow',monospace;letter-spacing:.04em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
+      <input id="forgotId" value="${esc(st.forgotId)}" placeholder="e.g. RAMESH01" style="width:100%;min-height:38px;padding:8px 10px;font-size:13px;font-family:'Archivo Narrow',monospace;letter-spacing:.04em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
     </div>
     <div style="margin-bottom:10px">
       <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">Mobile number</label>
       <input id="forgotPhone" value="${esc(st.forgotPhone)}" placeholder="on file with the store" style="width:100%;min-height:38px;padding:8px 10px;font-size:13px;font-family:'Archivo Narrow',monospace;letter-spacing:.04em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
     </div>
-    <div style="margin-bottom:10px">
-      <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">New password (optional — pick one you'll remember, or leave blank for a random one)</label>
-      <input id="forgotNewPw" value="${esc(st.forgotNewPw)}" placeholder="leave blank for a random password" style="width:100%;min-height:38px;padding:8px 10px;font-size:13px;font-family:'Archivo Narrow',monospace;letter-spacing:.04em;color:#201e1d;caret-color:#ec3013;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0"/>
-    </div>
     ${st.forgotError ? `<div class="mono" style="font-size:12px;color:#ae1800;margin-bottom:10px">${esc(st.forgotError)}</div>` : ""}
     <div style="display:flex;gap:8px">
-      <button data-action="doForgot" ${st.forgotBusy ? "disabled" : ""} style="flex:1;text-align:left;padding:10px 12px;font-weight:800;font-size:13px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">${st.forgotBusy ? "Checking…" : "Get new password"}</button>
+      <button data-action="doRequestOtp" ${st.forgotBusy ? "disabled" : ""} style="flex:1;text-align:left;padding:10px 12px;font-weight:800;font-size:13px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">${st.forgotBusy ? "Checking…" : "Send OTP"}</button>
       <button data-action="closeForgot" style="padding:10px 12px;font-weight:800;font-size:13px;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer">Cancel</button>
     </div>
     <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-top:12px;line-height:1.6">No mobile number on file, or it's changed? Ask the shopkeeper to reset it for you from the admin portal instead.</div>
@@ -637,6 +675,7 @@ function wire() {
     else if (e.target.id === "loginPw") state.loginPw = e.target.value;
     else if (e.target.id === "forgotId") state.forgotId = e.target.value;
     else if (e.target.id === "forgotPhone") state.forgotPhone = e.target.value;
+    else if (e.target.id === "forgotOtp") state.forgotOtp = e.target.value.replace(/[^0-9]/g, "").slice(0, 6);
     else if (e.target.id === "forgotNewPw") state.forgotNewPw = e.target.value;
     else if (e.target.id === "curPw") state.curPw = e.target.value;
     else if (e.target.id === "newPw") state.newPw = e.target.value;
@@ -646,7 +685,8 @@ function wire() {
   };
   app.onkeydown = e => {
     if (e.key === "Enter" && (e.target.id === "loginId" || e.target.id === "loginPw")) doLogin();
-    if (e.key === "Enter" && (e.target.id === "forgotId" || e.target.id === "forgotPhone" || e.target.id === "forgotNewPw")) doForgotPassword();
+    if (e.key === "Enter" && (e.target.id === "forgotId" || e.target.id === "forgotPhone")) doRequestOtp();
+    if (e.key === "Enter" && (e.target.id === "forgotOtp" || e.target.id === "forgotNewPw")) doResetWithOtp();
     if (e.key === "Enter" && (e.target.id === "curPw" || e.target.id === "newPw")) doChangePassword();
   };
   app.onclick = e => {
@@ -658,7 +698,8 @@ function wire() {
     else if (action === "logout") logout();
     else if (action === "openForgot") openForgot();
     else if (action === "closeForgot") closeForgot();
-    else if (action === "doForgot") doForgotPassword();
+    else if (action === "doRequestOtp") doRequestOtp();
+    else if (action === "doResetWithOtp") doResetWithOtp();
     else if (action === "openAccount") openAccount();
     else if (action === "closeAccount") closeAccount();
     else if (action === "doChangePassword") doChangePassword();

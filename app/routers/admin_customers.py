@@ -1,8 +1,12 @@
 """Customer directory. `POST /` is the endpoint named in the handoff spec ("every field but
 cust_code/password nullable; server generates cust_code + random password, returns them
-once in plaintext"). The list/detail GETs are an addition — the admin portal's Customers tab
-(directory + balance due + order history) has nothing to render without them.
+once in plaintext") — now with name/phone required (see CustomerCreateIn) so every customer
+has an ID derived from their name and a mobile number on file for self-service password
+reset. The list/detail GETs are an addition — the admin portal's Customers tab (directory +
+balance due + order history + current password/OTP) has nothing to render without them.
 """
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -27,6 +31,20 @@ def _balance_due(db: Session, customer_id: int) -> float:
     return round(float(total or 0), 2)
 
 
+def _otp_fields(customer: Customer) -> dict:
+    """Only surfaces the OTP while it's still live — once expired it's just noise for the
+    admin to read past, and reset-with-otp would reject it anyway."""
+    if not customer.otp_code or not customer.otp_expires_at:
+        return {"otp_code": None, "otp_expires_at": None}
+    try:
+        expires = datetime.strptime(customer.otp_expires_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return {"otp_code": None, "otp_expires_at": None}
+    if expires <= datetime.now(timezone.utc):
+        return {"otp_code": None, "otp_expires_at": None}
+    return {"otp_code": customer.otp_code, "otp_expires_at": customer.otp_expires_at}
+
+
 @router.post("", response_model=CustomerCredentialsOut, status_code=201)
 def create_customer(
     payload: CustomerCreateIn,
@@ -34,14 +52,15 @@ def create_customer(
     _admin=Depends(get_current_admin),
 ):
     existing = {c for (c,) in db.query(Customer.cust_code).all()}
-    cust_code = gen_cust_code(existing)
+    cust_code = gen_cust_code(payload.name, existing)
     password = payload.password or gen_password()
 
     customer = Customer(
         cust_code=cust_code,
         password_hash=hash_password(password),
-        name=payload.name or None,
-        phone=payload.phone or None,
+        password_plain=password,
+        name=payload.name,
+        phone=payload.phone,
         address=payload.address or None,
         gstin=payload.gstin or None,
         kind=payload.kind or None,
@@ -69,18 +88,17 @@ def reset_customer_password(
     _admin=Depends(get_current_admin),
 ):
     """Admin-triggered reset for a customer who's forgotten their password and can't (or
-    won't) use the mobile-number self-service flow — e.g. no phone on file, or the phone
-    changed. password_hash is a one-way bcrypt hash (see security.py), so there is no way to
-    ever recover or display the existing password. The admin can hand the customer a
+    won't) use the mobile-number/OTP self-service flow. The admin can hand the customer a
     password of their choosing (e.g. dictated over the counter so it's easy to remember), or
-    leave it blank for a fresh random one, generated and shown once exactly like at account
-    creation."""
+    leave it blank for a fresh random one — either way it's also saved for later lookup in
+    the customer directory (see CustomerOut.password / GET /{customer_id})."""
     customer = db.get(Customer, customer_id)
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
 
     password = (payload.password if payload else None) or gen_password()
     customer.password_hash = hash_password(password)
+    customer.password_plain = password
     db.commit()
 
     return CustomerCredentialsOut(
@@ -105,6 +123,8 @@ def list_customers(db: Session = Depends(get_db), _admin=Depends(get_current_adm
         out.append(
             {
                 **CustomerOut.model_validate(c).model_dump(),
+                "password": c.password_plain,
+                **_otp_fields(c),
                 "balance_due": _balance_due(db, c.id),
                 "order_count": int(order_count or 0),
             }
@@ -143,6 +163,8 @@ def get_customer(customer_id: int, db: Session = Depends(get_db), _admin=Depends
 
     return {
         **CustomerOut.model_validate(customer).model_dump(),
+        "password": customer.password_plain,
+        **_otp_fields(customer),
         "balance_due": _balance_due(db, customer_id),
         "lifetime_billed": round(lifetime_billed, 2),
         "order_count": len(orders),

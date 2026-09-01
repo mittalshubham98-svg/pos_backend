@@ -31,7 +31,9 @@ def _create_item(client, admin_headers, **overrides):
 
 
 def _create_customer(client, admin_headers, **overrides):
-    r = client.post("/api/admin/customers", json=overrides, headers=admin_headers)
+    payload = {"name": "Test Customer", "phone": "9876543210"}
+    payload.update(overrides)
+    r = client.post("/api/admin/customers", json=payload, headers=admin_headers)
     assert r.status_code == 201, r.text
     return r.json()
 
@@ -114,13 +116,15 @@ def test_scenario_1_mixed_tax_types_on_account_order_to_bill(client, admin_heade
 
 
 def test_scenario_2_customer_created_with_all_optional_fields_blank(client, admin_headers):
-    r = client.post("/api/admin/customers", json={}, headers=admin_headers)
+    # name and phone are the only compulsory fields now: the ID is derived from the name,
+    # and the phone is what powers self-service password reset.
+    r = client.post("/api/admin/customers", json={"name": "Ramesh Kumar", "phone": "9876543210"}, headers=admin_headers)
     assert r.status_code == 201, r.text
     cred = r.json()
-    assert cred["cust_code"].startswith("CUST-")
+    assert cred["cust_code"].startswith("RAMESH")
     assert cred["password"]
-    assert cred["name"] is None
-    assert cred["phone"] is None
+    assert cred["name"] == "Ramesh Kumar"
+    assert cred["phone"] == "9876543210"
     assert cred["address"] is None
     assert cred["gstin"] is None
     assert cred["kind"] is None
@@ -128,6 +132,17 @@ def test_scenario_2_customer_created_with_all_optional_fields_blank(client, admi
     # And the generated credentials actually work.
     r = client.post("/api/customer/login", json={"cust_code": cred["cust_code"], "password": cred["password"]})
     assert r.status_code == 200, r.text
+
+
+def test_scenario_2b_customer_creation_requires_name_and_phone(client, admin_headers):
+    r = client.post("/api/admin/customers", json={}, headers=admin_headers)
+    assert r.status_code == 400, r.text
+
+    r = client.post("/api/admin/customers", json={"name": "No Phone Customer"}, headers=admin_headers)
+    assert r.status_code == 400, r.text
+
+    r = client.post("/api/admin/customers", json={"phone": "9876543210"}, headers=admin_headers)
+    assert r.status_code == 400, r.text
 
 
 # --- Scenario 3 ---------------------------------------------------------------------
@@ -236,3 +251,70 @@ def test_scenario_6_double_billing_rejected(client, admin_headers):
 
     r = client.get(f"/api/orders/{po['id']}", headers=admin_headers)
     assert r.json()["invoice_number"] == r1.json()["invoice_number"]
+
+
+# --- Scenario 7: mobile-number + OTP self-service password reset, admin visibility -----
+
+
+def test_scenario_7_otp_password_reset_and_admin_visibility(client, admin_headers):
+    customer = _create_customer(client, admin_headers, name="Ramesh Kumar", phone="9876543210")
+
+    # The admin portal can see the current password right after creation.
+    row = _customer_row(client, admin_headers, customer["cust_code"])
+    assert row["password"] == customer["password"]
+    assert row["otp_code"] is None
+
+    # Wrong phone never matches, and never reveals which field was wrong.
+    r = client.post(
+        "/api/customer/otp/request",
+        json={"cust_code": customer["cust_code"], "phone": "0000000000"},
+    )
+    assert r.status_code == 401, r.text
+
+    # Requesting an OTP does not leak the actual code over the API...
+    r = client.post(
+        "/api/customer/otp/request",
+        json={"cust_code": customer["cust_code"], "phone": "9876543210"},
+    )
+    assert r.status_code == 200, r.text
+    assert set(r.json().keys()) == {"ok", "message"}
+
+    # ...it shows up in the admin portal instead, for the shopkeeper to read out.
+    detail = client.get(f"/api/admin/customers/{row['id']}", headers=admin_headers).json()
+    otp = detail["otp_code"]
+    assert otp and len(otp) == 6 and otp.isdigit()
+    assert detail["otp_expires_at"]
+
+    # A wrong OTP is rejected.
+    r = client.post(
+        "/api/customer/otp/reset",
+        json={"cust_code": customer["cust_code"], "phone": "9876543210", "otp": "000000"},
+    )
+    assert r.status_code == 401, r.text
+
+    # The correct OTP resets the password (chosen or random) and clears the OTP.
+    r = client.post(
+        "/api/customer/otp/reset",
+        json={"cust_code": customer["cust_code"], "phone": "9876543210", "otp": otp, "new_password": "MyNewPass1"},
+    )
+    assert r.status_code == 200, r.text
+    new_password = r.json()["password"]
+    assert new_password == "MyNewPass1"
+
+    # Old password no longer works, new one does.
+    r = client.post("/api/customer/login", json={"cust_code": customer["cust_code"], "password": customer["password"]})
+    assert r.status_code == 401
+    r = client.post("/api/customer/login", json={"cust_code": customer["cust_code"], "password": new_password})
+    assert r.status_code == 200, r.text
+
+    # The OTP is single-use — reusing it now fails.
+    r = client.post(
+        "/api/customer/otp/reset",
+        json={"cust_code": customer["cust_code"], "phone": "9876543210", "otp": otp},
+    )
+    assert r.status_code == 401, r.text
+
+    # And the admin portal now shows the freshly reset password.
+    detail = client.get(f"/api/admin/customers/{row['id']}", headers=admin_headers).json()
+    assert detail["password"] == new_password
+    assert detail["otp_code"] is None

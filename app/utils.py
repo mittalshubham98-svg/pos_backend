@@ -1,27 +1,37 @@
 """Small stateless helpers shared across routers/services: ID/password generation,
 Indian-style rupee formatting, and amount-in-words for the invoice."""
-import random
 import re
 import secrets
 import string
 from typing import Iterable, Optional, Set
 
 
-def gen_cust_code(existing: Optional[Set[str]] = None) -> str:
-    """CUST-#### with a random 4-digit tail, e.g. CUST-0418. Retries on collision."""
+def gen_cust_code(name: Optional[str], existing: Optional[Set[str]] = None) -> str:
+    """A short, memorable ID derived from the customer's name, e.g. "Ramesh Kumar" ->
+    RAMESH01. Letters only, uppercased, capped at 6 characters, plus a 2+ digit counter to
+    keep it unique (widening to 3, then 4 digits if the short forms of two names collide).
+    Falls back to "CUST" when the name has no usable letters (e.g. blank/numeric)."""
     existing = existing or set()
-    for _ in range(500):
-        code = f"CUST-{random.randint(0, 9999):04d}"
-        if code not in existing:
-            return code
-    # Astronomically unlikely fallback if the whole 0000-9999 range is somehow taken.
-    return f"CUST-{secrets.token_hex(3).upper()}"
+    letters = re.sub(r"[^A-Za-z]", "", name or "").upper()
+    base = letters[:6] or "CUST"
+    for digits in (2, 3, 4):
+        for n in range(1, 10 ** digits):
+            code = f"{base}{n:0{digits}d}"
+            if code not in existing:
+                return code
+    # Astronomically unlikely fallback if every 4-digit suffix for this base is taken.
+    return f"{base}{secrets.token_hex(3).upper()}"
 
 
 def gen_password(length: int = 8) -> str:
     """Random uppercase alphanumeric password, handed to the admin once in plaintext."""
     alphabet = string.ascii_uppercase + string.digits
     return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def gen_otp(length: int = 6) -> str:
+    """Random numeric OTP for the mobile-number self-service password reset flow."""
+    return "".join(secrets.choice(string.digits) for _ in range(length))
 
 
 def gen_po_number(next_seq: int) -> str:

@@ -43,12 +43,23 @@ def _add_missing_columns() -> None:
     table's columns. Additive model fields (aisle, hsn_code, brand, ...) therefore need an
     explicit ALTER TABLE for databases that predate them. Safe to call every startup."""
     inspector = inspect(engine)
-    if "items" not in inspector.get_table_names():
-        return
-    existing = {col["name"] for col in inspector.get_columns("items")}
-    if "brand" not in existing:
+    table_names = inspector.get_table_names()
+
+    if "items" in table_names:
+        existing = {col["name"] for col in inspector.get_columns("items")}
+        if "brand" not in existing:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE items ADD COLUMN brand VARCHAR"))
+
+    if "customers" in table_names:
+        existing = {col["name"] for col in inspector.get_columns("customers")}
         with engine.begin() as conn:
-            conn.execute(text("ALTER TABLE items ADD COLUMN brand VARCHAR"))
+            if "password_plain" not in existing:
+                conn.execute(text("ALTER TABLE customers ADD COLUMN password_plain VARCHAR"))
+            if "otp_code" not in existing:
+                conn.execute(text("ALTER TABLE customers ADD COLUMN otp_code VARCHAR"))
+            if "otp_expires_at" not in existing:
+                conn.execute(text("ALTER TABLE customers ADD COLUMN otp_expires_at VARCHAR"))
 
 
 def init_db() -> None:

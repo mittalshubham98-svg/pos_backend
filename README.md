@@ -192,11 +192,21 @@ slab, double-billing, etc.), and database constraint violations all return `400`
 **Auth**
 - `POST /api/admin/login` — `{username, password}` → `{access_token}`
 - `POST /api/customer/login` — `{cust_code, password}` → `{access_token}`
+- `POST /api/customer/otp/request` — `{cust_code, phone}`; on a match, generates a 5-minute
+  OTP (not returned here — read it off the admin portal's customer detail panel, no SMS
+  gateway is wired up)
+- `POST /api/customer/otp/reset` — `{cust_code, phone, otp, new_password?}` → new
+  credentials, once the OTP checks out
+- `POST /api/customer/change-password` — logged-in self-service change
 
 **Customers** *(admin)*
-- `POST /api/admin/customers` — create a customer; generates `cust_code` + password
-- `GET /api/admin/customers` — list, with balance due and order count
-- `GET /api/admin/customers/{id}` — detail, with order history
+- `POST /api/admin/customers` — create a customer; `name`+`phone` are required (the ID is a
+  short form of the name, e.g. "Ramesh Kumar" → `RAMESH01`; the phone powers OTP reset)
+- `GET /api/admin/customers` — list, with balance due, order count, current password, and
+  any active OTP
+- `GET /api/admin/customers/{id}` — detail, with order history, current password, and any
+  active OTP
+- `POST /api/admin/customers/{id}/reset-password` — admin-triggered reset
 - `POST /api/admin/customers/{id}/payments` — record a payment against balance due
 
 **Catalogue** *(admin writes, public reads)*
