@@ -232,6 +232,31 @@ function thumbHtml(it) {
   return '<div class="thumb"><span>' + esc(slugOf(it.item_name)) + '</span></div>';
 }
 
+function itemCardHtml(it, st) {
+  const qty = st.cart[it.id] || 0;
+  const showMrp = it.mrp - it.pricing.selling > 0.5;
+  return `
+  <div style="background:#f3f2f2;padding:10px;display:flex;flex-direction:column;gap:7px">
+    ${thumbHtml(it)}
+    ${it.promo_status ? `<div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#f3f2f2;background:#ec3013;padding:2px 5px;align-self:flex-start">${esc(it.promo_status)}</div>` : ""}
+    <div style="font-size:13px;font-weight:800;line-height:1.2">${esc(it.item_name)}</div>
+    <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55)">${esc(it.brand ? it.brand + " · " : "")}${esc(it.item_size || "")} · ${it.case_size}/case</div>
+    <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap">
+      ${showMrp ? `<span class="mono" style="font-size:12px;color:rgba(32,30,29,.55);text-decoration:line-through">${inr0(it.mrp)}</span>` : ""}
+      <span style="font-size:16px;font-weight:800;letter-spacing:-0.01em">${inr(it.pricing.selling)}</span>
+    </div>
+    <div style="margin-top:auto">
+      ${qty > 0 ? `
+      <div style="display:flex;border:1px solid #ec3013">
+        <button data-action="dec" data-id="${it.id}" style="flex:none;width:34px;height:34px;display:grid;place-items:center;background:#f3f2f2;color:#ec3013;border:0;cursor:pointer;font-weight:800;font-size:16px">−</button>
+        <div style="flex:1;display:grid;place-items:center;font-family:'Archivo Narrow',monospace;font-size:13px;background:#f3f2f2">${qty} pc</div>
+        <button data-action="inc" data-id="${it.id}" style="flex:none;width:34px;height:34px;display:grid;place-items:center;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer;font-weight:800;font-size:16px">+</button>
+      </div>` : `
+      <button data-action="inc" data-id="${it.id}" style="width:100%;text-align:left;padding:8px 10px;font-weight:800;font-size:13px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer;min-height:34px">Add</button>`}
+    </div>
+  </div>`;
+}
+
 let searchDebounce = null;
 function onSearchInput(v) {
   state.q = v;
@@ -403,7 +428,7 @@ function mainTpl() {
   });
   const repeats = Object.keys(freq)
     .map(id => itemById(id)).filter(Boolean)
-    .sort((a, b) => freq[b.id] - freq[a.id]).slice(0, 4);
+    .sort((a, b) => freq[b.id] - freq[a.id]).slice(0, 8);
   const showRepeat = st.cat === "All" && !q && repeats.length > 0;
 
   const lineData = Object.keys(st.cart).map(id => {
@@ -473,20 +498,13 @@ function mainTpl() {
     </div>` : ""}
 
     ${showRepeat ? `
-    <div style="padding:16px 16px 18px;border-bottom:2px solid rgba(32,30,29,.4)">
+    <div style="min-height:50vh;padding:16px 16px 18px;border-bottom:2px solid rgba(32,30,29,.4)">
       <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:10px">
         <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Buy again</div>
         <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55)">from your past orders</div>
       </div>
-      <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:2px" class="noscroll">
-        ${repeats.map(it => {
-          const qty = st.cart[it.id] || 0;
-          return `<div style="flex:none;width:132px;border:1px solid rgba(32,30,29,.4);background:#eae9e9;padding:8px;display:flex;flex-direction:column;gap:6px">
-            <div style="font-size:12px;font-weight:800;line-height:1.2;min-height:29px">${esc(it.item_name)}</div>
-            <div class="mono" style="font-size:12px">${inr(it.pricing.selling)}</div>
-            <button data-action="inc" data-id="${it.id}" style="width:100%;text-align:left;padding:6px 8px;font-weight:800;font-size:12px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">${qty > 0 ? "In cart · " + qty : "Add"}</button>
-          </div>`;
-        }).join("")}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:rgba(32,30,29,.4);border:2px solid rgba(32,30,29,.4)">
+        ${repeats.map(it => itemCardHtml(it, st)).join("")}
       </div>
     </div>` : ""}
 
@@ -496,30 +514,7 @@ function mainTpl() {
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px;background:rgba(32,30,29,.4);border-top:2px solid rgba(32,30,29,.4);border-bottom:2px solid rgba(32,30,29,.4)">
-      ${items.map(it => {
-        const qty = st.cart[it.id] || 0;
-        const showMrp = it.mrp - it.pricing.selling > 0.5;
-        return `
-        <div style="background:#f3f2f2;padding:10px;display:flex;flex-direction:column;gap:7px">
-          ${thumbHtml(it)}
-          ${it.promo_status ? `<div class="mono" style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#f3f2f2;background:#ec3013;padding:2px 5px;align-self:flex-start">${esc(it.promo_status)}</div>` : ""}
-          <div style="font-size:13px;font-weight:800;line-height:1.2">${esc(it.item_name)}</div>
-          <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55)">${esc(it.brand ? it.brand + " · " : "")}${esc(it.item_size || "")} · ${it.case_size}/case</div>
-          <div style="display:flex;align-items:baseline;gap:7px;flex-wrap:wrap">
-            ${showMrp ? `<span class="mono" style="font-size:12px;color:rgba(32,30,29,.55);text-decoration:line-through">${inr0(it.mrp)}</span>` : ""}
-            <span style="font-size:16px;font-weight:800;letter-spacing:-0.01em">${inr(it.pricing.selling)}</span>
-          </div>
-          <div style="margin-top:auto">
-            ${qty > 0 ? `
-            <div style="display:flex;border:1px solid #ec3013">
-              <button data-action="dec" data-id="${it.id}" style="flex:none;width:34px;height:34px;display:grid;place-items:center;background:#f3f2f2;color:#ec3013;border:0;cursor:pointer;font-weight:800;font-size:16px">−</button>
-              <div style="flex:1;display:grid;place-items:center;font-family:'Archivo Narrow',monospace;font-size:13px;background:#f3f2f2">${qty} pc</div>
-              <button data-action="inc" data-id="${it.id}" style="flex:none;width:34px;height:34px;display:grid;place-items:center;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer;font-weight:800;font-size:16px">+</button>
-            </div>` : `
-            <button data-action="inc" data-id="${it.id}" style="width:100%;text-align:left;padding:8px 10px;font-weight:800;font-size:13px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer;min-height:34px">Add</button>`}
-          </div>
-        </div>`;
-      }).join("")}
+      ${items.map(it => itemCardHtml(it, st)).join("")}
     </div>
 
     ${items.length === 0 ? `
