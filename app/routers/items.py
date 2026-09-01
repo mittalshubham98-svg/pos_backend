@@ -64,6 +64,7 @@ def download_template():
 def list_items(
     q: Optional[str] = Query(default=None),
     category: Optional[str] = Query(default=None),
+    brand: Optional[str] = Query(default=None),
     daily_only: bool = Query(default=False),
     include_inactive: bool = Query(default=False, description="Admin portal only — also return items hidden from the customer app"),
     db: Session = Depends(get_db),
@@ -76,6 +77,8 @@ def list_items(
         query = query.filter(or_(Item.item_name.ilike(like), Item.category.ilike(like), Item.brand.ilike(like)))
     if category and category.strip().lower() != "all":
         query = query.filter(Item.category == category)
+    if brand and brand.strip().lower() != "all":
+        query = query.filter(Item.brand == brand)
     if daily_only:
         query = query.filter(Item.is_daily_rate_change == 1)
     items = query.order_by(Item.item_name.asc()).all()

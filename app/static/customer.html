@@ -47,7 +47,7 @@ const state = {
   forgotError: "", forgotBusy: false, forgotResult: null,
   accountOpen: false, curPw: "", newPw: "", pwError: "", pwBusy: false, pwDone: false,
   booting: !!localStorage.getItem(TOKEN_KEY),
-  allItems: [], items: [], cats: ["All"], cat: "All", q: "", voiceListening: false,
+  allItems: [], items: [], cats: ["All"], cat: "All", brands: ["All"], brand: "All", q: "", voiceListening: false,
   myOrders: [],
   cart: {}, unlisted: "", utr: "", cartOpen: false, orderError: "", placing: false,
   placed: null,
@@ -98,12 +98,15 @@ async function loadAllItems() {
   state.allItems = items;
   const cats = Array.from(new Set(items.map(i => i.category).filter(Boolean))).sort();
   state.cats = ["All"].concat(cats);
+  const brands = Array.from(new Set(items.map(i => i.brand).filter(Boolean))).sort();
+  state.brands = ["All"].concat(brands);
 }
 
 async function refreshItems() {
   const params = new URLSearchParams();
   if (state.q.trim()) params.set("q", state.q.trim());
   if (state.cat !== "All") params.set("category", state.cat);
+  if (state.brand !== "All") params.set("brand", state.brand);
   const items = await authedApi("/api/items?" + params.toString());
   state.items = items;
   render();
@@ -274,7 +277,7 @@ async function placeOrder() {
 }
 
 function startNew() {
-  setState({ placed: null, cat: "All", q: "" });
+  setState({ placed: null, cat: "All", brand: "All", q: "" });
   refreshItems();
 }
 
@@ -444,6 +447,11 @@ function mainTpl() {
   <div style="flex:none;display:flex;gap:0;overflow-x:auto;border-bottom:2px solid rgba(32,30,29,.4)" class="noscroll">
     ${st.cats.map(c => `<button data-action="pickCat" data-cat="${esc(c)}" style="flex:none;padding:9px 13px;font-size:12px;font-weight:800;letter-spacing:.02em;white-space:nowrap;cursor:pointer;border:0;border-right:1px solid rgba(32,30,29,.4);${st.cat === c ? "background:#201e1d;color:#f3f2f2;" : "background:transparent;color:#201e1d;"}">${esc(c)}</button>`).join("")}
   </div>
+
+  ${st.brands.length > 1 ? `
+  <div style="flex:none;display:flex;gap:0;overflow-x:auto;border-bottom:2px solid rgba(32,30,29,.4)" class="noscroll">
+    ${st.brands.map(b => `<button data-action="pickBrand" data-brand="${esc(b)}" style="flex:none;padding:7px 13px;font-size:11px;font-weight:800;letter-spacing:.02em;white-space:nowrap;cursor:pointer;border:0;border-right:1px solid rgba(32,30,29,.4);${st.brand === b ? "background:#ec3013;color:#f3f2f2;" : "background:#eae9e9;color:#201e1d;"}">${b === "All" ? "All brands" : esc(b)}</button>`).join("")}
+  </div>` : ""}
 
   <div style="flex:1;overflow-y:auto" class="noscroll">
     ${showSpotlight ? `
@@ -703,9 +711,10 @@ function wire() {
     else if (action === "openAccount") openAccount();
     else if (action === "closeAccount") closeAccount();
     else if (action === "doChangePassword") doChangePassword();
-    else if (action === "clearSearch") { state.q = ""; state.cat = "All"; render(); refreshItems(); }
+    else if (action === "clearSearch") { state.q = ""; state.cat = "All"; state.brand = "All"; render(); refreshItems(); }
     else if (action === "voiceSearch") startVoiceSearch();
     else if (action === "pickCat" || action === "jumpCat") { state.cat = btn.getAttribute("data-cat"); state.q = ""; render(); refreshItems(); }
+    else if (action === "pickBrand") { state.brand = btn.getAttribute("data-brand"); render(); refreshItems(); }
     else if (action === "inc") bump(id, 1);
     else if (action === "dec") bump(id, -1);
     else if (action === "openCart") setState({ cartOpen: true, orderError: "" });
