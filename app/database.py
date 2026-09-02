@@ -53,6 +53,9 @@ def _add_missing_columns() -> None:
         if "is_active" not in existing:
             with engine.begin() as conn:
                 conn.execute(text("ALTER TABLE items ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1"))
+        if "watchlist_order" not in existing:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE items ADD COLUMN watchlist_order INTEGER"))
         existing_indexes = {idx["name"] for idx in inspector.get_indexes("items")}
         if "ix_items_item_name_brand" not in existing_indexes:
             with engine.begin() as conn:

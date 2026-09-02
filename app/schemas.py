@@ -284,6 +284,7 @@ class ItemUpdateIn(BaseModel):
     is_active: Optional[bool] = None
     aisle: Optional[str] = None
     hsn_code: Optional[str] = None
+    watchlist_order: Optional[int] = None
 
     @field_validator("total_gst_rate")
     @classmethod
@@ -319,6 +320,13 @@ class ItemUpdateIn(BaseModel):
         if v is not None and (v < 0 or v > 100):
             raise ValueError("discount_rate must be between 0 and 100")
         return v
+
+
+class WatchlistReorderIn(BaseModel):
+    """Body for POST /api/items/watchlist/reorder — the full set of daily-rate-watch item
+    ids in the order the admin wants them shown, top to bottom."""
+
+    item_ids: List[int] = Field(min_length=1)
 
 
 class ItemOut(BaseModel):

@@ -14,7 +14,7 @@ from ..config import settings
 from ..deps import get_current_admin, get_db
 from ..models import Item, PoLine
 from ..pricing import price_item
-from ..schemas import ImportResultOut, ItemCreateIn, ItemUpdateIn
+from ..schemas import ImportResultOut, ItemCreateIn, ItemUpdateIn, WatchlistReorderIn
 from ..services.csv_import import process_csv, template_csv_bytes
 from ..services.image_fetch import fetch_and_save_image
 
@@ -41,6 +41,7 @@ def _item_dict(item: Item) -> dict:
         "image_source": item.image_source,
         "aisle": item.aisle,
         "hsn_code": item.hsn_code,
+        "watchlist_order": item.watchlist_order,
         "created_at": item.created_at,
         "updated_at": item.updated_at,
         "pricing": price_item(item),
@@ -81,8 +82,28 @@ def list_items(
         query = query.filter(Item.brand == brand)
     if daily_only:
         query = query.filter(Item.is_daily_rate_change == 1)
-    items = query.order_by(Item.item_name.asc()).all()
+        # Admin-chosen watchlist_order first (nulls — never explicitly ordered — sort after
+        # everything that has been), then item name as the tiebreak/fallback.
+        items = query.order_by(Item.watchlist_order.is_(None), Item.watchlist_order.asc(), Item.item_name.asc()).all()
+    else:
+        items = query.order_by(Item.item_name.asc()).all()
     return [_item_dict(i) for i in items]
+
+
+@router.post("/watchlist/reorder")
+def reorder_watchlist(
+    payload: WatchlistReorderIn,
+    db: Session = Depends(get_db),
+    _admin=Depends(get_current_admin),
+):
+    """Persists the admin's chosen top-to-bottom order for the dashboard's daily rate
+    watchlist. Any item id not in the list keeps its existing watchlist_order untouched."""
+    for position, item_id in enumerate(payload.item_ids):
+        item = db.get(Item, item_id)
+        if item:
+            item.watchlist_order = position
+    db.commit()
+    return {"reordered": len(payload.item_ids)}
 
 
 @router.post("", status_code=201)

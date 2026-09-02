@@ -51,6 +51,9 @@ class Item(Base):
     promo_status: Mapped[str] = mapped_column(String, nullable=False, default="")
     discount_rate: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     is_daily_rate_change: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # Additive, nullable — admin-controlled display order within the dashboard's daily rate
+    # watchlist (lower sorts first). Unset items fall to the end, ordered by name.
+    watchlist_order: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     # Additive, nullable-free with a default of "shown" — lets the admin hide a discontinued
     # or out-of-stock item from the customer app's catalogue without deleting it (deleting is
     # blocked anyway once an item has been ordered; see delete_item's 409). The admin portal
