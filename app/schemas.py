@@ -211,9 +211,9 @@ class ItemBase(BaseModel):
     mrp: float = 0
     taxable_value: float = 0
     # Per-piece taxable value charged when a customer buys a full case instead of loose
-    # pieces. None (the default) means no case rate is configured; case orders then fall
-    # back to taxable_value.
-    case_taxable_value: Optional[float] = None
+    # pieces. 0 (the default — same "not set" convention as mrp/taxable_value above) means
+    # no case rate is configured; case orders then fall back to taxable_value.
+    case_taxable_value: float = 0
     total_gst_rate: float = 0
     tax_type: str = "Exclusive"
     promo_status: str = ""
@@ -258,17 +258,10 @@ class ItemBase(BaseModel):
             raise ValueError("discount_rate must be between 0 and 100")
         return v
 
-    @field_validator("mrp", "taxable_value")
+    @field_validator("mrp", "taxable_value", "case_taxable_value")
     @classmethod
     def _non_negative(cls, v):
         if v < 0:
-            raise ValueError("must be >= 0")
-        return v
-
-    @field_validator("case_taxable_value")
-    @classmethod
-    def _case_taxable_value_non_negative(cls, v):
-        if v is not None and v < 0:
             raise ValueError("must be >= 0")
         return v
 
@@ -359,7 +352,7 @@ class ItemOut(BaseModel):
     case_size: int
     mrp: float
     taxable_value: float
-    case_taxable_value: Optional[float] = None
+    case_taxable_value: float = 0
     total_gst_rate: float
     tax_type: str
     promo_status: str

@@ -151,6 +151,37 @@ def test_scenario_1b_loose_vs_case_order_lines_price_differently(client, admin_h
     assert case_line["unit_rate"] == 228
 
 
+def test_scenario_1c_zero_case_taxable_value_is_not_set_falls_back_to_loose_rate(client, admin_headers):
+    """case_taxable_value defaults to 0 for items uploaded before this feature (and for any
+    item where the admin just leaves it blank) — 0 must mean "no case rate configured" and
+    fall back to the loose rate, the same "not set" convention already used by mrp/taxable_value
+    elsewhere in the item master, never an actual free/₹0 case price."""
+    item = _create_item(
+        client, admin_headers,
+        item_name="Old Stock Item", case_size=10, tax_type="Exclusive",
+        mrp=100, taxable_value=90, total_gst_rate=5, discount_rate=0,
+    )
+    assert item["case_taxable_value"] == 0
+
+    r = client.get(f"/api/items/{item['id']}")
+    assert r.status_code == 200, r.text
+    catalog_item = r.json()
+    assert catalog_item["case_taxable_value"] == 0
+    assert catalog_item["pricing_case"] is None  # no case option offered
+
+    customer = _create_customer(client, admin_headers, name="Old Stock Store")
+    cust_headers = _customer_headers(client, customer["cust_code"], customer["password"])
+    r = client.post(
+        "/api/orders",
+        json={"lines": [{"item_id": item["id"], "qty": 2, "uom": "CASE"}]},
+        headers=cust_headers,
+    )
+    assert r.status_code == 201, r.text
+    case_line = r.json()["lines"][0]
+    assert case_line["qty"] == 20
+    assert case_line["unit_rate"] == 90  # loose rate, not free
+
+
 # --- Scenario 2 ---------------------------------------------------------------------
 
 

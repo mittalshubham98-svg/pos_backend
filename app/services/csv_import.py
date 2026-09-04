@@ -129,7 +129,7 @@ def validate_row(row: Dict[str, str]) -> Tuple[Optional[dict], Optional[str]]:
         "case_size": case_size,
         "mrp": mrp or 0,
         "taxable_value": taxable_value or 0,
-        "case_taxable_value": case_taxable_value,
+        "case_taxable_value": case_taxable_value or 0,
         "total_gst_rate": gst,
         "tax_type": tax_type,
         "promo_status": promo_status,

@@ -46,11 +46,12 @@ class Item(Base):
     case_size: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     mrp: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     taxable_value: Mapped[float] = mapped_column(Float, nullable=False, default=0)
-    # Additive, nullable — per-piece taxable value charged when a customer buys a full case
-    # (uom="CASE") instead of loose pieces (uom="PCS"), e.g. a cheaper per-piece rate for
-    # bulk. Unset (None) means no case rate has been configured, so case orders fall back to
-    # the loose taxable_value — see resolve_line_source() in pricing.py.
-    case_taxable_value: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    # Additive — per-piece taxable value charged when a customer buys a full case (uom="CASE")
+    # instead of loose pieces (uom="PCS"), e.g. a cheaper per-piece rate for bulk. 0 (the
+    # default, same "not set" convention as mrp/taxable_value elsewhere in this model) means
+    # no case rate has been configured, so case orders fall back to the loose taxable_value —
+    # see resolve_line_source() in pricing.py.
+    case_taxable_value: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     total_gst_rate: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     tax_type: Mapped[str] = mapped_column(String, nullable=False, default="Exclusive")
     promo_status: Mapped[str] = mapped_column(String, nullable=False, default="")
@@ -81,9 +82,7 @@ class Item(Base):
         CheckConstraint("case_size >= 1", name="ck_items_case_size"),
         CheckConstraint("mrp >= 0", name="ck_items_mrp"),
         CheckConstraint("taxable_value >= 0", name="ck_items_taxable_value"),
-        CheckConstraint(
-            "case_taxable_value IS NULL OR case_taxable_value >= 0", name="ck_items_case_taxable_value"
-        ),
+        CheckConstraint("case_taxable_value >= 0", name="ck_items_case_taxable_value"),
         CheckConstraint("total_gst_rate IN (0,3,5,18,28,40)", name="ck_items_gst_rate"),
         CheckConstraint("tax_type IN ('Exclusive','Inclusive_MRP')", name="ck_items_tax_type"),
         CheckConstraint("promo_status IN ('','NEW','DISCOUNT')", name="ck_items_promo_status"),

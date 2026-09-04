@@ -46,9 +46,10 @@ def _item_dict(item: Item) -> dict:
         "created_at": item.created_at,
         "updated_at": item.updated_at,
         "pricing": price_item(item),
-        # Only present when the item has a case rate and an actual multi-piece case;
-        # case_size == 1 (or no case_taxable_value) means "no case option" for this item.
-        "pricing_case": price_item(item, uom="CASE") if (item.case_taxable_value is not None and item.case_size > 1) else None,
+        # Only present when the item has a case rate configured (case_taxable_value != 0,
+        # its "not set" sentinel) and an actual multi-piece case; case_size == 1 means
+        # "no case option" for this item.
+        "pricing_case": price_item(item, uom="CASE") if (item.case_taxable_value and item.case_size > 1) else None,
     }
 
 

@@ -58,7 +58,14 @@ def _add_missing_columns() -> None:
                 conn.execute(text("ALTER TABLE items ADD COLUMN watchlist_order INTEGER"))
         if "case_taxable_value" not in existing:
             with engine.begin() as conn:
-                conn.execute(text("ALTER TABLE items ADD COLUMN case_taxable_value FLOAT"))
+                conn.execute(text("ALTER TABLE items ADD COLUMN case_taxable_value FLOAT NOT NULL DEFAULT 0"))
+        else:
+            # An earlier version of this migration added the column without a default,
+            # leaving already-uploaded items with NULL — backfill those to 0 (this model's
+            # usual "not set" sentinel for a rate, same as mrp/taxable_value) so they show up
+            # as 0 rather than blank, and so every row satisfies the NOT NULL column type.
+            with engine.begin() as conn:
+                conn.execute(text("UPDATE items SET case_taxable_value = 0 WHERE case_taxable_value IS NULL"))
         existing_indexes = {idx["name"] for idx in inspector.get_indexes("items")}
         if "ix_items_item_name_brand" not in existing_indexes:
             with engine.begin() as conn:

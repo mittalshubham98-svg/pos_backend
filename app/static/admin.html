@@ -273,7 +273,7 @@ async function createItemManual() {
     case_size: Math.max(Math.round(num(state.newItemCase, 1)), 1),
     mrp: num(state.newItemMrp, 0),
     taxable_value: num(state.newItemTaxable, 0),
-    case_taxable_value: state.newItemCaseTaxable.trim() === "" ? null : num(state.newItemCaseTaxable, 0),
+    case_taxable_value: num(state.newItemCaseTaxable, 0),
     total_gst_rate: num(state.newItemGst, 0),
     tax_type: state.newItemTaxType,
     promo_status: state.newItemPromo,
@@ -303,7 +303,7 @@ function openEditItem(id) {
     editItemName: it.item_name || "", editItemCategory: it.category || "", editItemBrand: it.brand || "",
     editItemSize: it.item_size || "", editItemCase: String(it.case_size || 1),
     editItemMrp: String(it.mrp || ""), editItemTaxable: String(it.taxable_value || ""),
-    editItemCaseTaxable: it.case_taxable_value != null ? String(it.case_taxable_value) : "",
+    editItemCaseTaxable: String(it.case_taxable_value || 0),
     editItemGst: String(it.total_gst_rate), editItemTaxType: it.tax_type,
     editItemPromo: it.promo_status || "", editItemDisc: String(it.discount_rate || 0),
     editItemDaily: !!it.is_daily_rate_change, editItemActive: it.is_active !== false, editItemAisle: it.aisle || "", editItemHsn: it.hsn_code || "",
@@ -324,7 +324,7 @@ async function saveEditItem() {
     case_size: Math.max(Math.round(num(state.editItemCase, 1)), 1),
     mrp: num(state.editItemMrp, 0),
     taxable_value: num(state.editItemTaxable, 0),
-    case_taxable_value: state.editItemCaseTaxable.trim() === "" ? null : num(state.editItemCaseTaxable, 0),
+    case_taxable_value: num(state.editItemCaseTaxable, 0),
     total_gst_rate: num(state.editItemGst, 0),
     tax_type: state.editItemTaxType,
     promo_status: state.editItemPromo,
@@ -767,12 +767,13 @@ function dashTpl() {
         </div>
         <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-bottom:14px">Edit the volatile rates first thing each morning. Selling price recomputes live through the tax engine. Use ▲/▼ to change which item shows first.</div>
 
-        <div style="display:grid;grid-template-columns:44px 34px 1fr 96px 96px 74px 120px 96px;gap:0;border-top:2px solid rgba(32,30,29,.4)">
+        <div style="display:grid;grid-template-columns:44px 34px 1fr 96px 96px 96px 74px 120px 96px;gap:0;border-top:2px solid rgba(32,30,29,.4)">
           <div style="${HEAD_STYLE}">Order</div>
           <div style="${HEAD_STYLE}"></div>
           <div style="${HEAD_STYLE}">Item</div>
           <div style="${HEAD_STYLE}">MRP</div>
-          <div style="${HEAD_STYLE}">Taxable</div>
+          <div style="${HEAD_STYLE}">Taxable (loose)</div>
+          <div style="${HEAD_STYLE}">Case rate /pc</div>
           <div style="${HEAD_STYLE}">Disc %</div>
           <div style="${HEAD_STYLE}">Selling incl. GST</div>
           <div style="${HEAD_STYLE}">Image</div>
@@ -791,6 +792,9 @@ function dashTpl() {
           </div>
           <div style="padding:5px 6px;border-bottom:1px solid rgba(32,30,29,.4);display:flex;align-items:center">
             <input data-action="setTaxable" data-id="${it.id}" value="${it.taxable_value}" class="mono" style="width:100%;min-height:30px;padding:4px 7px;font-size:13px;text-align:right;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
+          </div>
+          <div style="padding:5px 6px;border-bottom:1px solid rgba(32,30,29,.4);display:flex;align-items:center">
+            <input data-action="setCaseTaxable" data-id="${it.id}" value="${it.case_taxable_value || 0}" title="0 = no case rate, case orders use the loose rate" class="mono" style="width:100%;min-height:30px;padding:4px 7px;font-size:13px;text-align:right;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
           </div>
           <div style="padding:5px 6px;border-bottom:1px solid rgba(32,30,29,.4);display:flex;align-items:center">
             <input data-action="setDisc" data-id="${it.id}" value="${it.discount_rate}" class="mono" style="width:100%;min-height:30px;padding:4px 7px;font-size:13px;text-align:right;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
@@ -1153,7 +1157,7 @@ function catalogTpl() {
         <div>${miniField("newItemCase", "Case size", st.newItemCase)}</div>
         <div>${miniField("newItemMrp", "MRP", st.newItemMrp)}</div>
         <div>${miniField("newItemTaxable", "Taxable value (loose)", st.newItemTaxable)}</div>
-        <div>${miniField("newItemCaseTaxable", "Case rate /pc", st.newItemCaseTaxable, { placeholder: "blank = loose rate" })}</div>
+        <div>${miniField("newItemCaseTaxable", "Case rate /pc", st.newItemCaseTaxable, { placeholder: "0 = loose rate" })}</div>
         <div>
           <label style="display:block;font-size:11px;margin-bottom:5px;color:rgba(32,30,29,.7)">GST %</label>
           <select id="newItemGst" class="mono" style="width:100%;min-height:32px;padding:5px 7px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d">
@@ -1205,7 +1209,7 @@ function catalogTpl() {
         <div>${miniField("editItemCase", "Case size", st.editItemCase)}</div>
         <div>${miniField("editItemMrp", "MRP", st.editItemMrp)}</div>
         <div>${miniField("editItemTaxable", "Taxable value (loose)", st.editItemTaxable)}</div>
-        <div>${miniField("editItemCaseTaxable", "Case rate /pc", st.editItemCaseTaxable, { placeholder: "blank = loose rate" })}</div>
+        <div>${miniField("editItemCaseTaxable", "Case rate /pc", st.editItemCaseTaxable, { placeholder: "0 = loose rate" })}</div>
         <div>
           <label style="display:block;font-size:11px;margin-bottom:5px;color:rgba(32,30,29,.7)">GST %</label>
           <select id="editItemGst" class="mono" style="width:100%;min-height:32px;padding:5px 7px;font-size:13px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d">
@@ -1290,7 +1294,7 @@ function catalogTpl() {
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;text-align:right;color:rgba(32,30,29,.7)">${it.case_size}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right">${inr0(it.mrp)}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right">${it.taxable_value.toFixed(2)}</div>
-      <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right;${it.case_taxable_value != null ? "" : "color:rgba(32,30,29,.4)"}">${it.case_taxable_value != null ? it.case_taxable_value.toFixed(2) : "—"}</div>
+      <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right;${it.case_taxable_value ? "" : "color:rgba(32,30,29,.4)"}">${(it.case_taxable_value || 0).toFixed(2)}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right">${it.total_gst_rate}%</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;color:rgba(32,30,29,.7)">${it.tax_type === "Inclusive_MRP" ? "incl. MRP" : "excl."}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right">${it.discount_rate ? it.discount_rate + "%" : "—"}</div>
@@ -1577,6 +1581,7 @@ function wire() {
     const action = el.getAttribute("data-action");
     if (action === "setMrp") patchItem(el.getAttribute("data-id"), { mrp: num(el.value, 0) }, loadWatchItems);
     else if (action === "setTaxable") patchItem(el.getAttribute("data-id"), { taxable_value: num(el.value, 0) }, loadWatchItems);
+    else if (action === "setCaseTaxable") patchItem(el.getAttribute("data-id"), { case_taxable_value: num(el.value, 0) }, loadWatchItems);
     else if (action === "setDisc") patchItem(el.getAttribute("data-id"), { discount_rate: Math.min(Math.max(num(el.value, 0), 0), 100) }, loadWatchItems);
     else if (action === "setLineQty") patchOrderLines(el.getAttribute("data-po"), { update_lines: [{ line_id: Number(el.getAttribute("data-line")), qty: Math.max(num(el.value, 0), 0) }] });
     else if (action === "setLineRate") patchOrderLines(el.getAttribute("data-po"), { update_lines: [{ line_id: Number(el.getAttribute("data-line")), rate_override: num(el.value, 0) }] });

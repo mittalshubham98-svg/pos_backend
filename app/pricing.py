@@ -32,9 +32,10 @@ def price_item(item: Item, rate_override: Optional[float] = None, uom: str = "PC
 
     uom="CASE" prices at item.case_taxable_value (the per-piece rate for a full-case buyer)
     instead of the loose item.taxable_value, falling back to the loose rate when no case rate
-    has been configured for the item."""
+    has been configured for the item (case_taxable_value == 0, its "not set" sentinel —
+    same convention as mrp/taxable_value elsewhere in this model)."""
     taxable_value = item.taxable_value
-    if uom == "CASE" and item.case_taxable_value is not None:
+    if uom == "CASE" and item.case_taxable_value:
         taxable_value = item.case_taxable_value
     unit = price_unit(
         mrp=item.mrp,
@@ -65,7 +66,7 @@ def resolve_line_source(line: PoLine) -> LineSource:
         # "CASE" lines charge the item's per-piece case rate instead of the loose rate,
         # falling back to the loose rate when no case rate has been configured — see
         # Item.case_taxable_value's docstring in models.py.
-        taxable_value = it.case_taxable_value if (uom == "CASE" and it.case_taxable_value is not None) else it.taxable_value
+        taxable_value = it.case_taxable_value if (uom == "CASE" and it.case_taxable_value) else it.taxable_value
         return LineSource(
             name=it.item_name,
             category=it.category,
