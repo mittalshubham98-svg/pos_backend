@@ -227,6 +227,10 @@ async function switchTab(tab, force) {
 
 /* ------------------------------------------------------------- mutations */
 
+async function reloadCatalogAndWatch() {
+  await Promise.all([loadCatalog(), loadWatchItems().catch(() => {})]);
+}
+
 async function patchItem(id, patch, reload) {
   try {
     await authedApi("/api/items/" + id, { method: "PATCH", json: patch });
@@ -1294,7 +1298,9 @@ function catalogTpl() {
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;text-align:right;color:rgba(32,30,29,.7)">${it.case_size}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right">${inr0(it.mrp)}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right">${it.taxable_value.toFixed(2)}</div>
-      <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right;${it.case_taxable_value ? "" : "color:rgba(32,30,29,.4)"}">${(it.case_taxable_value || 0).toFixed(2)}</div>
+      <div style="padding:5px 6px;border-bottom:1px solid rgba(32,30,29,.4);display:flex;align-items:center">
+        <input data-action="setCaseTaxable" data-id="${it.id}" value="${it.case_taxable_value || 0}" title="0 = no case rate, case orders use the loose rate" class="mono" style="width:100%;min-height:30px;padding:4px 7px;font-size:12px;text-align:right;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
+      </div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right">${it.total_gst_rate}%</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:11px;color:rgba(32,30,29,.7)">${it.tax_type === "Inclusive_MRP" ? "incl. MRP" : "excl."}</div>
       <div class="mono" style="padding:7px 8px;border-bottom:1px solid rgba(32,30,29,.4);font-size:12px;text-align:right">${it.discount_rate ? it.discount_rate + "%" : "—"}</div>
@@ -1579,10 +1585,10 @@ function wire() {
   app.onchange = e => {
     const el = e.target;
     const action = el.getAttribute("data-action");
-    if (action === "setMrp") patchItem(el.getAttribute("data-id"), { mrp: num(el.value, 0) }, loadWatchItems);
-    else if (action === "setTaxable") patchItem(el.getAttribute("data-id"), { taxable_value: num(el.value, 0) }, loadWatchItems);
-    else if (action === "setCaseTaxable") patchItem(el.getAttribute("data-id"), { case_taxable_value: num(el.value, 0) }, loadWatchItems);
-    else if (action === "setDisc") patchItem(el.getAttribute("data-id"), { discount_rate: Math.min(Math.max(num(el.value, 0), 0), 100) }, loadWatchItems);
+    if (action === "setMrp") patchItem(el.getAttribute("data-id"), { mrp: num(el.value, 0) }, reloadCatalogAndWatch);
+    else if (action === "setTaxable") patchItem(el.getAttribute("data-id"), { taxable_value: num(el.value, 0) }, reloadCatalogAndWatch);
+    else if (action === "setCaseTaxable") patchItem(el.getAttribute("data-id"), { case_taxable_value: num(el.value, 0) }, reloadCatalogAndWatch);
+    else if (action === "setDisc") patchItem(el.getAttribute("data-id"), { discount_rate: Math.min(Math.max(num(el.value, 0), 0), 100) }, reloadCatalogAndWatch);
     else if (action === "setLineQty") patchOrderLines(el.getAttribute("data-po"), { update_lines: [{ line_id: Number(el.getAttribute("data-line")), qty: Math.max(num(el.value, 0), 0) }] });
     else if (action === "setLineRate") patchOrderLines(el.getAttribute("data-po"), { update_lines: [{ line_id: Number(el.getAttribute("data-line")), rate_override: num(el.value, 0) }] });
     else if (action === "setOcrQty") { const i = Number(el.getAttribute("data-idx")); state.ocrRows[i].qty = Math.max(num(el.value, 0), 0); render(); }
