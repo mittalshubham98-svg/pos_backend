@@ -112,6 +112,45 @@ def test_scenario_1_mixed_tax_types_on_account_order_to_bill(client, admin_heade
     assert any(o["id"] == po["id"] for o in r.json())
 
 
+# --- Scenario 1b: loose (PCS) vs. full-case (CASE) ordering charge different rates -----
+
+
+def test_scenario_1b_loose_vs_case_order_lines_price_differently(client, admin_headers):
+    item = _create_item(
+        client, admin_headers,
+        item_name="Chakki Atta 5 kg", case_size=10, tax_type="Exclusive",
+        mrp=285, taxable_value=244, case_taxable_value=228, total_gst_rate=5, discount_rate=0,
+    )
+    # The catalogue view exposes both rates: loose (taxable_value) and case (case_taxable_value).
+    r = client.get(f"/api/items/{item['id']}")
+    assert r.status_code == 200, r.text
+    catalog_item = r.json()
+    assert catalog_item["pricing"]["taxable"] == 244
+    assert catalog_item["pricing_case"]["taxable"] == 228
+
+    customer = _create_customer(client, admin_headers, name="Loose vs Case Store")
+    cust_headers = _customer_headers(client, customer["cust_code"], customer["password"])
+
+    # 5 loose pieces at the piece rate, plus 2 full cases (= 20 pieces) at the case rate.
+    order_payload = {
+        "lines": [
+            {"item_id": item["id"], "qty": 5, "uom": "PCS"},
+            {"item_id": item["id"], "qty": 2, "uom": "CASE"},
+        ],
+    }
+    r = client.post("/api/orders", json=order_payload, headers=cust_headers)
+    assert r.status_code == 201, r.text
+    po = r.json()
+
+    pcs_line = next(l for l in po["lines"] if l["uom"] == "PCS")
+    case_line = next(l for l in po["lines"] if l["uom"] == "CASE")
+    assert pcs_line["qty"] == 5
+    assert pcs_line["unit_rate"] == 244
+    # Case qty is stored in pieces (2 cases x 10/case = 20), priced at the case rate.
+    assert case_line["qty"] == 20
+    assert case_line["unit_rate"] == 228
+
+
 # --- Scenario 2 ---------------------------------------------------------------------
 
 

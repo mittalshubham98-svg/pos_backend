@@ -31,6 +31,7 @@ def _item_dict(item: Item) -> dict:
         "case_size": item.case_size,
         "mrp": item.mrp,
         "taxable_value": item.taxable_value,
+        "case_taxable_value": item.case_taxable_value,
         "total_gst_rate": item.total_gst_rate,
         "tax_type": item.tax_type,
         "promo_status": item.promo_status,
@@ -45,6 +46,9 @@ def _item_dict(item: Item) -> dict:
         "created_at": item.created_at,
         "updated_at": item.updated_at,
         "pricing": price_item(item),
+        # Only present when the item has a case rate and an actual multi-piece case;
+        # case_size == 1 (or no case_taxable_value) means "no case option" for this item.
+        "pricing_case": price_item(item, uom="CASE") if (item.case_taxable_value is not None and item.case_size > 1) else None,
     }
 
 

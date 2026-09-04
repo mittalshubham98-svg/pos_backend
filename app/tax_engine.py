@@ -15,6 +15,9 @@ from typing import Optional, Tuple
 
 ALLOWED_GST_RATES = (0, 3, 5, 18, 28, 40)
 TAX_TYPES = ("Exclusive", "Inclusive_MRP")
+# Ordering unit for a PO line: "PCS" (loose, priced off item.taxable_value) or "CASE" (a full
+# case, priced off item.case_taxable_value) — see Item.case_taxable_value's docstring.
+UOMS = ("PCS", "CASE")
 
 
 class TaxEngineError(ValueError):

@@ -20,6 +20,7 @@ TEMPLATE_COLUMNS = [
     "Case_Size",
     "MRP",
     "Taxable_Value",
+    "Case_Taxable_Value",
     "Total_GST_Rate",
     "Tax_Type",
     "Promo_Status",
@@ -37,7 +38,7 @@ def template_csv_bytes() -> bytes:
     writer = csv.writer(buf)
     writer.writerow(TEMPLATE_COLUMNS)
     writer.writerow(
-        ["Chakki Atta 5 kg", "Atta & Flour", "Aashirvaad", "5 kg", "10", "285", "244", "5", "Exclusive", "", "4", "0", "A1 · 03", "1101"]
+        ["Chakki Atta 5 kg", "Atta & Flour", "Aashirvaad", "5 kg", "10", "285", "244", "228", "5", "Exclusive", "", "4", "0", "A1 · 03", "1101"]
     )
     return buf.getvalue().encode("utf-8")
 
@@ -83,8 +84,11 @@ def validate_row(row: Dict[str, str]) -> Tuple[Optional[dict], Optional[str]]:
 
     mrp = _num(row.get("MRP"))
     taxable_value = _num(row.get("Taxable_Value"))
+    case_taxable_value = _num(row.get("Case_Taxable_Value"))
     if mrp == "INVALID" or taxable_value == "INVALID":
         return None, "MRP/Taxable_Value is not numeric — row skipped"
+    if case_taxable_value == "INVALID":
+        return None, "Case_Taxable_Value is not numeric — row skipped"
 
     if mrp is not None and mrp > MRP_SANITY_CEILING:
         return None, f"MRP {mrp:g} exceeds sanity ceiling of {MRP_SANITY_CEILING} — held for review, row skipped"
@@ -125,6 +129,7 @@ def validate_row(row: Dict[str, str]) -> Tuple[Optional[dict], Optional[str]]:
         "case_size": case_size,
         "mrp": mrp or 0,
         "taxable_value": taxable_value or 0,
+        "case_taxable_value": case_taxable_value,
         "total_gst_rate": gst,
         "tax_type": tax_type,
         "promo_status": promo_status,

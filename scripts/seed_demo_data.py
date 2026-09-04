@@ -26,10 +26,10 @@ from app.utils import gen_cust_code  # noqa: E402
 # tax types, all non-zero GST slabs, daily-rate items, and a couple of promoted items.
 CATALOG = [
     dict(item_name="Chakki Atta 5 kg", category="Atta & Flour", brand="Aashirvaad", item_size="5 kg", case_size=10,
-         mrp=285, taxable_value=244, total_gst_rate=5, tax_type="Exclusive", discount_rate=4,
+         mrp=285, taxable_value=244, case_taxable_value=228, total_gst_rate=5, tax_type="Exclusive", discount_rate=4,
          aisle="A1 · 03", hsn_code="1101"),
     dict(item_name="Refined Soyabean Oil 1 L", category="Oil & Ghee", brand="Fortune", item_size="1 L", case_size=12,
-         mrp=165, taxable_value=145, total_gst_rate=5, tax_type="Exclusive", discount_rate=6,
+         mrp=165, taxable_value=145, case_taxable_value=136, total_gst_rate=5, tax_type="Exclusive", discount_rate=6,
          promo_status="DISCOUNT", aisle="B2 · 01", hsn_code="1507"),
     dict(item_name="Sona Masoori Rice 25 kg", category="Rice & Pulses", brand="India Gate", item_size="25 kg", case_size=1,
          mrp=1350, taxable_value=1285, total_gst_rate=0, tax_type="Exclusive",

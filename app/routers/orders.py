@@ -30,9 +30,12 @@ def create_order(
     if not payload.lines and not unlisted:
         raise HTTPException(status_code=400, detail="Order needs at least one line or an unlisted request")
 
+    items_by_id = {}
     for line in payload.lines:
-        if not db.get(Item, line.item_id):
+        item = db.get(Item, line.item_id)
+        if not item:
             raise HTTPException(status_code=400, detail=f"Item {line.item_id} does not exist")
+        items_by_id[line.item_id] = item
 
     po = PurchaseOrder(
         po_number=settings_store.next_po_number(db),
@@ -46,7 +49,12 @@ def create_order(
     db.flush()
 
     for line in payload.lines:
-        db.add(PoLine(po_id=po.id, item_id=line.item_id, qty=line.qty))
+        # qty arrives in the chosen uom (piece count for PCS, case count for CASE) — convert
+        # to pieces once here so every downstream consumer (tax engine, invoice, picking
+        # sheet) keeps working in piece terms unchanged.
+        item = items_by_id[line.item_id]
+        pieces = line.qty * (item.case_size or 1) if line.uom == "CASE" else line.qty
+        db.add(PoLine(po_id=po.id, item_id=line.item_id, qty=pieces, uom=line.uom))
 
     settings_store.bump_po_seq(db)
     db.commit()
@@ -104,12 +112,16 @@ def patch_order(
                 line.qty = upd.qty
             if upd.rate_override is not None:
                 line.rate_override = upd.rate_override
+            if upd.uom is not None:
+                line.uom = upd.uom
 
     if payload.add_item_lines:
         for il in payload.add_item_lines:
-            if not db.get(Item, il.item_id):
+            item = db.get(Item, il.item_id)
+            if not item:
                 raise HTTPException(status_code=400, detail=f"Item {il.item_id} does not exist")
-            db.add(PoLine(po_id=po.id, item_id=il.item_id, qty=il.qty, rate_override=il.rate_override))
+            pieces = il.qty * (item.case_size or 1) if il.uom == "CASE" else il.qty
+            db.add(PoLine(po_id=po.id, item_id=il.item_id, qty=pieces, rate_override=il.rate_override, uom=il.uom))
 
     if payload.add_custom_lines:
         for cl in payload.add_custom_lines:

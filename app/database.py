@@ -56,6 +56,9 @@ def _add_missing_columns() -> None:
         if "watchlist_order" not in existing:
             with engine.begin() as conn:
                 conn.execute(text("ALTER TABLE items ADD COLUMN watchlist_order INTEGER"))
+        if "case_taxable_value" not in existing:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE items ADD COLUMN case_taxable_value FLOAT"))
         existing_indexes = {idx["name"] for idx in inspector.get_indexes("items")}
         if "ix_items_item_name_brand" not in existing_indexes:
             with engine.begin() as conn:
@@ -73,6 +76,18 @@ def _add_missing_columns() -> None:
                 conn.execute(text("ALTER TABLE customers ADD COLUMN otp_code VARCHAR"))
             if "otp_expires_at" not in existing:
                 conn.execute(text("ALTER TABLE customers ADD COLUMN otp_expires_at VARCHAR"))
+
+    if "po_lines" in table_names:
+        existing = {col["name"] for col in inspector.get_columns("po_lines")}
+        if "uom" not in existing:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE po_lines ADD COLUMN uom VARCHAR NOT NULL DEFAULT 'PCS'"))
+
+    if "sale_bill_lines" in table_names:
+        existing = {col["name"] for col in inspector.get_columns("sale_bill_lines")}
+        if "uom" not in existing:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE sale_bill_lines ADD COLUMN uom VARCHAR NOT NULL DEFAULT 'PCS'"))
 
 
 def init_db() -> None:

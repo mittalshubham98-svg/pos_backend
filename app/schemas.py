@@ -10,7 +10,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from .tax_engine import ALLOWED_GST_RATES, TAX_TYPES
+from .tax_engine import ALLOWED_GST_RATES, TAX_TYPES, UOMS
 
 # ---------------------------------------------------------------------------
 # Auth
@@ -210,6 +210,10 @@ class ItemBase(BaseModel):
     case_size: int = 1
     mrp: float = 0
     taxable_value: float = 0
+    # Per-piece taxable value charged when a customer buys a full case instead of loose
+    # pieces. None (the default) means no case rate is configured; case orders then fall
+    # back to taxable_value.
+    case_taxable_value: Optional[float] = None
     total_gst_rate: float = 0
     tax_type: str = "Exclusive"
     promo_status: str = ""
@@ -261,6 +265,13 @@ class ItemBase(BaseModel):
             raise ValueError("must be >= 0")
         return v
 
+    @field_validator("case_taxable_value")
+    @classmethod
+    def _case_taxable_value_non_negative(cls, v):
+        if v is not None and v < 0:
+            raise ValueError("must be >= 0")
+        return v
+
 
 class ItemCreateIn(ItemBase):
     pass
@@ -276,6 +287,7 @@ class ItemUpdateIn(BaseModel):
     case_size: Optional[int] = None
     mrp: Optional[float] = None
     taxable_value: Optional[float] = None
+    case_taxable_value: Optional[float] = None
     total_gst_rate: Optional[float] = None
     tax_type: Optional[str] = None
     promo_status: Optional[str] = None
@@ -321,6 +333,13 @@ class ItemUpdateIn(BaseModel):
             raise ValueError("discount_rate must be between 0 and 100")
         return v
 
+    @field_validator("case_taxable_value")
+    @classmethod
+    def _case_taxable_value_non_negative(cls, v):
+        if v is not None and v < 0:
+            raise ValueError("must be >= 0")
+        return v
+
 
 class WatchlistReorderIn(BaseModel):
     """Body for POST /api/items/watchlist/reorder — the full set of daily-rate-watch item
@@ -340,6 +359,7 @@ class ItemOut(BaseModel):
     case_size: int
     mrp: float
     taxable_value: float
+    case_taxable_value: Optional[float] = None
     total_gst_rate: float
     tax_type: str
     promo_status: str
@@ -360,7 +380,17 @@ class ItemOut(BaseModel):
 
 class OrderLineIn(BaseModel):
     item_id: int
+    # Quantity in the chosen uom: pieces when uom="PCS", number of full cases when
+    # uom="CASE" (the router converts case-count x item.case_size to pieces before storing).
     qty: float = Field(gt=0)
+    uom: str = "PCS"
+
+    @field_validator("uom")
+    @classmethod
+    def _uom_known(cls, v):
+        if v not in UOMS:
+            raise ValueError(f"uom must be one of {UOMS}")
+        return v
 
 
 class OrderCreateIn(BaseModel):
@@ -371,8 +401,19 @@ class OrderCreateIn(BaseModel):
 
 class LineUpdateIn(BaseModel):
     line_id: int
+    # Always in pieces, regardless of the line's uom (unchanged from before uom existed).
     qty: Optional[float] = Field(default=None, ge=0)
     rate_override: Optional[float] = None
+    # Optional — switches which of the item's two rates (loose/case) this line is priced at,
+    # without changing its stored piece qty. Omit to leave the line's existing uom as-is.
+    uom: Optional[str] = None
+
+    @field_validator("uom")
+    @classmethod
+    def _uom_known(cls, v):
+        if v is not None and v not in UOMS:
+            raise ValueError(f"uom must be one of {UOMS}")
+        return v
 
 
 class CustomLineIn(BaseModel):
@@ -395,8 +436,17 @@ class AddItemLineIn(BaseModel):
     item_id at all."""
 
     item_id: int
+    # Quantity in the chosen uom — see OrderLineIn.qty.
     qty: float = Field(gt=0)
     rate_override: Optional[float] = None
+    uom: str = "PCS"
+
+    @field_validator("uom")
+    @classmethod
+    def _uom_known(cls, v):
+        if v not in UOMS:
+            raise ValueError(f"uom must be one of {UOMS}")
+        return v
 
 
 class OrderPatchIn(BaseModel):
@@ -418,6 +468,8 @@ class POLineOut(BaseModel):
     custom_name: Optional[str] = None
     name: str
     category: Optional[str] = None
+    case_size: int = 1
+    uom: str = "PCS"
     tax_type: str
     gst_rate: float
     qty: float

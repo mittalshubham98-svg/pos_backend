@@ -45,6 +45,7 @@ def convert_po_to_bill(db: Session, po: PurchaseOrder) -> SaleBill:
                     category=l["category"],
                     item_size=l["item_size"],
                     case_size=l["case_size"] or 1,
+                    uom=l["uom"],
                     aisle=l["aisle"],
                     hsn_code=l["hsn_code"],
                     tax_type=l["tax_type"],

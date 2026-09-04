@@ -23,14 +23,22 @@ class LineSource:
     aisle: Optional[str] = None
     hsn_code: Optional[str] = None
     is_unlisted: bool = False
+    uom: str = "PCS"
 
 
-def price_item(item: Item, rate_override: Optional[float] = None) -> dict:
+def price_item(item: Item, rate_override: Optional[float] = None, uom: str = "PCS") -> dict:
     """Priced view of a single catalogue item at piece rate (qty=1) — used by the catalogue
-    endpoints and the admin portal's item table/daily-rate watchlist."""
+    endpoints and the admin portal's item table/daily-rate watchlist.
+
+    uom="CASE" prices at item.case_taxable_value (the per-piece rate for a full-case buyer)
+    instead of the loose item.taxable_value, falling back to the loose rate when no case rate
+    has been configured for the item."""
+    taxable_value = item.taxable_value
+    if uom == "CASE" and item.case_taxable_value is not None:
+        taxable_value = item.case_taxable_value
     unit = price_unit(
         mrp=item.mrp,
-        taxable_value=item.taxable_value,
+        taxable_value=taxable_value,
         gst_rate=item.total_gst_rate,
         tax_type=item.tax_type,
         discount_rate=item.discount_rate,
@@ -53,19 +61,25 @@ def resolve_line_source(line: PoLine) -> LineSource:
     the admin at billing time (item_id is null, custom_name is set)."""
     if line.item_id is not None and line.item is not None:
         it: Item = line.item
+        uom = line.uom or "PCS"
+        # "CASE" lines charge the item's per-piece case rate instead of the loose rate,
+        # falling back to the loose rate when no case rate has been configured — see
+        # Item.case_taxable_value's docstring in models.py.
+        taxable_value = it.case_taxable_value if (uom == "CASE" and it.case_taxable_value is not None) else it.taxable_value
         return LineSource(
             name=it.item_name,
             category=it.category,
             item_size=it.item_size,
             case_size=it.case_size or 1,
             mrp=it.mrp,
-            taxable_value=it.taxable_value,
+            taxable_value=taxable_value,
             gst_rate=it.total_gst_rate,
             tax_type=it.tax_type,
             discount_rate=it.discount_rate,
             aisle=it.aisle,
             hsn_code=it.hsn_code,
             is_unlisted=False,
+            uom=uom,
         )
     # Custom / unlisted line: rate_override carries the flat unit price the admin set,
     # gst_override carries its GST slab. Mirrors the prototype's custom-line handling
@@ -115,6 +129,7 @@ def price_line(line: PoLine) -> dict:
         "category": src.category,
         "item_size": src.item_size,
         "case_size": src.case_size,
+        "uom": src.uom,
         "aisle": src.aisle,
         "hsn_code": src.hsn_code,
         "tax_type": src.tax_type,
@@ -169,6 +184,7 @@ def _priced_view_from_snapshot(bill: SaleBill) -> dict:
                 "category": sl.category,
                 "item_size": sl.item_size,
                 "case_size": sl.case_size,
+                "uom": sl.uom or "PCS",
                 "aisle": sl.aisle,
                 "hsn_code": sl.hsn_code,
                 "tax_type": sl.tax_type,
@@ -219,6 +235,8 @@ def po_summary(po: PurchaseOrder) -> dict:
             "custom_name": l["custom_name"],
             "name": l["name"],
             "category": l["category"],
+            "case_size": l["case_size"],
+            "uom": l["uom"],
             "tax_type": l["tax_type"],
             "gst_rate": l["gst_rate"],
             "qty": l["qty"],

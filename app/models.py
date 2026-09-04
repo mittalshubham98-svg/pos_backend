@@ -46,6 +46,11 @@ class Item(Base):
     case_size: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     mrp: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     taxable_value: Mapped[float] = mapped_column(Float, nullable=False, default=0)
+    # Additive, nullable — per-piece taxable value charged when a customer buys a full case
+    # (uom="CASE") instead of loose pieces (uom="PCS"), e.g. a cheaper per-piece rate for
+    # bulk. Unset (None) means no case rate has been configured, so case orders fall back to
+    # the loose taxable_value — see resolve_line_source() in pricing.py.
+    case_taxable_value: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     total_gst_rate: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     tax_type: Mapped[str] = mapped_column(String, nullable=False, default="Exclusive")
     promo_status: Mapped[str] = mapped_column(String, nullable=False, default="")
@@ -76,6 +81,9 @@ class Item(Base):
         CheckConstraint("case_size >= 1", name="ck_items_case_size"),
         CheckConstraint("mrp >= 0", name="ck_items_mrp"),
         CheckConstraint("taxable_value >= 0", name="ck_items_taxable_value"),
+        CheckConstraint(
+            "case_taxable_value IS NULL OR case_taxable_value >= 0", name="ck_items_case_taxable_value"
+        ),
         CheckConstraint("total_gst_rate IN (0,3,5,18,28,40)", name="ck_items_gst_rate"),
         CheckConstraint("tax_type IN ('Exclusive','Inclusive_MRP')", name="ck_items_tax_type"),
         CheckConstraint("promo_status IN ('','NEW','DISCOUNT')", name="ck_items_promo_status"),
@@ -152,12 +160,19 @@ class PoLine(Base):
     qty: Mapped[float] = mapped_column(Float, nullable=False, default=0)
     rate_override: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     gst_override: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    # Additive — which rate tier this line was priced at: "PCS" (loose, item.taxable_value)
+    # or "CASE" (bulk, item.case_taxable_value). qty is always stored in pieces regardless of
+    # uom (a case order converts case-count x case_size to pieces at order time), so every
+    # downstream consumer (tax engine, invoice, picking sheet) keeps working in piece terms
+    # unchanged; uom only decides which of the item's two rates resolve_line_source() picks.
+    uom: Mapped[str] = mapped_column(String, nullable=False, default="PCS")
 
     purchase_order: Mapped[PurchaseOrder] = relationship(back_populates="lines")
     item: Mapped[Optional[Item]] = relationship(back_populates="po_lines")
 
     __table_args__ = (
         CheckConstraint("qty >= 0", name="ck_po_lines_qty"),
+        CheckConstraint("uom IN ('PCS','CASE')", name="ck_po_lines_uom"),
     )
 
 
@@ -201,6 +216,9 @@ class SaleBillLine(Base):
     case_size: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     aisle: Mapped[Optional[str]] = mapped_column(String, nullable=True)
     hsn_code: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    # Additive — frozen copy of the PoLine's uom ("PCS"/"CASE") at billing time, so a past
+    # invoice keeps showing which rate tier the customer was actually charged at.
+    uom: Mapped[str] = mapped_column(String, nullable=False, default="PCS")
     tax_type: Mapped[str] = mapped_column(String, nullable=False)
     gst_rate: Mapped[float] = mapped_column(Float, nullable=False)
     qty: Mapped[float] = mapped_column(Float, nullable=False)

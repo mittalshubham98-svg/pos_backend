@@ -176,6 +176,7 @@ otherwise couldn't have:
 | `GET /api/orders/{po_id}` | Fetch a single order — needed for the invoice/order-detail views, only list/create/patch/bill were specified. |
 | `GET /api/customer/orders` | The customer-facing order history list. |
 | `POST /api/settings/upi-qr` | Lets the admin upload the UPI QR image referenced by the `upi_qr_path` setting. |
+| `items.case_taxable_value` (nullable column) + `po_lines.uom` / `sale_bill_lines.uom` | Loose vs. full-case pricing: a customer buying loose pieces (`uom="PCS"`) is charged `items.taxable_value` per piece; buying a full case (`uom="CASE"`) is charged `items.case_taxable_value` per piece instead (falling back to the loose rate if unset). An order line's `qty` is always stored in pieces — a case order converts case-count × `case_size` to pieces at order time — so billing, invoices, and the picking sheet all keep working in piece terms unchanged. |
 
 None of these change or constrain any of the originally specified tables, columns, or
 endpoints — existing behaviour and CSV imports that don't touch the new fields are
@@ -212,7 +213,7 @@ slab, double-billing, etc.), and database constraint violations all return `400`
 **Catalogue** *(admin writes, public reads)*
 - `GET /api/items` — search/filter
 - `POST /api/items` — create; kicks off a background image fetch if no image given
-- `GET /api/items/template.csv` — blank import template (12 columns incl. HSN)
+- `GET /api/items/template.csv` — blank import template (13 columns incl. HSN and the optional `Case_Taxable_Value` case rate)
 - `POST /api/items/import?dry_run=true|false` — two-phase CSV import with row warnings
 - `GET /api/items/{id}` / `PATCH /api/items/{id}`
 - `POST /api/items/{id}/image` — manual image upload
