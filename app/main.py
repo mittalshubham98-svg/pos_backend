@@ -147,18 +147,30 @@ def health() -> dict:
 # app/static (see app/static/customer.html, admin.html, api.js) — no separate frontend
 # build step. These two routes just give them friendly URLs; the files are also reachable
 # directly at /static/customer.html and /static/admin.html via the mount above.
+#
+# no-cache (not no-store) on all three: browsers must revalidate with the server on every
+# request instead of serving straight from disk cache. Without this, FileResponse's own
+# Last-Modified/ETag headers are the only cache signal, and a browser's heuristic freshness
+# rules can serve an already-open tab a stale copy of the app shell for a long time after a
+# deploy (a real incident: a newly deployed admin-table column stayed invisible in a
+# customer's browser well after the server itself had the new file — see sw.js's matching
+# fix for the service-worker layer of this same problem). Revalidation is cheap: an
+# unchanged file still gets a 304 with no body.
+_NO_CACHE_HEADERS = {"Cache-Control": "no-cache"}
+
+
 @app.get("/")
 def customer_app() -> FileResponse:
-    return FileResponse(settings.STATIC_DIR / "customer.html")
+    return FileResponse(settings.STATIC_DIR / "customer.html", headers=_NO_CACHE_HEADERS)
 
 
 @app.get("/admin")
 def admin_portal() -> FileResponse:
-    return FileResponse(settings.STATIC_DIR / "admin.html")
+    return FileResponse(settings.STATIC_DIR / "admin.html", headers=_NO_CACHE_HEADERS)
 
 
 @app.get("/sw.js")
 def service_worker() -> FileResponse:
     """Top-level route (not /static/sw.js) so the worker's default scope is the whole
     app ("/"), not just "/static/" — it must control navigations to "/" and "/admin"."""
-    return FileResponse(settings.STATIC_DIR / "sw.js", media_type="application/javascript")
+    return FileResponse(settings.STATIC_DIR / "sw.js", media_type="application/javascript", headers=_NO_CACHE_HEADERS)

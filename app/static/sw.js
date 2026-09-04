@@ -49,8 +49,16 @@ self.addEventListener("fetch", (event) => {
   if (req.method !== "GET" || url.origin !== self.location.origin) return;
   if (!SHELL_URLS.includes(url.pathname)) return;
 
+  // { cache: "no-store" } is the actual fix, not just decoration: a plain fetch() is still
+  // subject to the browser's own HTTP cache underneath this handler, and these responses
+  // carry no explicit Cache-Control — so browsers apply a heuristic freshness lifetime off
+  // Last-Modified and can silently serve a stale admin.html/customer.html straight out of
+  // disk cache, without this "network-first" code ever actually reaching the network. That
+  // is exactly how a just-deployed change (e.g. a new admin table column) can stay invisible
+  // in an already-open tab even after a normal reload. no-store forces every shell fetch to
+  // really hit the network, so a fresh deploy shows up on the very next reload.
   event.respondWith(
-    fetch(req)
+    fetch(req, { cache: "no-store" })
       .then((res) => {
         const copy = res.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
