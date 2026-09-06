@@ -15,7 +15,7 @@ from ..deps import get_current_admin, get_db
 from ..models import Item, PoLine
 from ..pricing import price_item
 from ..schemas import ImportResultOut, ItemCreateIn, ItemUpdateIn, WatchlistReorderIn
-from ..services.csv_import import process_csv, template_csv_bytes
+from ..services.csv_import import export_csv_bytes, process_csv, template_csv_bytes
 from ..services.image_fetch import fetch_and_save_image
 
 router = APIRouter(prefix="/api/items", tags=["items"])
@@ -63,6 +63,41 @@ def download_template():
         content=template_csv_bytes(),
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=item_master_template.csv"},
+    )
+
+
+@router.get("/export.csv")
+def export_catalogue(
+    db: Session = Depends(get_db),
+    _admin=Depends(get_current_admin),
+):
+    """Whole catalogue (active and inactive) in the import template's column layout, so it
+    can be edited and re-uploaded through Import CSV to apply the changes."""
+    items = db.query(Item).order_by(Item.item_name.asc()).all()
+    return Response(
+        content=export_csv_bytes(items),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=item_catalogue.csv"},
+    )
+
+
+@router.get("/watchlist/export.csv")
+def export_watchlist(
+    db: Session = Depends(get_db),
+    _admin=Depends(get_current_admin),
+):
+    """Just the items flagged Is_Daily_Rate_Change, in the admin's chosen watchlist order —
+    edit and re-upload through Import CSV to push the day's rate changes."""
+    items = (
+        db.query(Item)
+        .filter(Item.is_daily_rate_change == 1)
+        .order_by(Item.watchlist_order.is_(None), Item.watchlist_order.asc(), Item.item_name.asc())
+        .all()
+    )
+    return Response(
+        content=export_csv_bytes(items),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=daily_rate_watchlist.csv"},
     )
 
 

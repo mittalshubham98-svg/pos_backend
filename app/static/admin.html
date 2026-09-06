@@ -767,9 +767,12 @@ function dashTpl() {
             <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Daily rate watchlist</div>
             <div class="mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#f3f2f2;background:#ec3013;padding:2px 6px">Pinned</div>
           </div>
-          <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55)">${st.watchItems.length} items flagged Is_Daily_Rate_Change</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55)">${st.watchItems.length} items flagged Is_Daily_Rate_Change</div>
+            <button data-action="downloadReport" data-path="/api/items/watchlist/export.csv" data-file="daily_rate_watchlist.csv" style="padding:6px 10px;font-size:11px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer">Download CSV</button>
+          </div>
         </div>
-        <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-bottom:14px">Edit the volatile rates first thing each morning. Selling price recomputes live through the tax engine. Use ▲/▼ to change which item shows first.</div>
+        <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-bottom:14px">Edit the volatile rates first thing each morning. Selling price recomputes live through the tax engine. Use ▲/▼ to change which item shows first. Download, edit, and re-upload via Import catalogue CSV to push bulk changes.</div>
 
         <div style="display:grid;grid-template-columns:44px 34px 1fr 96px 96px 96px 74px 120px 96px;gap:0;border-top:2px solid rgba(32,30,29,.4)">
           <div style="${HEAD_STYLE}">Order</div>
@@ -1140,6 +1143,7 @@ function catalogTpl() {
           ${MIC_ICON_SVG}
         </button>` : ""}
         <a href="/api/items/template.csv" download style="padding:9px 13px;font-size:13px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer;text-decoration:none;display:inline-block">Download CSV template</a>
+        <button data-action="downloadReport" data-path="/api/items/export.csv" data-file="item_catalogue.csv" style="padding:9px 13px;font-size:13px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer">Download catalogue CSV</button>
         <button data-action="openImport" style="padding:9px 13px;font-size:13px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer">Import CSV</button>
         <button data-action="openAddItem" style="padding:9px 13px;font-size:13px;font-weight:800;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">Add item</button>
       </div>

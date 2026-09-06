@@ -43,6 +43,35 @@ def template_csv_bytes() -> bytes:
     return buf.getvalue().encode("utf-8")
 
 
+def export_csv_bytes(items: List[Item]) -> bytes:
+    """Dumps items in the same column layout as the import template, so the file this
+    produces can be edited and handed straight back to /api/items/import to apply changes."""
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(TEMPLATE_COLUMNS)
+    for item in items:
+        writer.writerow(
+            [
+                item.item_name,
+                item.category or "",
+                item.brand or "",
+                item.item_size or "",
+                item.case_size,
+                item.mrp,
+                item.taxable_value,
+                item.case_taxable_value,
+                item.total_gst_rate,
+                item.tax_type,
+                item.promo_status or "",
+                item.discount_rate,
+                "1" if item.is_daily_rate_change else "0",
+                item.aisle or "",
+                item.hsn_code or "",
+            ]
+        )
+    return buf.getvalue().encode("utf-8")
+
+
 def _num(raw: Optional[str]):
     """Returns None for blank, the parsed float for a valid number, or the sentinel
     "INVALID" for something that isn't a number at all — three outcomes a warning message
