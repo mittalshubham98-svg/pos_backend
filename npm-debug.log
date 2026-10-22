@@ -1,0 +1,709 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files (x86)\\nodejs\\node.exe',
+1 verbose cli   'C:\\Program Files (x86)\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'install',
+1 verbose cli   '-g',
+1 verbose cli   '@anthropic-ai/claude-code' ]
+2 info using npm@3.10.10
+3 info using node@v6.10.1
+4 silly loadCurrentTree Starting
+5 silly install loadCurrentTree
+6 silly install readGlobalPackageData
+7 silly fetchPackageMetaData @anthropic-ai/claude-code
+8 silly fetchNamedPackageData @anthropic-ai/claude-code
+9 silly mapToRegistry name @anthropic-ai/claude-code
+10 silly mapToRegistry scope (from package name) @anthropic-ai
+11 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+12 silly mapToRegistry using default registry
+13 silly mapToRegistry registry https://registry.npmjs.org/
+14 silly mapToRegistry data Result {
+14 silly mapToRegistry   raw: '@anthropic-ai/claude-code',
+14 silly mapToRegistry   scope: '@anthropic-ai',
+14 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code',
+14 silly mapToRegistry   name: '@anthropic-ai/claude-code',
+14 silly mapToRegistry   rawSpec: '',
+14 silly mapToRegistry   spec: 'latest',
+14 silly mapToRegistry   type: 'tag' }
+15 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code
+16 verbose request uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code
+17 verbose request no auth needed
+18 info attempt registry request try #1 at 10:10:47 PM
+19 verbose request id 8fbdcd4facfbb901
+20 verbose etag W/"7a81b8beebaf4a55bff3c1bff7670be2"
+21 verbose lastModified Thu, 27 Aug 2026 00:07:59 GMT
+22 http request GET https://registry.npmjs.org/@anthropic-ai%2fclaude-code
+23 http 304 https://registry.npmjs.org/@anthropic-ai%2fclaude-code
+24 verbose headers { date: 'Thu, 27 Aug 2026 16:40:46 GMT',
+24 verbose headers   connection: 'keep-alive',
+24 verbose headers   'set-cookie':
+24 verbose headers    [ '__cf_bm=DoP_VBSXJFLKdoSou8VzEuuZKGdZ2nUleG5MGliMig4-1787848846.7035098-1.0.1.1-PaGD7GuYwdCxd0nGH_M2CwOxE782N0kcd6BxMWCAthh4vI2yLU3v9vKQrSwIwv04o_o_mj2inDkcPzZ2zqGu88L5hJUqeWgKsuD0H5C4j36J8LMcA4HGI1NqptNbxMb5; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:46 GMT',
+24 verbose headers      '_cfuvid=wk8aGC8gS5Qp6fnJVtLurDHxs1GsWpMKx8PtNZtjEuM-1787848846.7035098-1.0.1.1-RztYtj.mICdJUpxoj.riBKX4TrQIsfyAOAHAixGtZTM; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+24 verbose headers   'cf-ray': 'a31c851beea65999-DEL',
+24 verbose headers   'cf-cache-status': 'HIT',
+24 verbose headers   'access-control-allow-origin': '*',
+24 verbose headers   age: '143',
+24 verbose headers   'cache-control': 'public, max-age=300',
+24 verbose headers   etag: '"7a81b8beebaf4a55bff3c1bff7670be2"',
+24 verbose headers   'last-modified': 'Thu, 27 Aug 2026 00:07:59 GMT',
+24 verbose headers   server: 'cloudflare' }
+25 silly get cb [ 304,
+25 silly get   { date: 'Thu, 27 Aug 2026 16:40:46 GMT',
+25 silly get     connection: 'keep-alive',
+25 silly get     'set-cookie':
+25 silly get      [ '__cf_bm=DoP_VBSXJFLKdoSou8VzEuuZKGdZ2nUleG5MGliMig4-1787848846.7035098-1.0.1.1-PaGD7GuYwdCxd0nGH_M2CwOxE782N0kcd6BxMWCAthh4vI2yLU3v9vKQrSwIwv04o_o_mj2inDkcPzZ2zqGu88L5hJUqeWgKsuD0H5C4j36J8LMcA4HGI1NqptNbxMb5; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:46 GMT',
+25 silly get        '_cfuvid=wk8aGC8gS5Qp6fnJVtLurDHxs1GsWpMKx8PtNZtjEuM-1787848846.7035098-1.0.1.1-RztYtj.mICdJUpxoj.riBKX4TrQIsfyAOAHAixGtZTM; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+25 silly get     'cf-ray': 'a31c851beea65999-DEL',
+25 silly get     'cf-cache-status': 'HIT',
+25 silly get     'access-control-allow-origin': '*',
+25 silly get     age: '143',
+25 silly get     'cache-control': 'public, max-age=300',
+25 silly get     etag: '"7a81b8beebaf4a55bff3c1bff7670be2"',
+25 silly get     'last-modified': 'Thu, 27 Aug 2026 00:07:59 GMT',
+25 silly get     server: 'cloudflare' } ]
+26 verbose etag https://registry.npmjs.org/@anthropic-ai%2fclaude-code from cache
+27 verbose get saving @anthropic-ai/claude-code to C:\Users\SANJAY\AppData\Roaming\npm-cache\registry.npmjs.org\_40anthropic-ai_252fclaude-code\.cache.json
+28 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+29 silly install normalizeTree
+30 silly loadCurrentTree Finishing
+31 silly loadIdealTree Starting
+32 silly install loadIdealTree
+33 silly cloneCurrentTree Starting
+34 silly install cloneCurrentTreeToIdealTree
+35 silly cloneCurrentTree Finishing
+36 silly loadShrinkwrap Starting
+37 silly install loadShrinkwrap
+38 silly loadShrinkwrap Finishing
+39 silly loadAllDepsIntoIdealTree Starting
+40 silly install loadAllDepsIntoIdealTree
+41 silly resolveWithNewModule @anthropic-ai/claude-code@2.1.247 checking installable status
+42 silly cache add args [ '@anthropic-ai/claude-code', null ]
+43 verbose cache add spec @anthropic-ai/claude-code
+44 silly cache add parsed spec Result {
+44 silly cache add   raw: '@anthropic-ai/claude-code',
+44 silly cache add   scope: '@anthropic-ai',
+44 silly cache add   escapedName: '@anthropic-ai%2fclaude-code',
+44 silly cache add   name: '@anthropic-ai/claude-code',
+44 silly cache add   rawSpec: '',
+44 silly cache add   spec: 'latest',
+44 silly cache add   type: 'tag' }
+45 silly addNamed @anthropic-ai/claude-code@latest
+46 verbose addNamed "latest" is being treated as a dist-tag for @anthropic-ai/claude-code
+47 info addNameTag [ '@anthropic-ai/claude-code', 'latest' ]
+48 silly mapToRegistry name @anthropic-ai/claude-code
+49 silly mapToRegistry scope (from package name) @anthropic-ai
+50 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+51 silly mapToRegistry using default registry
+52 silly mapToRegistry registry https://registry.npmjs.org/
+53 silly mapToRegistry data Result {
+53 silly mapToRegistry   raw: '@anthropic-ai/claude-code',
+53 silly mapToRegistry   scope: '@anthropic-ai',
+53 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code',
+53 silly mapToRegistry   name: '@anthropic-ai/claude-code',
+53 silly mapToRegistry   rawSpec: '',
+53 silly mapToRegistry   spec: 'latest',
+53 silly mapToRegistry   type: 'tag' }
+54 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code
+55 verbose addNameTag registry:https://registry.npmjs.org/@anthropic-ai%2fclaude-code not in flight; fetching
+56 verbose get https://registry.npmjs.org/@anthropic-ai%2fclaude-code not expired, no request
+57 silly addNameTag next cb for @anthropic-ai/claude-code with tag latest
+58 silly addNamed @anthropic-ai/claude-code@2.1.247
+59 verbose addNamed "2.1.247" is a plain semver version for @anthropic-ai/claude-code
+60 silly cache afterAdd @anthropic-ai/claude-code@2.1.247
+61 verbose afterAdd C:\Users\SANJAY\AppData\Roaming\npm-cache\@anthropic-ai\claude-code\2.1.247\package\package.json not in flight; writing
+62 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+63 verbose afterAdd C:\Users\SANJAY\AppData\Roaming\npm-cache\@anthropic-ai\claude-code\2.1.247\package\package.json written
+64 silly fetchNamedPackageData @anthropic-ai/claude-code-linux-x64
+65 silly mapToRegistry name @anthropic-ai/claude-code-linux-x64
+66 silly mapToRegistry scope (from package name) @anthropic-ai
+67 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+68 silly mapToRegistry using default registry
+69 silly mapToRegistry registry https://registry.npmjs.org/
+70 silly mapToRegistry data Result {
+70 silly mapToRegistry   raw: '@anthropic-ai/claude-code-linux-x64',
+70 silly mapToRegistry   scope: '@anthropic-ai',
+70 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code-linux-x64',
+70 silly mapToRegistry   name: '@anthropic-ai/claude-code-linux-x64',
+70 silly mapToRegistry   rawSpec: '',
+70 silly mapToRegistry   spec: 'latest',
+70 silly mapToRegistry   type: 'tag' }
+71 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64
+72 silly fetchNamedPackageData @anthropic-ai/claude-code-win32-x64
+73 silly mapToRegistry name @anthropic-ai/claude-code-win32-x64
+74 silly mapToRegistry scope (from package name) @anthropic-ai
+75 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+76 silly mapToRegistry using default registry
+77 silly mapToRegistry registry https://registry.npmjs.org/
+78 silly mapToRegistry data Result {
+78 silly mapToRegistry   raw: '@anthropic-ai/claude-code-win32-x64',
+78 silly mapToRegistry   scope: '@anthropic-ai',
+78 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code-win32-x64',
+78 silly mapToRegistry   name: '@anthropic-ai/claude-code-win32-x64',
+78 silly mapToRegistry   rawSpec: '',
+78 silly mapToRegistry   spec: 'latest',
+78 silly mapToRegistry   type: 'tag' }
+79 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-x64
+80 silly fetchNamedPackageData @anthropic-ai/claude-code-darwin-x64
+81 silly mapToRegistry name @anthropic-ai/claude-code-darwin-x64
+82 silly mapToRegistry scope (from package name) @anthropic-ai
+83 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+84 silly mapToRegistry using default registry
+85 silly mapToRegistry registry https://registry.npmjs.org/
+86 silly mapToRegistry data Result {
+86 silly mapToRegistry   raw: '@anthropic-ai/claude-code-darwin-x64',
+86 silly mapToRegistry   scope: '@anthropic-ai',
+86 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code-darwin-x64',
+86 silly mapToRegistry   name: '@anthropic-ai/claude-code-darwin-x64',
+86 silly mapToRegistry   rawSpec: '',
+86 silly mapToRegistry   spec: 'latest',
+86 silly mapToRegistry   type: 'tag' }
+87 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-x64
+88 silly fetchNamedPackageData @anthropic-ai/claude-code-linux-arm64
+89 silly mapToRegistry name @anthropic-ai/claude-code-linux-arm64
+90 silly mapToRegistry scope (from package name) @anthropic-ai
+91 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+92 silly mapToRegistry using default registry
+93 silly mapToRegistry registry https://registry.npmjs.org/
+94 silly mapToRegistry data Result {
+94 silly mapToRegistry   raw: '@anthropic-ai/claude-code-linux-arm64',
+94 silly mapToRegistry   scope: '@anthropic-ai',
+94 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code-linux-arm64',
+94 silly mapToRegistry   name: '@anthropic-ai/claude-code-linux-arm64',
+94 silly mapToRegistry   rawSpec: '',
+94 silly mapToRegistry   spec: 'latest',
+94 silly mapToRegistry   type: 'tag' }
+95 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64
+96 silly fetchNamedPackageData @anthropic-ai/claude-code-win32-arm64
+97 silly mapToRegistry name @anthropic-ai/claude-code-win32-arm64
+98 silly mapToRegistry scope (from package name) @anthropic-ai
+99 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+100 silly mapToRegistry using default registry
+101 silly mapToRegistry registry https://registry.npmjs.org/
+102 silly mapToRegistry data Result {
+102 silly mapToRegistry   raw: '@anthropic-ai/claude-code-win32-arm64',
+102 silly mapToRegistry   scope: '@anthropic-ai',
+102 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code-win32-arm64',
+102 silly mapToRegistry   name: '@anthropic-ai/claude-code-win32-arm64',
+102 silly mapToRegistry   rawSpec: '',
+102 silly mapToRegistry   spec: 'latest',
+102 silly mapToRegistry   type: 'tag' }
+103 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-arm64
+104 silly fetchNamedPackageData @anthropic-ai/claude-code-darwin-arm64
+105 silly mapToRegistry name @anthropic-ai/claude-code-darwin-arm64
+106 silly mapToRegistry scope (from package name) @anthropic-ai
+107 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+108 silly mapToRegistry using default registry
+109 silly mapToRegistry registry https://registry.npmjs.org/
+110 silly mapToRegistry data Result {
+110 silly mapToRegistry   raw: '@anthropic-ai/claude-code-darwin-arm64',
+110 silly mapToRegistry   scope: '@anthropic-ai',
+110 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code-darwin-arm64',
+110 silly mapToRegistry   name: '@anthropic-ai/claude-code-darwin-arm64',
+110 silly mapToRegistry   rawSpec: '',
+110 silly mapToRegistry   spec: 'latest',
+110 silly mapToRegistry   type: 'tag' }
+111 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-arm64
+112 silly fetchNamedPackageData @anthropic-ai/claude-code-linux-x64-musl
+113 silly mapToRegistry name @anthropic-ai/claude-code-linux-x64-musl
+114 silly mapToRegistry scope (from package name) @anthropic-ai
+115 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+116 silly mapToRegistry using default registry
+117 silly mapToRegistry registry https://registry.npmjs.org/
+118 silly mapToRegistry data Result {
+118 silly mapToRegistry   raw: '@anthropic-ai/claude-code-linux-x64-musl',
+118 silly mapToRegistry   scope: '@anthropic-ai',
+118 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code-linux-x64-musl',
+118 silly mapToRegistry   name: '@anthropic-ai/claude-code-linux-x64-musl',
+118 silly mapToRegistry   rawSpec: '',
+118 silly mapToRegistry   spec: 'latest',
+118 silly mapToRegistry   type: 'tag' }
+119 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64-musl
+120 silly fetchNamedPackageData @anthropic-ai/claude-code-linux-arm64-musl
+121 silly mapToRegistry name @anthropic-ai/claude-code-linux-arm64-musl
+122 silly mapToRegistry scope (from package name) @anthropic-ai
+123 verbose mapToRegistry no registry URL found in name for scope @anthropic-ai
+124 silly mapToRegistry using default registry
+125 silly mapToRegistry registry https://registry.npmjs.org/
+126 silly mapToRegistry data Result {
+126 silly mapToRegistry   raw: '@anthropic-ai/claude-code-linux-arm64-musl',
+126 silly mapToRegistry   scope: '@anthropic-ai',
+126 silly mapToRegistry   escapedName: '@anthropic-ai%2fclaude-code-linux-arm64-musl',
+126 silly mapToRegistry   name: '@anthropic-ai/claude-code-linux-arm64-musl',
+126 silly mapToRegistry   rawSpec: '',
+126 silly mapToRegistry   spec: 'latest',
+126 silly mapToRegistry   type: 'tag' }
+127 silly mapToRegistry uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64-musl
+128 verbose request uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-x64
+129 verbose request no auth needed
+130 info attempt registry request try #1 at 10:10:48 PM
+131 verbose etag W/"5852345f79acdc5b52ff21fe6d18285e"
+132 verbose lastModified Thu, 27 Aug 2026 00:08:26 GMT
+133 http request GET https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-x64
+134 verbose request uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64
+135 verbose request no auth needed
+136 info attempt registry request try #1 at 10:10:48 PM
+137 verbose etag W/"a90cadd3a5efc240bda4c9138bce1ab2"
+138 verbose lastModified Thu, 27 Aug 2026 00:08:08 GMT
+139 http request GET https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64
+140 verbose request uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-x64
+141 verbose request no auth needed
+142 info attempt registry request try #1 at 10:10:48 PM
+143 verbose etag W/"0fef64a7939808796f13f89024d446d6"
+144 verbose lastModified Thu, 27 Aug 2026 00:08:35 GMT
+145 http request GET https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-x64
+146 verbose request uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64-musl
+147 verbose request no auth needed
+148 info attempt registry request try #1 at 10:10:48 PM
+149 verbose etag W/"ba977c74866a07494f92a8cef5684a53"
+150 verbose lastModified Thu, 27 Aug 2026 00:08:17 GMT
+151 http request GET https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64-musl
+152 verbose request uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64
+153 verbose request no auth needed
+154 info attempt registry request try #1 at 10:10:48 PM
+155 verbose etag W/"e41fe606bb9f990c2280c0947c68b354"
+156 verbose lastModified Thu, 27 Aug 2026 00:08:12 GMT
+157 http request GET https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64
+158 verbose request uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-arm64
+159 verbose request no auth needed
+160 info attempt registry request try #1 at 10:10:48 PM
+161 verbose etag W/"f0a42c2145c5b6fe046f3aa8756b420b"
+162 verbose lastModified Thu, 27 Aug 2026 00:08:31 GMT
+163 http request GET https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-arm64
+164 verbose request uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64-musl
+165 verbose request no auth needed
+166 info attempt registry request try #1 at 10:10:48 PM
+167 verbose etag W/"e33af0e754d87d40f252826788b47bce"
+168 verbose lastModified Thu, 27 Aug 2026 00:08:21 GMT
+169 http request GET https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64-musl
+170 verbose request uri https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-arm64
+171 verbose request no auth needed
+172 info attempt registry request try #1 at 10:10:48 PM
+173 verbose etag W/"7b24aa68720d5137050a0471eae2e810"
+174 verbose lastModified Thu, 27 Aug 2026 00:08:40 GMT
+175 http request GET https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-arm64
+176 http 304 https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-x64
+177 verbose headers { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+177 verbose headers   connection: 'keep-alive',
+177 verbose headers   'set-cookie':
+177 verbose headers    [ '__cf_bm=fuTp8dLRAVtu9bV.imU6ukRwXvG08SsfftAI68F95Bk-1787848847.126307-1.0.1.1-Kl0RtFG7ANAvjIeWD3_HAd6SvTYGk7C9So8GJYDMsYd7lSxxgiiZ8NNecQfzIl8heCOf3448W3b1fWVquybwy7aH15aN02Wew1BTKOWRc1vSs5_fOKFomq4t3hONks5X; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+177 verbose headers      '_cfuvid=xS28VxhN4p.Z2zc7nnwGAK9NpKokDaUXUHyqk8ykG7c-1787848847.126307-1.0.1.1-.WKC_vZFeSke5R2BITy_aYk0vBpnDuLFjR_sbEn1PGA; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+177 verbose headers   'cf-ray': 'a31c851e88a45999-DEL',
+177 verbose headers   'cf-cache-status': 'HIT',
+177 verbose headers   'access-control-allow-origin': '*',
+177 verbose headers   age: '115',
+177 verbose headers   'cache-control': 'public, max-age=300',
+177 verbose headers   etag: '"5852345f79acdc5b52ff21fe6d18285e"',
+177 verbose headers   'last-modified': 'Thu, 27 Aug 2026 00:08:26 GMT',
+177 verbose headers   server: 'cloudflare' }
+178 silly get cb [ 304,
+178 silly get   { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+178 silly get     connection: 'keep-alive',
+178 silly get     'set-cookie':
+178 silly get      [ '__cf_bm=fuTp8dLRAVtu9bV.imU6ukRwXvG08SsfftAI68F95Bk-1787848847.126307-1.0.1.1-Kl0RtFG7ANAvjIeWD3_HAd6SvTYGk7C9So8GJYDMsYd7lSxxgiiZ8NNecQfzIl8heCOf3448W3b1fWVquybwy7aH15aN02Wew1BTKOWRc1vSs5_fOKFomq4t3hONks5X; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+178 silly get        '_cfuvid=xS28VxhN4p.Z2zc7nnwGAK9NpKokDaUXUHyqk8ykG7c-1787848847.126307-1.0.1.1-.WKC_vZFeSke5R2BITy_aYk0vBpnDuLFjR_sbEn1PGA; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+178 silly get     'cf-ray': 'a31c851e88a45999-DEL',
+178 silly get     'cf-cache-status': 'HIT',
+178 silly get     'access-control-allow-origin': '*',
+178 silly get     age: '115',
+178 silly get     'cache-control': 'public, max-age=300',
+178 silly get     etag: '"5852345f79acdc5b52ff21fe6d18285e"',
+178 silly get     'last-modified': 'Thu, 27 Aug 2026 00:08:26 GMT',
+178 silly get     server: 'cloudflare' } ]
+179 verbose etag https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-x64 from cache
+180 verbose get saving @anthropic-ai/claude-code-darwin-x64 to C:\Users\SANJAY\AppData\Roaming\npm-cache\registry.npmjs.org\_40anthropic-ai_252fclaude-code-darwin-x64\.cache.json
+181 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+182 silly resolveWithNewModule @anthropic-ai/claude-code-darwin-x64@2.1.247 checking installable status
+183 http 304 https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64
+184 verbose headers { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+184 verbose headers   connection: 'keep-alive',
+184 verbose headers   'set-cookie':
+184 verbose headers    [ '__cf_bm=EZV3CiG91sSpPwOHivEos1S_pmysHwtfRWsipXFJjg8-1787848847.184794-1.0.1.1-1dAanAneY16iT7TSw0mKCBYWrcF3AmUVKk0DAGpmtDiQqKqCtNnTxwe6YWap_OUhioNYsmMgJL51kgCphDECzVP74Y2eXr.H.mAh7TAYR4A_YlzBAlgU7RZXV1P6JCY7; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+184 verbose headers      '_cfuvid=JD5eeSdCAffyt5A8Xgg7wgETL4hAlcmjG9jRuZWJXDc-1787848847.184794-1.0.1.1-jtmapbtbpESM5ViFNnBsY1nEXhhWVM9iwXSLpK_qIUc; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+184 verbose headers   'cf-ray': 'a31c851eed41d40b-DEL',
+184 verbose headers   'cf-cache-status': 'HIT',
+184 verbose headers   'access-control-allow-origin': '*',
+184 verbose headers   age: '137',
+184 verbose headers   'cache-control': 'public, max-age=300',
+184 verbose headers   etag: '"a90cadd3a5efc240bda4c9138bce1ab2"',
+184 verbose headers   'last-modified': 'Thu, 27 Aug 2026 00:08:08 GMT',
+184 verbose headers   server: 'cloudflare' }
+185 silly get cb [ 304,
+185 silly get   { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+185 silly get     connection: 'keep-alive',
+185 silly get     'set-cookie':
+185 silly get      [ '__cf_bm=EZV3CiG91sSpPwOHivEos1S_pmysHwtfRWsipXFJjg8-1787848847.184794-1.0.1.1-1dAanAneY16iT7TSw0mKCBYWrcF3AmUVKk0DAGpmtDiQqKqCtNnTxwe6YWap_OUhioNYsmMgJL51kgCphDECzVP74Y2eXr.H.mAh7TAYR4A_YlzBAlgU7RZXV1P6JCY7; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+185 silly get        '_cfuvid=JD5eeSdCAffyt5A8Xgg7wgETL4hAlcmjG9jRuZWJXDc-1787848847.184794-1.0.1.1-jtmapbtbpESM5ViFNnBsY1nEXhhWVM9iwXSLpK_qIUc; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+185 silly get     'cf-ray': 'a31c851eed41d40b-DEL',
+185 silly get     'cf-cache-status': 'HIT',
+185 silly get     'access-control-allow-origin': '*',
+185 silly get     age: '137',
+185 silly get     'cache-control': 'public, max-age=300',
+185 silly get     etag: '"a90cadd3a5efc240bda4c9138bce1ab2"',
+185 silly get     'last-modified': 'Thu, 27 Aug 2026 00:08:08 GMT',
+185 silly get     server: 'cloudflare' } ]
+186 verbose etag https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64 from cache
+187 verbose get saving @anthropic-ai/claude-code-linux-x64 to C:\Users\SANJAY\AppData\Roaming\npm-cache\registry.npmjs.org\_40anthropic-ai_252fclaude-code-linux-x64\.cache.json
+188 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+189 http 304 https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64-musl
+190 verbose headers { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+190 verbose headers   connection: 'keep-alive',
+190 verbose headers   'set-cookie':
+190 verbose headers    [ '__cf_bm=DVEPftzrlEX7LUuR5R.m_CDOsE1RUl2Wunnnxv9M1d0-1787848847.188059-1.0.1.1-336URdzy3.HPF584xchpfE_8ilwTIjAycGrdsAxB4xL46lzXztkPU6wz5CNVVLOhku0sMmRqc.gCoePLOxVDUQRfjiK5Dq.tdsBVQtSztBheRPRQKq0hBMhiL4uE2_l1; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+190 verbose headers      '_cfuvid=S3.jXf8eUNSbA0yZCT2Qfghz8PpLxthakHRyowjZx34-1787848847.188059-1.0.1.1-K91tyAmcTTf4P8g72iZKu3r5zGYzpbZhqlPqjdPAQNE; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+190 verbose headers   'cf-ray': 'a31c851eeb5059d6-DEL',
+190 verbose headers   'cf-cache-status': 'HIT',
+190 verbose headers   'access-control-allow-origin': '*',
+190 verbose headers   age: '131',
+190 verbose headers   'cache-control': 'public, max-age=300',
+190 verbose headers   etag: '"ba977c74866a07494f92a8cef5684a53"',
+190 verbose headers   'last-modified': 'Thu, 27 Aug 2026 00:08:17 GMT',
+190 verbose headers   server: 'cloudflare' }
+191 silly get cb [ 304,
+191 silly get   { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+191 silly get     connection: 'keep-alive',
+191 silly get     'set-cookie':
+191 silly get      [ '__cf_bm=DVEPftzrlEX7LUuR5R.m_CDOsE1RUl2Wunnnxv9M1d0-1787848847.188059-1.0.1.1-336URdzy3.HPF584xchpfE_8ilwTIjAycGrdsAxB4xL46lzXztkPU6wz5CNVVLOhku0sMmRqc.gCoePLOxVDUQRfjiK5Dq.tdsBVQtSztBheRPRQKq0hBMhiL4uE2_l1; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+191 silly get        '_cfuvid=S3.jXf8eUNSbA0yZCT2Qfghz8PpLxthakHRyowjZx34-1787848847.188059-1.0.1.1-K91tyAmcTTf4P8g72iZKu3r5zGYzpbZhqlPqjdPAQNE; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+191 silly get     'cf-ray': 'a31c851eeb5059d6-DEL',
+191 silly get     'cf-cache-status': 'HIT',
+191 silly get     'access-control-allow-origin': '*',
+191 silly get     age: '131',
+191 silly get     'cache-control': 'public, max-age=300',
+191 silly get     etag: '"ba977c74866a07494f92a8cef5684a53"',
+191 silly get     'last-modified': 'Thu, 27 Aug 2026 00:08:17 GMT',
+191 silly get     server: 'cloudflare' } ]
+192 verbose etag https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-x64-musl from cache
+193 verbose get saving @anthropic-ai/claude-code-linux-x64-musl to C:\Users\SANJAY\AppData\Roaming\npm-cache\registry.npmjs.org\_40anthropic-ai_252fclaude-code-linux-x64-musl\.cache.json
+194 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+195 http 304 https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-x64
+196 verbose headers { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+196 verbose headers   connection: 'keep-alive',
+196 verbose headers   'set-cookie':
+196 verbose headers    [ '__cf_bm=e2ZrXAf8AMTTBeRYlc6PfETrA.51yCdiGMvUwtUWTu4-1787848847.1862683-1.0.1.1-MthLHqd_8YwtANXMmb_qi0M3z4Yx566nbx23HHSgrjtC7_AIZtRSfIKnYTYzyVvaNaQ22I2ore8td9ciSKDXqWDd1RQvxDWeomSItt3JOEhXkdcHEKmQJl_Rj4WeXJqb; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+196 verbose headers      '_cfuvid=9mhTYtWC8FjXxBJw33bnUHfUBmHbY9azdeDG2h5XScs-1787848847.1862683-1.0.1.1-F7WoyrCvXRLAXfSSquSJq7y4sfg8IpBMll8orcLZbHY; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+196 verbose headers   'cf-ray': 'a31c851eedd8564c-DEL',
+196 verbose headers   'cf-cache-status': 'HIT',
+196 verbose headers   'access-control-allow-origin': '*',
+196 verbose headers   age: '110',
+196 verbose headers   'cache-control': 'public, max-age=300',
+196 verbose headers   etag: '"0fef64a7939808796f13f89024d446d6"',
+196 verbose headers   'last-modified': 'Thu, 27 Aug 2026 00:08:35 GMT',
+196 verbose headers   server: 'cloudflare' }
+197 silly get cb [ 304,
+197 silly get   { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+197 silly get     connection: 'keep-alive',
+197 silly get     'set-cookie':
+197 silly get      [ '__cf_bm=e2ZrXAf8AMTTBeRYlc6PfETrA.51yCdiGMvUwtUWTu4-1787848847.1862683-1.0.1.1-MthLHqd_8YwtANXMmb_qi0M3z4Yx566nbx23HHSgrjtC7_AIZtRSfIKnYTYzyVvaNaQ22I2ore8td9ciSKDXqWDd1RQvxDWeomSItt3JOEhXkdcHEKmQJl_Rj4WeXJqb; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+197 silly get        '_cfuvid=9mhTYtWC8FjXxBJw33bnUHfUBmHbY9azdeDG2h5XScs-1787848847.1862683-1.0.1.1-F7WoyrCvXRLAXfSSquSJq7y4sfg8IpBMll8orcLZbHY; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+197 silly get     'cf-ray': 'a31c851eedd8564c-DEL',
+197 silly get     'cf-cache-status': 'HIT',
+197 silly get     'access-control-allow-origin': '*',
+197 silly get     age: '110',
+197 silly get     'cache-control': 'public, max-age=300',
+197 silly get     etag: '"0fef64a7939808796f13f89024d446d6"',
+197 silly get     'last-modified': 'Thu, 27 Aug 2026 00:08:35 GMT',
+197 silly get     server: 'cloudflare' } ]
+198 verbose etag https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-x64 from cache
+199 verbose get saving @anthropic-ai/claude-code-win32-x64 to C:\Users\SANJAY\AppData\Roaming\npm-cache\registry.npmjs.org\_40anthropic-ai_252fclaude-code-win32-x64\.cache.json
+200 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+201 http 304 https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-arm64
+202 verbose headers { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+202 verbose headers   connection: 'keep-alive',
+202 verbose headers   'set-cookie':
+202 verbose headers    [ '__cf_bm=gCIzGX0ETl8JtfKkjsBeYIOoWVFcl9R0GjByq3RqbwI-1787848847.1996636-1.0.1.1-B95H7bJhejUj89EnQCEQIVNFQLAowQznL2Aki3j6Xa7SydthJvVnfvLVQiv1hjBhB8aK7fPyi94sDi6BIZmRM0XVXozqJIJlfz.u6fxbIFT92y78OG4TNS4K6.UIDixA; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+202 verbose headers      '_cfuvid=1mmTXRbJB46cQ2lHT5NQ1pl.yQRFKmRI87IW0CYVdIs-1787848847.1996636-1.0.1.1-vrnypJ1KcFgoYtnVXeCuDJexFzLLM7wP4j0ZT5EEnUs; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+202 verbose headers   'cf-ray': 'a31c851ef9b78e7a-DEL',
+202 verbose headers   'cf-cache-status': 'HIT',
+202 verbose headers   'access-control-allow-origin': '*',
+202 verbose headers   age: '100',
+202 verbose headers   'cache-control': 'public, max-age=300',
+202 verbose headers   etag: '"7b24aa68720d5137050a0471eae2e810"',
+202 verbose headers   'last-modified': 'Thu, 27 Aug 2026 00:08:40 GMT',
+202 verbose headers   server: 'cloudflare' }
+203 silly get cb [ 304,
+203 silly get   { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+203 silly get     connection: 'keep-alive',
+203 silly get     'set-cookie':
+203 silly get      [ '__cf_bm=gCIzGX0ETl8JtfKkjsBeYIOoWVFcl9R0GjByq3RqbwI-1787848847.1996636-1.0.1.1-B95H7bJhejUj89EnQCEQIVNFQLAowQznL2Aki3j6Xa7SydthJvVnfvLVQiv1hjBhB8aK7fPyi94sDi6BIZmRM0XVXozqJIJlfz.u6fxbIFT92y78OG4TNS4K6.UIDixA; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+203 silly get        '_cfuvid=1mmTXRbJB46cQ2lHT5NQ1pl.yQRFKmRI87IW0CYVdIs-1787848847.1996636-1.0.1.1-vrnypJ1KcFgoYtnVXeCuDJexFzLLM7wP4j0ZT5EEnUs; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+203 silly get     'cf-ray': 'a31c851ef9b78e7a-DEL',
+203 silly get     'cf-cache-status': 'HIT',
+203 silly get     'access-control-allow-origin': '*',
+203 silly get     age: '100',
+203 silly get     'cache-control': 'public, max-age=300',
+203 silly get     etag: '"7b24aa68720d5137050a0471eae2e810"',
+203 silly get     'last-modified': 'Thu, 27 Aug 2026 00:08:40 GMT',
+203 silly get     server: 'cloudflare' } ]
+204 verbose etag https://registry.npmjs.org/@anthropic-ai%2fclaude-code-win32-arm64 from cache
+205 verbose get saving @anthropic-ai/claude-code-win32-arm64 to C:\Users\SANJAY\AppData\Roaming\npm-cache\registry.npmjs.org\_40anthropic-ai_252fclaude-code-win32-arm64\.cache.json
+206 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+207 http 304 https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64-musl
+208 verbose headers { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+208 verbose headers   connection: 'keep-alive',
+208 verbose headers   'set-cookie':
+208 verbose headers    [ '__cf_bm=qPuGAbS.lV.b5EjGZ5MdZFDLYHeK6d5Pd.fPKYfGmOU-1787848847.197631-1.0.1.1-wHZiIXO0kyWwPefgBFeoFYkOh5.FMJa0j6C5XvkqTfFirUX.A0DvDrJGrQYb5dA45yXQ.7qdORkdMpcdefScwZHl9rOzVeQh7OuxPIxdfzr25hCbFWaDwWhLkhFq7kI4; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+208 verbose headers      '_cfuvid=nXpKY11yaGYKNUevFDJ6LTudmgjMnJcno08O71IeuJ0-1787848847.197631-1.0.1.1-MO.Z4NAB_oZ1Hg_IIvtkMeieMvuYIz7JBC.4pdE3n70; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+208 verbose headers   'cf-ray': 'a31c851ef9a491b2-DEL',
+208 verbose headers   'cf-cache-status': 'HIT',
+208 verbose headers   'access-control-allow-origin': '*',
+208 verbose headers   age: '120',
+208 verbose headers   'cache-control': 'public, max-age=300',
+208 verbose headers   etag: '"e33af0e754d87d40f252826788b47bce"',
+208 verbose headers   'last-modified': 'Thu, 27 Aug 2026 00:08:21 GMT',
+208 verbose headers   server: 'cloudflare' }
+209 silly get cb [ 304,
+209 silly get   { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+209 silly get     connection: 'keep-alive',
+209 silly get     'set-cookie':
+209 silly get      [ '__cf_bm=qPuGAbS.lV.b5EjGZ5MdZFDLYHeK6d5Pd.fPKYfGmOU-1787848847.197631-1.0.1.1-wHZiIXO0kyWwPefgBFeoFYkOh5.FMJa0j6C5XvkqTfFirUX.A0DvDrJGrQYb5dA45yXQ.7qdORkdMpcdefScwZHl9rOzVeQh7OuxPIxdfzr25hCbFWaDwWhLkhFq7kI4; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+209 silly get        '_cfuvid=nXpKY11yaGYKNUevFDJ6LTudmgjMnJcno08O71IeuJ0-1787848847.197631-1.0.1.1-MO.Z4NAB_oZ1Hg_IIvtkMeieMvuYIz7JBC.4pdE3n70; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+209 silly get     'cf-ray': 'a31c851ef9a491b2-DEL',
+209 silly get     'cf-cache-status': 'HIT',
+209 silly get     'access-control-allow-origin': '*',
+209 silly get     age: '120',
+209 silly get     'cache-control': 'public, max-age=300',
+209 silly get     etag: '"e33af0e754d87d40f252826788b47bce"',
+209 silly get     'last-modified': 'Thu, 27 Aug 2026 00:08:21 GMT',
+209 silly get     server: 'cloudflare' } ]
+210 verbose etag https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64-musl from cache
+211 verbose get saving @anthropic-ai/claude-code-linux-arm64-musl to C:\Users\SANJAY\AppData\Roaming\npm-cache\registry.npmjs.org\_40anthropic-ai_252fclaude-code-linux-arm64-musl\.cache.json
+212 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+213 http 304 https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64
+214 verbose headers { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+214 verbose headers   connection: 'keep-alive',
+214 verbose headers   'set-cookie':
+214 verbose headers    [ '__cf_bm=f2NYC139SuYnmo_1I3afH.MUbHaevN9mWrUlA.GT2w8-1787848847.1970894-1.0.1.1-hmVK861hohPFdAtW2VCAaQ5I4WG6yZZXl5LijgnFLdxpIo8cCHA7c5OOnzpM1dR2E_iy4Zzr6QnDi54nDDLFKhlEAO5ejZKXmUrueQQ0JiiD5WDJXFjlPeNNrMnSOSEp; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+214 verbose headers      '_cfuvid=y3FQ8gCSdAmBSW.I4QvgA7I2O4AzCLDNIIzDmEQUbSk-1787848847.1970894-1.0.1.1-u3zIXoHE_oyaj.nt13RkVmCe3i3oBPfBOX.dbKw_..o; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+214 verbose headers   'cf-ray': 'a31c851efe1d8e90-DEL',
+214 verbose headers   'cf-cache-status': 'HIT',
+214 verbose headers   'access-control-allow-origin': '*',
+214 verbose headers   age: '129',
+214 verbose headers   'cache-control': 'public, max-age=300',
+214 verbose headers   etag: '"e41fe606bb9f990c2280c0947c68b354"',
+214 verbose headers   'last-modified': 'Thu, 27 Aug 2026 00:08:12 GMT',
+214 verbose headers   server: 'cloudflare' }
+215 silly get cb [ 304,
+215 silly get   { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+215 silly get     connection: 'keep-alive',
+215 silly get     'set-cookie':
+215 silly get      [ '__cf_bm=f2NYC139SuYnmo_1I3afH.MUbHaevN9mWrUlA.GT2w8-1787848847.1970894-1.0.1.1-hmVK861hohPFdAtW2VCAaQ5I4WG6yZZXl5LijgnFLdxpIo8cCHA7c5OOnzpM1dR2E_iy4Zzr6QnDi54nDDLFKhlEAO5ejZKXmUrueQQ0JiiD5WDJXFjlPeNNrMnSOSEp; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+215 silly get        '_cfuvid=y3FQ8gCSdAmBSW.I4QvgA7I2O4AzCLDNIIzDmEQUbSk-1787848847.1970894-1.0.1.1-u3zIXoHE_oyaj.nt13RkVmCe3i3oBPfBOX.dbKw_..o; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+215 silly get     'cf-ray': 'a31c851efe1d8e90-DEL',
+215 silly get     'cf-cache-status': 'HIT',
+215 silly get     'access-control-allow-origin': '*',
+215 silly get     age: '129',
+215 silly get     'cache-control': 'public, max-age=300',
+215 silly get     etag: '"e41fe606bb9f990c2280c0947c68b354"',
+215 silly get     'last-modified': 'Thu, 27 Aug 2026 00:08:12 GMT',
+215 silly get     server: 'cloudflare' } ]
+216 verbose etag https://registry.npmjs.org/@anthropic-ai%2fclaude-code-linux-arm64 from cache
+217 verbose get saving @anthropic-ai/claude-code-linux-arm64 to C:\Users\SANJAY\AppData\Roaming\npm-cache\registry.npmjs.org\_40anthropic-ai_252fclaude-code-linux-arm64\.cache.json
+218 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+219 http 304 https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-arm64
+220 verbose headers { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+220 verbose headers   connection: 'keep-alive',
+220 verbose headers   'set-cookie':
+220 verbose headers    [ '__cf_bm=2i6qMjtx1NP9wvBSyANikQmtQHaw9c3o_20_xk9IBa0-1787848847.1983392-1.0.1.1-dAS5xkLsjqcIIjDVb04qPAcvHvNUO2ldHDJ4BRAADB8ke8xyp8qHtL9Ho0pbJnuxWs2I2kRrbZpMHclJJEooejlMM52nCegdzAHPG1kiqQMVsc7LwNySIBwrHqzYLdYw; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+220 verbose headers      '_cfuvid=qAbIiKyMib_73u2rJI94.it_IYNBDnZpVGF.xEoc8YE-1787848847.1983392-1.0.1.1-nvfRh8TWQba9586RPG9aIQSJ.5waAyTTsxms6.RNEmA; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+220 verbose headers   'cf-ray': 'a31c851efcc291a3-DEL',
+220 verbose headers   'cf-cache-status': 'HIT',
+220 verbose headers   'access-control-allow-origin': '*',
+220 verbose headers   age: '115',
+220 verbose headers   'cache-control': 'public, max-age=300',
+220 verbose headers   etag: '"f0a42c2145c5b6fe046f3aa8756b420b"',
+220 verbose headers   'last-modified': 'Thu, 27 Aug 2026 00:08:31 GMT',
+220 verbose headers   server: 'cloudflare' }
+221 silly get cb [ 304,
+221 silly get   { date: 'Thu, 27 Aug 2026 16:40:47 GMT',
+221 silly get     connection: 'keep-alive',
+221 silly get     'set-cookie':
+221 silly get      [ '__cf_bm=2i6qMjtx1NP9wvBSyANikQmtQHaw9c3o_20_xk9IBa0-1787848847.1983392-1.0.1.1-dAS5xkLsjqcIIjDVb04qPAcvHvNUO2ldHDJ4BRAADB8ke8xyp8qHtL9Ho0pbJnuxWs2I2kRrbZpMHclJJEooejlMM52nCegdzAHPG1kiqQMVsc7LwNySIBwrHqzYLdYw; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org; Expires=Thu, 27 Aug 2026 17:10:47 GMT',
+221 silly get        '_cfuvid=qAbIiKyMib_73u2rJI94.it_IYNBDnZpVGF.xEoc8YE-1787848847.1983392-1.0.1.1-nvfRh8TWQba9586RPG9aIQSJ.5waAyTTsxms6.RNEmA; HttpOnly; SameSite=None; Secure; Path=/; Domain=npmjs.org' ],
+221 silly get     'cf-ray': 'a31c851efcc291a3-DEL',
+221 silly get     'cf-cache-status': 'HIT',
+221 silly get     'access-control-allow-origin': '*',
+221 silly get     age: '115',
+221 silly get     'cache-control': 'public, max-age=300',
+221 silly get     etag: '"f0a42c2145c5b6fe046f3aa8756b420b"',
+221 silly get     'last-modified': 'Thu, 27 Aug 2026 00:08:31 GMT',
+221 silly get     server: 'cloudflare' } ]
+222 verbose etag https://registry.npmjs.org/@anthropic-ai%2fclaude-code-darwin-arm64 from cache
+223 verbose get saving @anthropic-ai/claude-code-darwin-arm64 to C:\Users\SANJAY\AppData\Roaming\npm-cache\registry.npmjs.org\_40anthropic-ai_252fclaude-code-darwin-arm64\.cache.json
+224 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache correctMkdir not in flight; initializing
+225 silly resolveWithNewModule @anthropic-ai/claude-code-linux-x64@2.1.247 checking installable status
+226 silly resolveWithNewModule @anthropic-ai/claude-code-linux-x64-musl@2.1.247 checking installable status
+227 silly resolveWithNewModule @anthropic-ai/claude-code-win32-x64@2.1.247 checking installable status
+228 silly resolveWithNewModule @anthropic-ai/claude-code-linux-arm64-musl@2.1.247 checking installable status
+229 silly resolveWithNewModule @anthropic-ai/claude-code-linux-arm64@2.1.247 checking installable status
+230 silly resolveWithNewModule @anthropic-ai/claude-code-win32-arm64@2.1.247 checking installable status
+231 silly resolveWithNewModule @anthropic-ai/claude-code-darwin-arm64@2.1.247 checking installable status
+232 silly loadAllDepsIntoIdealTree Finishing
+233 silly loadIdealTree Finishing
+234 silly currentTree npm
+235 silly idealTree npm
+235 silly idealTree `-- @anthropic-ai/claude-code@2.1.247
+236 silly generateActionsToTake Starting
+237 silly install generateActionsToTake
+238 silly generateActionsToTake Finishing
+239 silly diffTrees action count 1
+240 silly diffTrees add @anthropic-ai/claude-code@2.1.247
+241 silly decomposeActions action count 8
+242 silly decomposeActions fetch @anthropic-ai/claude-code@2.1.247
+243 silly decomposeActions extract @anthropic-ai/claude-code@2.1.247
+244 silly decomposeActions test @anthropic-ai/claude-code@2.1.247
+245 silly decomposeActions preinstall @anthropic-ai/claude-code@2.1.247
+246 silly decomposeActions build @anthropic-ai/claude-code@2.1.247
+247 silly decomposeActions install @anthropic-ai/claude-code@2.1.247
+248 silly decomposeActions postinstall @anthropic-ai/claude-code@2.1.247
+249 silly decomposeActions finalize @anthropic-ai/claude-code@2.1.247
+250 silly runTopLevelLifecycles Starting
+251 silly executeActions Starting
+252 silly install executeActions
+253 silly doSerial global-install 0
+254 silly doParallel fetch 1
+255 verbose correctMkdir C:\Users\SANJAY\AppData\Roaming\npm-cache\_locks correctMkdir not in flight; initializing
+256 verbose lock using C:\Users\SANJAY\AppData\Roaming\npm-cache\_locks\staging-c04ecd6956cbf010.lock for C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging
+257 silly doParallel extract 1
+258 silly extract @anthropic-ai/claude-code@2.1.247
+259 verbose unbuild node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f
+260 silly gentlyRm C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f is being purged from base C:\Users\SANJAY\AppData\Roaming\npm
+261 verbose gentlyRm don't care about contents; nuking C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f
+262 verbose tar unpack C:\Users\SANJAY\AppData\Roaming\npm-cache\@anthropic-ai\claude-code\2.1.247\package.tgz
+263 verbose tar unpacking to C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f
+264 silly gentlyRm C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f is being purged
+265 verbose gentlyRm don't care about contents; nuking C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f
+266 silly gunzTarPerm modes [ '777', '666' ]
+267 silly gunzTarPerm extractEntry cli-wrapper.cjs
+268 silly gunzTarPerm modified mode [ 'cli-wrapper.cjs', 420, 438 ]
+269 silly gunzTarPerm extractEntry install.cjs
+270 silly gunzTarPerm modified mode [ 'install.cjs', 420, 438 ]
+271 silly gunzTarPerm extractEntry bin/claude.exe
+272 silly gunzTarPerm modified mode [ 'bin/claude.exe', 420, 438 ]
+273 silly gunzTarPerm extractEntry package.json
+274 silly gunzTarPerm modified mode [ 'package.json', 420, 438 ]
+275 silly gunzTarPerm extractEntry LICENSE.md
+276 silly gunzTarPerm modified mode [ 'LICENSE.md', 420, 438 ]
+277 silly gunzTarPerm extractEntry README.md
+278 silly gunzTarPerm modified mode [ 'README.md', 420, 438 ]
+279 silly gunzTarPerm extractEntry sdk-tools.d.ts
+280 silly gunzTarPerm modified mode [ 'sdk-tools.d.ts', 420, 438 ]
+281 silly gentlyRm C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f\node_modules is being purged
+282 verbose gentlyRm don't care about contents; nuking C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f\node_modules
+283 silly doParallel preinstall 1
+284 silly preinstall @anthropic-ai/claude-code@2.1.247 C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f
+285 info lifecycle @anthropic-ai/claude-code@2.1.247~preinstall: @anthropic-ai/claude-code@2.1.247
+286 silly lifecycle @anthropic-ai/claude-code@2.1.247~preinstall: no script for preinstall, continuing
+287 silly doReverseSerial remove 0
+288 silly doSerial move 0
+289 silly doSerial finalize 1
+290 silly finalize C:\Users\SANJAY\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code
+291 silly doSerial build 1
+292 silly build @anthropic-ai/claude-code@2.1.247
+293 info linkStuff @anthropic-ai/claude-code@2.1.247
+294 silly linkStuff @anthropic-ai/claude-code@2.1.247 has C:\Users\SANJAY\AppData\Roaming\npm\node_modules as its parent node_modules
+295 silly linkStuff @anthropic-ai/claude-code@2.1.247 is part of a global install
+296 silly linkStuff @anthropic-ai/claude-code@2.1.247 is installed into a global node_modules
+297 silly linkStuff @anthropic-ai/claude-code@2.1.247 is installed into the top-level global node_modules
+298 verbose linkBins @anthropic-ai/claude-code@2.1.247
+299 verbose link bins [ { claude: 'bin/claude.exe' },
+299 verbose link bins   'C:\\Users\\SANJAY\\AppData\\Roaming\\npm',
+299 verbose link bins   true ]
+300 verbose linkMans @anthropic-ai/claude-code@2.1.247
+301 silly doSerial global-link 0
+302 silly doParallel update-linked 0
+303 silly doSerial install 1
+304 silly install @anthropic-ai/claude-code@2.1.247 C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f
+305 info lifecycle @anthropic-ai/claude-code@2.1.247~install: @anthropic-ai/claude-code@2.1.247
+306 silly lifecycle @anthropic-ai/claude-code@2.1.247~install: no script for install, continuing
+307 silly doSerial postinstall 1
+308 silly postinstall @anthropic-ai/claude-code@2.1.247 C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging\@anthropic-ai\claude-code-7ca2d99f
+309 info lifecycle @anthropic-ai/claude-code@2.1.247~postinstall: @anthropic-ai/claude-code@2.1.247
+310 verbose lifecycle @anthropic-ai/claude-code@2.1.247~postinstall: unsafe-perm in lifecycle true
+311 verbose lifecycle @anthropic-ai/claude-code@2.1.247~postinstall: PATH: C:\Program Files (x86)\nodejs\node_modules\npm\bin\node-gyp-bin;C:\Users\SANJAY\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code\node_modules\.bin;C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files (x86)\HP\Common\HPDestPlgIn\;C:\Program Files (x86)\nodejs\;C:\Program Files\Git\cmd;C:\Users\SANJAY\AppData\Local\Programs\Python\Python314\Scripts\;C:\Users\SANJAY\AppData\Local\Programs\Python\Python314\;C:\Users\SANJAY\AppData\Local\Programs\Python\Launcher\;C:\Users\SANJAY\AppData\Local\Microsoft\WindowsApps;C:\Program Files (x86)\HP\Common\HPDestPlgIn\;C:\Users\SANJAY\AppData\Roaming\npm;C:\Users\SANJAY\AppData\Local\Programs\Microsoft VS Code\bin
+312 verbose lifecycle @anthropic-ai/claude-code@2.1.247~postinstall: CWD: C:\Users\SANJAY\AppData\Roaming\npm\node_modules\@anthropic-ai\claude-code
+313 silly lifecycle @anthropic-ai/claude-code@2.1.247~postinstall: Args: [ '/d /s /c', 'node install.cjs' ]
+314 silly lifecycle @anthropic-ai/claude-code@2.1.247~postinstall: Returned: code: 1  signal: null
+315 info lifecycle @anthropic-ai/claude-code@2.1.247~postinstall: Failed to exec postinstall script
+316 verbose unlock done using C:\Users\SANJAY\AppData\Roaming\npm-cache\_locks\staging-c04ecd6956cbf010.lock for C:\Users\SANJAY\AppData\Roaming\npm\node_modules\.staging
+317 silly rollbackFailedOptional Starting
+318 silly rollbackFailedOptional Finishing
+319 silly runTopLevelLifecycles Finishing
+320 silly install printInstalled
+321 warn optional SKIPPING OPTIONAL DEPENDENCY: @anthropic-ai/claude-code-darwin-x64@2.1.247 (node_modules\@anthropic-ai\claude-code\node_modules\@anthropic-ai\claude-code-darwin-x64):
+322 warn notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for @anthropic-ai/claude-code-darwin-x64@2.1.247: wanted {"os":"darwin","arch":"x64"} (current: {"os":"win32","arch":"ia32"})
+323 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid OS:    darwin
+323 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid Arch:  x64
+323 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual OS:   win32
+323 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual Arch: ia32
+324 warn optional SKIPPING OPTIONAL DEPENDENCY: @anthropic-ai/claude-code-linux-x64@2.1.247 (node_modules\@anthropic-ai\claude-code\node_modules\@anthropic-ai\claude-code-linux-x64):
+325 warn notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for @anthropic-ai/claude-code-linux-x64@2.1.247: wanted {"os":"linux","arch":"x64"} (current: {"os":"win32","arch":"ia32"})
+326 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid OS:    linux
+326 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid Arch:  x64
+326 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual OS:   win32
+326 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual Arch: ia32
+327 warn optional SKIPPING OPTIONAL DEPENDENCY: @anthropic-ai/claude-code-linux-x64-musl@2.1.247 (node_modules\@anthropic-ai\claude-code\node_modules\@anthropic-ai\claude-code-linux-x64-musl):
+328 warn notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for @anthropic-ai/claude-code-linux-x64-musl@2.1.247: wanted {"os":"linux","arch":"x64"} (current: {"os":"win32","arch":"ia32"})
+329 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid OS:    linux
+329 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid Arch:  x64
+329 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual OS:   win32
+329 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual Arch: ia32
+330 warn optional SKIPPING OPTIONAL DEPENDENCY: @anthropic-ai/claude-code-win32-x64@2.1.247 (node_modules\@anthropic-ai\claude-code\node_modules\@anthropic-ai\claude-code-win32-x64):
+331 warn notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for @anthropic-ai/claude-code-win32-x64@2.1.247: wanted {"os":"win32","arch":"x64"} (current: {"os":"win32","arch":"ia32"})
+332 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid OS:    win32
+332 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid Arch:  x64
+332 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual OS:   win32
+332 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual Arch: ia32
+333 warn optional SKIPPING OPTIONAL DEPENDENCY: @anthropic-ai/claude-code-linux-arm64-musl@2.1.247 (node_modules\@anthropic-ai\claude-code\node_modules\@anthropic-ai\claude-code-linux-arm64-musl):
+334 warn notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for @anthropic-ai/claude-code-linux-arm64-musl@2.1.247: wanted {"os":"linux","arch":"arm64"} (current: {"os":"win32","arch":"ia32"})
+335 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid OS:    linux
+335 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid Arch:  arm64
+335 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual OS:   win32
+335 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual Arch: ia32
+336 warn optional SKIPPING OPTIONAL DEPENDENCY: @anthropic-ai/claude-code-linux-arm64@2.1.247 (node_modules\@anthropic-ai\claude-code\node_modules\@anthropic-ai\claude-code-linux-arm64):
+337 warn notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for @anthropic-ai/claude-code-linux-arm64@2.1.247: wanted {"os":"linux","arch":"arm64"} (current: {"os":"win32","arch":"ia32"})
+338 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid OS:    linux
+338 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid Arch:  arm64
+338 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual OS:   win32
+338 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual Arch: ia32
+339 warn optional SKIPPING OPTIONAL DEPENDENCY: @anthropic-ai/claude-code-win32-arm64@2.1.247 (node_modules\@anthropic-ai\claude-code\node_modules\@anthropic-ai\claude-code-win32-arm64):
+340 warn notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for @anthropic-ai/claude-code-win32-arm64@2.1.247: wanted {"os":"win32","arch":"arm64"} (current: {"os":"win32","arch":"ia32"})
+341 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid OS:    win32
+341 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid Arch:  arm64
+341 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual OS:   win32
+341 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual Arch: ia32
+342 warn optional SKIPPING OPTIONAL DEPENDENCY: @anthropic-ai/claude-code-darwin-arm64@2.1.247 (node_modules\@anthropic-ai\claude-code\node_modules\@anthropic-ai\claude-code-darwin-arm64):
+343 warn notsup SKIPPING OPTIONAL DEPENDENCY: Unsupported platform for @anthropic-ai/claude-code-darwin-arm64@2.1.247: wanted {"os":"darwin","arch":"arm64"} (current: {"os":"win32","arch":"ia32"})
+344 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid OS:    darwin
+344 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Valid Arch:  arm64
+344 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual OS:   win32
+344 verbose notsup SKIPPING OPTIONAL DEPENDENCY: Actual Arch: ia32
+345 verbose stack Error: @anthropic-ai/claude-code@2.1.247 postinstall: `node install.cjs`
+345 verbose stack Exit status 1
+345 verbose stack     at EventEmitter.<anonymous> (C:\Program Files (x86)\nodejs\node_modules\npm\lib\utils\lifecycle.js:255:16)
+345 verbose stack     at emitTwo (events.js:106:13)
+345 verbose stack     at EventEmitter.emit (events.js:191:7)
+345 verbose stack     at ChildProcess.<anonymous> (C:\Program Files (x86)\nodejs\node_modules\npm\lib\utils\spawn.js:40:14)
+345 verbose stack     at emitTwo (events.js:106:13)
+345 verbose stack     at ChildProcess.emit (events.js:191:7)
+345 verbose stack     at maybeClose (internal/child_process.js:886:16)
+345 verbose stack     at Process.ChildProcess._handle.onexit (internal/child_process.js:226:5)
+346 verbose pkgid @anthropic-ai/claude-code@2.1.247
+347 verbose cwd G:\pos_backend\pos_backend
+348 error Windows_NT 10.0.26200
+349 error argv "C:\\Program Files (x86)\\nodejs\\node.exe" "C:\\Program Files (x86)\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install" "-g" "@anthropic-ai/claude-code"
+350 error node v6.10.1
+351 error npm  v3.10.10
+352 error code ELIFECYCLE
+353 error @anthropic-ai/claude-code@2.1.247 postinstall: `node install.cjs`
+353 error Exit status 1
+354 error Failed at the @anthropic-ai/claude-code@2.1.247 postinstall script 'node install.cjs'.
+354 error Make sure you have the latest version of node.js and npm installed.
+354 error If you do, this is most likely a problem with the @anthropic-ai/claude-code package,
+354 error not with npm itself.
+354 error Tell the author that this fails on your system:
+354 error     node install.cjs
+354 error You can get information on how to open an issue for this project with:
+354 error     npm bugs @anthropic-ai/claude-code
+354 error Or if that isn't available, you can get their info via:
+354 error     npm owner ls @anthropic-ai/claude-code
+354 error There is likely additional logging output above.
+355 verbose exit [ 1, true ]
