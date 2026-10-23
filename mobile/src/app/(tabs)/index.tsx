@@ -120,7 +120,6 @@ export default function HomeScreen() {
         <RegularsCard
           items={purchased.items}
           error={purchased.error}
-          apiUrl={auth.apiUrl}
           onPress={() => router.push('/regulars')}
           onRetry={purchased.reload}
         />

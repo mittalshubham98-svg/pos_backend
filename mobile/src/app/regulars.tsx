@@ -76,7 +76,7 @@ function RegularRow({ item, rank, apiUrl }: { item: PurchasedItem; rank: number;
   return (
     <View style={styles.row}>
       <Text style={styles.rank}>{rank}</Text>
-      <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} category={item.category} size={56} />
+      <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} size={56} />
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={styles.name} numberOfLines={2}>
           {item.name}

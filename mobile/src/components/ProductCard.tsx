@@ -10,8 +10,9 @@ import { lineKey, useCart } from '@/state/cart';
 
 type Props = { item: CatalogItem; apiUrl: string; width: number };
 
-/** Quick-commerce product tile: photo on a grey plate with a % OFF tag, size, name, price
- *  with struck-through MRP, and a green ADD that turns into a stepper. */
+/** Quick-commerce product tile: % OFF and size tags, name, brand, price with struck-through
+ *  MRP, and a green ADD that turns into a stepper. Shows the item's photo only if one has
+ *  been uploaded. */
 function ProductCardBase({ item, apiUrl, width }: Props) {
   const cart = useCart();
   const qty = cart.qtyOf(item.id, 'PCS');
@@ -22,24 +23,26 @@ function ProductCardBase({ item, apiUrl, width }: Props) {
 
   return (
     <View style={[styles.card, { width }]}>
+      {/* Only an uploaded photo is shown — no placeholder art for items without one. */}
       <View style={{ alignSelf: 'center' }}>
-        <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} category={item.category} size={imageSize} />
-        {off > 0 && (
-          <View style={styles.offTag}>
-            <Text style={styles.offText}>{off}%</Text>
-            <Text style={styles.offText}>OFF</Text>
-          </View>
-        )}
+        <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} size={imageSize} />
       </View>
 
       <View style={styles.body}>
-        {item.size ? (
-          <View style={styles.sizePill}>
-            <Text style={styles.sizeText} numberOfLines={1}>
-              {item.size}
-            </Text>
-          </View>
-        ) : null}
+        <View style={styles.tags}>
+          {off > 0 && (
+            <View style={styles.offPill}>
+              <Text style={styles.offPillText}>{off}% OFF</Text>
+            </View>
+          )}
+          {item.size ? (
+            <View style={styles.sizePill}>
+              <Text style={styles.sizeText} numberOfLines={1}>
+                {item.size}
+              </Text>
+            </View>
+          ) : null}
+        </View>
         <Text style={styles.name} numberOfLines={2}>
           {item.name}
         </Text>
@@ -102,28 +105,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.line,
   },
-  offTag: {
-    position: 'absolute',
-    top: 0,
-    left: 8,
-    backgroundColor: colors.blue,
-    borderBottomLeftRadius: 6,
-    borderBottomRightRadius: 6,
-    paddingHorizontal: 5,
-    paddingTop: 3,
-    paddingBottom: 4,
-    alignItems: 'center',
-  },
-  offText: { color: '#fff', fontSize: 9, fontWeight: '900', lineHeight: 10 },
-  body: { paddingHorizontal: 2, paddingTop: 8 },
-  sizePill: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.imageBg,
-    borderRadius: 4,
-    paddingHorizontal: 5,
-    paddingVertical: 2,
-    marginBottom: 4,
-  },
+  body: { paddingHorizontal: 4, paddingTop: 4 },
+  tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginBottom: 6, minHeight: 18 },
+  offPill: { backgroundColor: colors.blue, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2 },
+  offPillText: { color: '#fff', fontSize: 10, fontWeight: '900' },
+  sizePill: { backgroundColor: colors.imageBg, borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2 },
   sizeText: { fontSize: 10, fontWeight: '700', color: colors.inkMuted },
   name: { fontSize: 13, fontWeight: '700', color: colors.ink, minHeight: 34, lineHeight: 17 },
   brand: { marginTop: 2, fontSize: 11, color: colors.inkFaint },

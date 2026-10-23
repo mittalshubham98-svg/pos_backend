@@ -5,32 +5,93 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Pilani Supply Co. — Admin</title>
 <link rel="manifest" href="/static/admin-manifest.json">
-<meta name="theme-color" content="#ec3013">
+<meta name="theme-color" content="#111827">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pilani Admin">
 <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
+  :root{
+    --bg:#f5f6fa; --card:#ffffff; --ink:#1c1c1c; --muted:#6b7280; --line:#e6e8ee; --field:#d9dce3;
+    --brand:#0c831f; --brand-dark:#0a6a19; --brand-tint:#e8f5ea; --yellow:#f8cb46; --yellow-tint:#fff6d9;
+    --danger:#d1281f; --blue:#256fef; --radius:12px;
+    --shadow:0 1px 2px rgba(16,24,40,.05),0 4px 14px rgba(16,24,40,.06);
+  }
   *,*::before,*::after{box-sizing:border-box}
-  body{margin:0;background:#f3f2f2;color:#201e1d;font-family:"Archivo",system-ui,sans-serif;font-size:15px;line-height:1.55}
-  a{color:#ec3013;text-underline-offset:3px}
-  a:hover{color:#ae1800}
-  h1,h2,h3,h4,h5,h6{margin:0;font-family:"Archivo",system-ui,sans-serif;font-weight:800;line-height:1.12;letter-spacing:-0.015em}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",system-ui,sans-serif;font-size:14px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:var(--brand);text-underline-offset:3px}
+  a:hover{color:var(--brand-dark)}
+  h1,h2,h3,h4,h5,h6{margin:0;font-family:"Inter",system-ui,sans-serif;font-weight:800;line-height:1.12;letter-spacing:-0.015em}
   input,textarea,button,select{font-family:inherit}
   :focus{outline:none}
-  :focus-visible{outline:2px solid #ec3013;outline-offset:2px}
-  ::selection{background:rgba(236,48,19,.3)}
-  .mono{font-family:"Archivo Narrow","Archivo",monospace}
+  :focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+  ::selection{background:rgba(12,131,31,.2)}
+  .mono{font-family:"Inter",system-ui,sans-serif;font-variant-numeric:tabular-nums}
   @keyframes drawerUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
   .noscroll::-webkit-scrollbar{width:0;height:0}
-  .thumb{width:32px;height:32px;filter:grayscale(1) contrast(1.08);background:repeating-linear-gradient(135deg,#e3e0e0 0 4px,#d7d3d3 4px 8px);background-size:cover;background-position:center;overflow:hidden}
+  .thumb{width:34px;height:34px;border-radius:8px;background:#f2f3f6;background-size:cover;background-position:center;overflow:hidden}
   .thumb img{width:100%;height:100%;object-fit:cover}
+
+  /* ---- Modern theme layer --------------------------------------------------------------
+     The screens below were built with inline styles in a flat "print" look. Rather than
+     rewrite every template, these rules re-skin those inline styles: grey hairline grids
+     become separated white cards, inputs/buttons get rounded corners, the old red accent
+     becomes the brand green. Errors keep a red (#ae1800 in the templates). */
+  .page [style*="gap:2px;background:rgba(32,30,29,.4)"]{gap:16px!important;background:transparent!important}
+  .page [style*="background:#f3f2f2"]{background:var(--card)!important;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .page [style*="border-bottom:2px solid rgba(32,30,29,.4)"]{border-bottom-color:var(--line)!important}
+  .page [style*="rgba(32,30,29,.4)"]{border-color:var(--line)!important}
+  .page [style*="rgba(32,30,29,.55)"]{color:var(--muted)!important}
+  .page [style*="background:#eae9e9"]{background:#f7f8fa!important;border-radius:8px}
+  .page input:not([type=checkbox]):not([type=radio]),.page select,.page textarea{border-radius:8px!important;border:1px solid var(--field)!important;background:#fff!important;transition:border-color .15s,box-shadow .15s}
+  .page input:focus,.page select:focus,.page textarea:focus{border-color:var(--brand)!important;box-shadow:0 0 0 3px rgba(12,131,31,.12)}
+  .page button{border-radius:8px!important;transition:filter .15s,background .15s}
+  .page button:hover:not(:disabled){filter:brightness(.96)}
+  .page [style*="background:#ec3013"]{background:var(--brand)!important}
+  /* ";color:" / leading "color:" so "caret-color:#ec3013" on inputs doesn't also match. */
+  .page [style*=";color:#ec3013"],.page [style^="color:#ec3013"]{color:var(--brand)!important}
+  .page [style*="caret-color:#ec3013"]{caret-color:var(--brand)!important}
+  .page [style*=";color:#ae1800"],.page [style^="color:#ae1800"]{color:var(--danger)!important}
+  .page [style*="background:#ae1800"]{background:var(--danger)!important}
+  .page [style*="background:#201e1d"]{background:var(--ink)!important}
+
+  /* ---- Shell: sidebar + top bar -------------------------------------------------------- */
+  .shell{display:flex;min-height:100vh}
+  .side{width:236px;flex:none;background:#111827;color:#e5e7eb;display:flex;flex-direction:column;position:sticky;top:0;height:100vh}
+  .side-brand{display:flex;align-items:center;gap:10px;padding:20px 18px 18px}
+  .side-logo{width:38px;height:38px;border-radius:10px;background:var(--yellow);color:var(--ink);display:grid;place-items:center;font-weight:900;font-size:15px}
+  .side-name{font-weight:800;font-size:15px;color:#fff;line-height:1.2}
+  .side-sub{font-size:11px;color:#9ca3af}
+  .side-nav{display:flex;flex-direction:column;gap:2px;padding:6px 10px;flex:1}
+  .side-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:9px;border:0;background:transparent;color:#d1d5db;font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;text-decoration:none}
+  .side-item:hover{background:rgba(255,255,255,.06);color:#fff}
+  .side-item.on{background:var(--yellow);color:var(--ink)}
+  .side-item svg{flex:none}
+  .side-foot{padding:12px 10px 18px;border-top:1px solid rgba(255,255,255,.08)}
+  .main{flex:1;min-width:0;display:flex;flex-direction:column}
+  .topbar{height:64px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 28px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+  .topbar h1{font-size:19px;font-weight:800}
+  .who{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--muted)}
+  .avatar{width:34px;height:34px;border-radius:50%;background:var(--brand-tint);color:var(--brand);display:grid;place-items:center;font-weight:800}
+  .page{padding:24px 28px 32px;display:flex;flex-direction:column;gap:20px}
+  .toast{position:fixed;right:24px;bottom:24px;background:var(--ink);color:#fff;padding:12px 16px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.2);font-size:13px;max-width:420px;z-index:50}
+
+  /* ---- Dashboard ------------------------------------------------------------------------ */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .kpi{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px 20px;display:flex;gap:14px;align-items:flex-start}
+  .kpi-icon{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;flex:none}
+  .kpi-label{font-size:12.5px;color:var(--muted);font-weight:600}
+  .kpi-value{font-size:28px;font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-top:2px}
+  .kpi-note{font-size:12px;color:var(--muted);margin-top:4px}
+  .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 22px}
+  .card-title{font-size:15px;font-weight:800}
+  .card-sub{font-size:12.5px;color:var(--muted)}
 </style>
 </head>
 <body>
-<div id="app" style="min-height:100vh;width:1440px;margin:0 auto;background:#f3f2f2"></div>
+<div id="app" style="min-height:100vh;min-width:1180px"></div>
 
 <script src="/static/api.js"></script>
 <script>
@@ -46,6 +107,24 @@ const TABS = [
   { id: "ocr", label: "Parchi OCR" },
   { id: "reports", label: "Reports & settings" },
 ];
+/* Line icons (24px grid, stroke) for the sidebar and dashboard. */
+const ICON_PATHS = {
+  dash: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  orders: '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/>',
+  invoices: '<path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1z"/><path d="M8 7h8M8 11h8M8 15h5"/>',
+  customers: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  catalog: '<path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
+  ocr: '<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8h10M7 12h10M7 16h6"/>',
+  reports: '<path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  external: '<path d="M15 3h6v6M10 14 21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  rupee: '<path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3a5 5 0 0 0 0-10"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+};
+function icon(name, size, color) {
+  return `<svg width="${size || 18}" height="${size || 18}" viewBox="0 0 24 24" fill="none" stroke="${color || "currentColor"}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON_PATHS[name] || ""}</svg>`;
+}
 
 const state = {
   token: localStorage.getItem(TOKEN_KEY) || null,
@@ -741,23 +820,26 @@ function render() {
 
 function loginTpl() {
   return `
-  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center">
-    <div style="width:380px;border:2px solid #201e1d">
-      <div style="background:#201e1d;color:#f3f2f2;padding:28px 24px 22px">
-        <div class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.7;margin-bottom:8px">Store admin</div>
-        <div style="font-size:24px;font-weight:800;letter-spacing:-0.02em">Pilani Supply Co.</div>
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f8cb46 0%,#ffe08a 45%,#f5f6fa 45%)">
+    <div style="width:400px;background:#fff;border-radius:18px;box-shadow:0 20px 60px rgba(16,24,40,.15);overflow:hidden">
+      <div style="padding:30px 28px 8px;display:flex;align-items:center;gap:12px">
+        <div class="side-logo" style="width:46px;height:46px;font-size:17px">PS</div>
+        <div>
+          <div style="font-size:21px;font-weight:800;letter-spacing:-0.02em">Pilani Supply Co.</div>
+          <div style="font-size:13px;color:var(--muted)">Sign in to the store admin</div>
+        </div>
       </div>
-      <div style="padding:24px">
+      <div style="padding:20px 28px 28px">
         <div style="margin-bottom:14px">
-          <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">Username</label>
-          <input id="loginUser" value="${esc(state.loginUser)}" style="width:100%;min-height:40px;padding:8px 10px;font-size:14px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
+          <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px">Username</label>
+          <input id="loginUser" value="${esc(state.loginUser)}" style="width:100%;min-height:44px;padding:10px 12px;font-size:14px;background:#fff;border:1px solid var(--field);border-radius:10px;color:var(--ink)"/>
         </div>
-        <div style="margin-bottom:10px">
-          <label style="display:block;font-size:12px;margin-bottom:6px;color:rgba(32,30,29,.7)">Password</label>
-          <input id="loginPw" type="password" value="${esc(state.loginPw)}" style="width:100%;min-height:40px;padding:8px 10px;font-size:14px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d;caret-color:#ec3013"/>
+        <div style="margin-bottom:12px">
+          <label style="display:block;font-size:12.5px;font-weight:600;margin-bottom:6px">Password</label>
+          <input id="loginPw" type="password" value="${esc(state.loginPw)}" style="width:100%;min-height:44px;padding:10px 12px;font-size:14px;background:#fff;border:1px solid var(--field);border-radius:10px;color:var(--ink)"/>
         </div>
-        ${state.loginError ? `<div class="mono" style="font-size:12px;color:#ae1800;margin-bottom:12px">${esc(state.loginError)}</div>` : ""}
-        <button data-action="login" style="width:100%;text-align:left;padding:12px 14px;font-weight:800;font-size:14px;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">${state.loginBusy ? "Signing in…" : "Sign in"}</button>
+        ${state.loginError ? `<div style="font-size:12.5px;color:var(--danger);margin-bottom:12px">${esc(state.loginError)}</div>` : ""}
+        <button data-action="login" style="width:100%;padding:13px 14px;font-weight:700;font-size:14.5px;background:var(--brand);color:#fff;border:0;border-radius:10px;cursor:pointer">${state.loginBusy ? "Signing in…" : "Sign in"}</button>
       </div>
     </div>
   </div>`;
@@ -765,39 +847,49 @@ function loginTpl() {
 
 function shellTpl() {
   const st = state;
+  const current = TABS.find(t => t.id === st.tab) || TABS[0];
+  const pendingCount = st.orders.filter(o => o.status !== "BILLED").length;
   return `
-  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding:16px 32px 14px;border-bottom:2px solid rgba(32,30,29,.4)">
-    <div style="display:flex;align-items:baseline;gap:18px">
-      <div style="font-size:15px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">Pilani Supply Co.</div>
-      <div class="mono" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:rgba(32,30,29,.55)">Store admin — Pilani, Rajasthan</div>
-    </div>
-    <div style="display:flex;align-items:baseline;gap:14px">
-      <div class="mono" style="font-size:11px;letter-spacing:.06em;color:rgba(32,30,29,.55)">${fmtToday()} · admin</div>
-      <button data-action="logout" class="mono" style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:0;color:#ae1800;cursor:pointer;padding:0">Sign out</button>
+  <div class="shell">
+    <aside class="side">
+      <div class="side-brand">
+        <div class="side-logo">PS</div>
+        <div><div class="side-name">Pilani Supply Co.</div><div class="side-sub">Store admin</div></div>
+      </div>
+      <nav class="side-nav">
+        ${TABS.map(t => `<button data-action="tab" data-tab="${t.id}" class="side-item${st.tab === t.id ? " on" : ""}">
+          ${icon(t.id)}<span style="flex:1">${t.label}</span>
+          ${t.id === "orders" && pendingCount ? `<span style="font-size:11px;font-weight:800;background:${st.tab === t.id ? "#1c1c1c" : "var(--yellow)"};color:${st.tab === t.id ? "#fff" : "#1c1c1c"};border-radius:10px;padding:1px 7px">${pendingCount}</span>` : ""}
+        </button>`).join("")}
+      </nav>
+      <div class="side-foot">
+        <a href="/" target="_blank" class="side-item">${icon("external")}<span>Customer web app</span></a>
+        <button data-action="logout" class="side-item" style="width:100%">${icon("logout")}<span>Sign out</span></button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <h1>${current.label}</h1>
+        <div class="who">
+          <span>${fmtToday()}</span>
+          <div class="avatar">A</div>
+          <div><div style="font-weight:700;color:var(--ink);font-size:13px">admin</div><div style="font-size:11px">Pilani, Rajasthan</div></div>
+        </div>
+      </header>
+      <div class="page">
+        ${st.tab === "dash" ? dashTpl() : ""}
+        ${st.tab === "orders" ? ordersTpl() : ""}
+        ${st.tab === "invoices" ? invoicesTpl() : ""}
+        ${st.tab === "customers" ? customersTpl() : ""}
+        ${st.tab === "catalog" ? catalogTpl() : ""}
+        ${st.tab === "ocr" ? ocrTpl() : ""}
+        ${st.tab === "reports" ? reportsTpl() : ""}
+        <div style="font-size:11.5px;color:var(--muted)">Data stored on this computer · grocery_b2b.db</div>
+      </div>
     </div>
   </div>
-
-  <div style="display:flex;border-bottom:2px solid rgba(32,30,29,.4)">
-    ${TABS.map(t => `<button data-action="tab" data-tab="${t.id}" style="flex:none;padding:11px 20px;font-size:12px;font-weight:800;letter-spacing:.02em;cursor:pointer;border:0;border-right:1px solid rgba(32,30,29,.4);${st.tab === t.id ? "background:#201e1d;color:#f3f2f2;" : "background:transparent;color:#201e1d;"}">${t.label}</button>`).join("")}
-    <div style="flex:1;border-bottom:0"></div>
-    <a href="/" target="_blank" style="flex:none;display:flex;align-items:center;gap:7px;padding:11px 18px;font-size:12px;font-weight:800;letter-spacing:.02em;text-decoration:none;color:#201e1d;border-left:1px solid rgba(32,30,29,.4)">
-      Customer app
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M17 7H8M17 7v9"></path></svg>
-    </a>
-  </div>
-
-  ${st.tab === "dash" ? dashTpl() : ""}
-  ${st.tab === "orders" ? ordersTpl() : ""}
-  ${st.tab === "invoices" ? invoicesTpl() : ""}
-  ${st.tab === "customers" ? customersTpl() : ""}
-  ${st.tab === "catalog" ? catalogTpl() : ""}
-  ${st.tab === "ocr" ? ocrTpl() : ""}
-  ${st.tab === "reports" ? reportsTpl() : ""}
-
-  <div style="border-top:2px solid rgba(32,30,29,.4);padding:14px 32px 28px;display:flex;justify-content:space-between;gap:24px">
-    <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55)">grocery_b2b.db · local SQLite</div>
-    ${st.toast ? `<div class="mono" style="font-size:11px;color:#ae1800">${esc(st.toast)}</div>` : ""}
-  </div>`;
+  ${st.toast ? `<div class="toast">${esc(st.toast)}</div>` : ""}`;
 }
 
 function dashTpl() {
@@ -814,16 +906,27 @@ function dashTpl() {
     { label: "Pending POs", value: String(pending.length), note: pending.length ? "oldest " + timeOf(pending[pending.length - 1].created_at) : "queue clear" },
   ];
   const queue = orders.slice(0, 5);
+  const kpiLook = [
+    { icon: "rupee", bg: "#e8f5ea", fg: "#0c831f" },
+    { icon: "orders", bg: "#e8f0ff", fg: "#256fef" },
+    { icon: "check", bg: "#fff6d9", fg: "#b26a00" },
+    { icon: "clock", bg: "#fdecec", fg: "#d1281f" },
+  ];
 
   return `
-  <div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:rgba(32,30,29,.4);border-bottom:2px solid rgba(32,30,29,.4)">
-      ${tiles.map(k => `<div style="background:#f3f2f2;padding:22px 24px 20px">
-        <div class="mono" style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:rgba(32,30,29,.55);margin-bottom:10px">${k.label}</div>
-        <div style="font-size:42px;font-weight:800;letter-spacing:-0.03em;line-height:1">${k.value}</div>
-        <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-top:8px">${k.note}</div>
+  <div style="display:flex;flex-direction:column;gap:20px">
+    <div class="kpis">
+      ${tiles.map((k, i) => `<div class="kpi">
+        <div class="kpi-icon" style="background:${kpiLook[i].bg}">${icon(kpiLook[i].icon, 20, kpiLook[i].fg)}</div>
+        <div style="min-width:0">
+          <div class="kpi-label">${k.label}</div>
+          <div class="kpi-value">${k.value}</div>
+          <div class="kpi-note">${k.note}</div>
+        </div>
       </div>`).join("")}
     </div>
+
+    ${salesChartTpl(orders)}
 
     <div style="display:grid;grid-template-columns:1fr 380px;gap:2px;background:rgba(32,30,29,.4)">
       <div style="background:#f3f2f2;padding:24px 32px 32px">
@@ -902,6 +1005,50 @@ function dashTpl() {
     </div>
     ${bannersTpl()}
   </div>`;
+}
+
+/* Last 7 days of billed sales (bars) and orders received (count above each bar), from the
+   orders already loaded for the dashboard. created_at is UTC; bucketed by the local day. */
+function salesChartTpl(orders) {
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+    days.push({ date: d, sales: 0, count: 0 });
+  }
+  for (const o of orders) {
+    const t = new Date(String(o.created_at || "").replace(" ", "T") + "Z");
+    if (isNaN(t)) continue;
+    t.setHours(0, 0, 0, 0);
+    const day = days.find(d => d.date.getTime() === t.getTime());
+    if (!day) continue;
+    day.count += 1;
+    if (o.status === "BILLED") day.sales += o.totals.grand_total;
+  }
+  const max = Math.max(1, ...days.map(d => d.sales));
+  const total = days.reduce((a, d) => a + d.sales, 0);
+  const orderTotal = days.reduce((a, d) => a + d.count, 0);
+  const names = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const PLOT = 150; // px height of the bar area
+  return `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div><div class="card-title">Sales · last 7 days</div><div class="card-sub">Billed invoices by day · order count above each bar</div></div>
+        <div style="text-align:right"><div style="font-size:22px;font-weight:800">${inr0(total)}</div><div class="card-sub">${orderTotal} order${orderTotal === 1 ? "" : "s"} received</div></div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:18px;height:${PLOT + 22}px;padding-top:4px;background:repeating-linear-gradient(to top,transparent 0 ${PLOT / 4 - 1}px,#eef0f4 ${PLOT / 4 - 1}px ${PLOT / 4}px) bottom/100% ${PLOT}px no-repeat">
+        ${days.map((d, i) => {
+          const today = i === 6;
+          const h = d.sales ? Math.max(6, Math.round(PLOT * d.sales / max)) : 3;
+          return `<div title="${inr0(d.sales)} billed · ${d.count} order${d.count === 1 ? "" : "s"}" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;height:100%">
+            <div style="font-size:11px;font-weight:700;color:var(--muted);min-height:16px">${d.count || ""}</div>
+            <div style="width:100%;max-width:72px;height:${h}px;border-radius:8px 8px 3px 3px;background:${today ? "var(--brand)" : "#bfe3c6"}"></div>
+          </div>`;
+        }).join("")}
+      </div>
+      <div style="display:flex;gap:18px;margin-top:8px">
+        ${days.map((d, i) => `<div style="flex:1;text-align:center;font-size:12px;${i === 6 ? "font-weight:800;color:var(--ink)" : "color:var(--muted)"}">${i === 6 ? "Today" : names[d.date.getDay()]}</div>`).join("")}
+      </div>
+    </div>`;
 }
 
 /* Dashboard panel: the mobile app's home-screen banner carousel. */

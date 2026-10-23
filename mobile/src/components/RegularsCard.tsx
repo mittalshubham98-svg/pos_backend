@@ -1,22 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { ProductImage } from '@/components/ProductImage';
-import { imageUrl, PurchasedItem } from '@/lib/api';
+import { PurchasedItem } from '@/lib/api';
 import { colors, radius, shadow } from '@/lib/theme';
 
-/** Home-screen card previewing the customer's most-bought items; tapping opens the full
- *  most-to-least list. New customers see a hint instead. */
+/** Home-screen card previewing the customer's top 4 most-bought items as a ranked list;
+ *  tapping opens the full most-to-least list. New customers see a hint instead. */
 export function RegularsCard({
   items,
   error,
-  apiUrl,
   onPress,
   onRetry,
 }: {
   items: PurchasedItem[] | null;
   error: string | null;
-  apiUrl: string;
   onPress: () => void;
   onRetry: () => void;
 }) {
@@ -66,23 +63,21 @@ export function RegularsCard({
         <Ionicons name="chevron-forward" size={16} color={colors.brand} />
       </View>
       <Text style={styles.sub}>Most bought first — tap to reorder quickly</Text>
-      <View style={styles.row}>
+      <View style={styles.list}>
         {items.slice(0, 4).map((item, rank) => (
           <View key={item.id} style={styles.item}>
-            <View>
-              <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} category={item.category} size={64} />
-              <View style={styles.rankBadge}>
-                <Text style={styles.rankText}>{rank + 1}</Text>
-              </View>
+            <View style={styles.rankBadge}>
+              <Text style={styles.rankText}>{rank + 1}</Text>
             </View>
-            <Text style={styles.name} numberOfLines={2}>
+            <Text style={styles.name} numberOfLines={1}>
               {item.name}
             </Text>
+            <Text style={styles.meta} numberOfLines={1}>
+              {[item.size, `${Number.isInteger(item.total_qty) ? item.total_qty : item.total_qty.toFixed(1)} pcs`]
+                .filter(Boolean)
+                .join(' · ')}
+            </Text>
           </View>
-        ))}
-        {/* Keep preview tiles a fixed width when there are fewer than four items. */}
-        {Array.from({ length: Math.max(0, 4 - items.length) }, (_, i) => (
-          <View key={`pad-${i}`} style={styles.item} />
         ))}
       </View>
     </Pressable>
@@ -95,19 +90,24 @@ const styles = StyleSheet.create({
   title: { flex: 1, fontSize: 16, fontWeight: '900', color: colors.ink },
   seeAll: { fontSize: 13, fontWeight: '800', color: colors.brand },
   sub: { fontSize: 12, color: colors.inkMuted },
-  row: { flexDirection: 'row', gap: 10, marginTop: 6 },
-  item: { flex: 1, alignItems: 'center', gap: 4 },
-  name: { fontSize: 11, color: colors.ink, textAlign: 'center' },
+  list: { marginTop: 4 },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.line,
+  },
+  name: { flex: 1, fontSize: 13, fontWeight: '700', color: colors.ink },
+  meta: { fontSize: 12, color: colors.inkMuted },
   rankBadge: {
-    position: 'absolute',
-    top: -6,
-    left: -6,
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: colors.ink,
+    backgroundColor: colors.yellow,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  rankText: { color: '#fff', fontSize: 11, fontWeight: '900' },
+  rankText: { color: colors.ink, fontSize: 11, fontWeight: '900' },
 });
