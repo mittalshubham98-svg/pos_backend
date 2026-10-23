@@ -64,14 +64,6 @@ export default function HomeScreen() {
           />
         }
       >
-        <RegularsCard
-          items={purchased.items}
-          error={purchased.error}
-          apiUrl={auth.apiUrl}
-          onPress={() => router.push('/regulars')}
-          onRetry={purchased.reload}
-        />
-
         {catalog && (
           <PromoBanner
             offerCount={offers.length}
@@ -80,6 +72,14 @@ export default function HomeScreen() {
             onPress={() => router.navigate({ pathname: '/catalogue', params: { category: DEALS } })}
           />
         )}
+
+        <RegularsCard
+          items={purchased.items}
+          error={purchased.error}
+          apiUrl={auth.apiUrl}
+          onPress={() => router.push('/regulars')}
+          onRetry={purchased.reload}
+        />
 
         <Pressable
           onPress={() => router.navigate('/catalogue')}
