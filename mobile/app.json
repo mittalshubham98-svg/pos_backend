@@ -42,7 +42,16 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "http://192.168.0.154:8000"
-    }
+      "apiUrl": "http://192.168.0.154:8000",
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "0fa9c2b8-99d8-4b54-aaff-5930ef55790f"
+      }
+    },
+    "owner": "subhammittal"
   }
 }
