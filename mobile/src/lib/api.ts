@@ -23,6 +23,13 @@ export type CatalogItem = {
 
 export type Catalog = { categories: string[]; items: CatalogItem[] };
 
+/** A catalogue item this customer has ordered before, with how much of it they've bought. */
+export type PurchasedItem = CatalogItem & {
+  total_qty: number; // pieces, across all their orders
+  times_ordered: number;
+  last_ordered_at: string;
+};
+
 export type AuthResult = {
   token: string;
   role: string;
@@ -121,6 +128,9 @@ export const api = {
     request<Order>(baseUrl, '/api/orders', { method: 'POST', token, body: payload }),
 
   myOrders: (baseUrl: string, token: string) => request<Order[]>(baseUrl, '/api/customer/orders', { token }),
+
+  purchasedItems: (baseUrl: string, token: string) =>
+    request<PurchasedItem[]>(baseUrl, '/api/customer/purchased-items', { token }),
 };
 
 export const upiQrUrl = (baseUrl: string) => `${baseUrl}/static/images/upi_qr.png`;

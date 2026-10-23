@@ -47,6 +47,44 @@ def test_auth_returns_token_and_name_and_rejects_bad_credentials(client, admin_h
     assert client.post("/api/auth", json={"cust_code": "NOSUCH01", "password": "x"}).status_code == 401
 
 
+def test_purchased_items_ranked_most_to_least_and_per_customer(client, admin_headers):
+    atta = _create_item(client, admin_headers, item_name="Chakki Atta 5 kg", case_taxable_value=228)
+    dal = _create_item(client, admin_headers, item_name="Toor Dal 1 kg")
+    salt = _create_item(client, admin_headers, item_name="Iodised Salt 1 kg")
+    never = _create_item(client, admin_headers, item_name="Never Bought")
+    me = _create_customer(client, admin_headers, name="Ramesh Kumar")
+    other = _create_customer(client, admin_headers, name="Other Shop", phone="9123456780")
+
+    def headers_for(cred):
+        token = client.post("/api/auth", json={"cust_code": cred["cust_code"], "password": cred["password"]}).json()["token"]
+        return {"Authorization": f"Bearer {token}"}
+
+    mine, theirs = headers_for(me), headers_for(other)
+    for lines in (
+        [{"item_id": dal["id"], "qty": 3}, {"item_id": salt["id"], "qty": 1}],
+        [{"item_id": dal["id"], "qty": 2}, {"item_id": atta["id"], "qty": 1, "uom": "CASE"}],  # 1 case = 10 pcs
+    ):
+        assert client.post("/api/orders", json={"lines": lines}, headers=mine).status_code == 201
+    # Another customer's orders must not leak into mine.
+    client.post("/api/orders", json={"lines": [{"item_id": never["id"], "qty": 50}]}, headers=theirs)
+
+    r = client.get("/api/customer/purchased-items", headers=mine)
+    assert r.status_code == 200, r.text
+    rows = r.json()
+    assert [row["name"] for row in rows] == ["Chakki Atta 5 kg", "Toor Dal 1 kg", "Iodised Salt 1 kg"]
+    assert [row["total_qty"] for row in rows] == [10, 5, 1]
+    assert rows[1]["times_ordered"] == 2
+    assert rows[0]["selling_price"] == atta["pricing"]["selling"]
+
+    # Deactivated items drop out; no token is rejected.
+    client.patch(f"/api/items/{atta['id']}", json={"is_active": False}, headers=admin_headers)
+    assert [row["name"] for row in client.get("/api/customer/purchased-items", headers=mine).json()] == [
+        "Toor Dal 1 kg",
+        "Iodised Salt 1 kg",
+    ]
+    assert client.get("/api/customer/purchased-items").status_code == 401
+
+
 def test_order_placed_with_auth_token(client, admin_headers):
     item = _create_item(client, admin_headers)
     cred = _create_customer(client, admin_headers)

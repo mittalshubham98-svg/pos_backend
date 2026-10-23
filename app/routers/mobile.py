@@ -4,11 +4,11 @@ via price_item, and orders still go through POST /api/orders unchanged."""
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 from sqlalchemy.orm import Session
 
-from ..deps import get_db
-from ..models import Customer, Item
+from ..deps import get_current_customer, get_db
+from ..models import Customer, Item, PoLine, PurchaseOrder
 from ..pricing import price_item
 from ..schemas import CustomerLoginIn
 from .auth import customer_login
@@ -62,6 +62,41 @@ def get_catalog(
         c for (c,) in db.query(Item.category).filter(Item.is_active == 1).distinct().order_by(Item.category.asc()) if c
     ]
     return {"categories": categories, "items": [_catalog_item(i) for i in items]}
+
+
+@router.get("/customer/purchased-items")
+def purchased_items(db: Session = Depends(get_db), customer: Customer = Depends(get_current_customer)):
+    """The logged-in customer's previously ordered catalogue items, most bought (total
+    pieces across all their orders) to least — the app's "your regular items" list.
+    Items since deactivated or deleted are left out, as they can't be reordered."""
+    rows = (
+        db.query(
+            PoLine.item_id,
+            func.sum(PoLine.qty).label("total_qty"),
+            func.count(func.distinct(PoLine.po_id)).label("times_ordered"),
+            func.max(PurchaseOrder.created_at).label("last_ordered_at"),
+        )
+        .join(PurchaseOrder, PurchaseOrder.id == PoLine.po_id)
+        .filter(PurchaseOrder.customer_id == customer.id, PoLine.item_id.isnot(None), PoLine.qty > 0)
+        .group_by(PoLine.item_id)
+        .all()
+    )
+    items = {i.id: i for i in db.query(Item).filter(Item.id.in_([r.item_id for r in rows]), Item.is_active == 1)}
+    ranked = sorted(
+        (r for r in rows if r.item_id in items),
+        # Most pieces first; ties go to the item ordered more often, then more recently.
+        key=lambda r: (r.total_qty, r.times_ordered, r.last_ordered_at),
+        reverse=True,
+    )
+    return [
+        {
+            **_catalog_item(items[r.item_id]),
+            "total_qty": r.total_qty,
+            "times_ordered": r.times_ordered,
+            "last_ordered_at": r.last_ordered_at,
+        }
+        for r in ranked
+    ]
 
 
 @router.post("/auth")

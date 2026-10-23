@@ -9,10 +9,12 @@ build a cart and place orders. It talks to the same FastAPI backend as the web a
 | Catalogue (MRP, selling price, promo) | `GET /api/catalog` |
 | Place order (cart + unlisted items + UTR) | `POST /api/orders` |
 | My orders | `GET /api/customer/orders` |
+| Your regular items (most to least) | `GET /api/customer/purchased-items` |
 | UPI QR at checkout | `/static/images/upi_qr.png` (uploaded in the admin portal) |
 
-Screens: Login · Home (deals banner, category strip, product grid, sticky cart bar) · Cart ·
-Checkout modal (unlisted items, UPI QR, UTR) · Orders · Account.
+Tabs: **Home** (your regular items → full most-to-least list, deals banner) · **Catalogue**
+(search, category dropdown + tiles, product grid) · **Cart** · **Orders** · **Account**.
+Checkout opens as a modal (unlisted items, UPI QR, UTR).
 
 ## Which server does the app use?
 

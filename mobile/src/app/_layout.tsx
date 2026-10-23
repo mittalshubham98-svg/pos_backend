@@ -16,6 +16,10 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
             <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen
+              name="regulars"
+              options={{ title: 'Your regular items', headerTitleStyle: { fontWeight: '800' } }}
+            />
+            <Stack.Screen
               name="checkout"
               options={{
                 presentation: 'modal',

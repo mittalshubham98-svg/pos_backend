@@ -38,7 +38,7 @@ export default function CartScreen() {
             <Text style={styles.emptyText}>
               Add items from the catalogue, or go to checkout to send the store a list of anything not listed.
             </Text>
-            <Pressable onPress={() => router.navigate('/')} style={styles.primary}>
+            <Pressable onPress={() => router.navigate('/catalogue')} style={styles.primary}>
               <Text style={styles.primaryText}>Browse catalogue</Text>
             </Pressable>
             <Pressable onPress={() => router.push('/checkout')} hitSlop={8}>
