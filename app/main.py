@@ -89,8 +89,8 @@ async def integrity_error_handler(request: Request, exc: IntegrityError):
 app.mount("/static", StaticFiles(directory=str(settings.STATIC_DIR)), name="static")
 
 app.include_router(auth.router)
-   from app.routers import backup
-   app.include_router(backup.router)
+from app.routers import backup
+app.include_router(backup.router)
 app.include_router(admin_customers.router)
 app.include_router(items.router)
 app.include_router(orders.router)
