@@ -18,7 +18,7 @@ from sqlalchemy.exc import IntegrityError
 from .config import settings
 from .database import SessionLocal, init_db
 from .models import PurchaseOrder
-from .routers import admin_customers, auth, invoices, items, ocr, orders, reports, settings_router
+from .routers import admin_customers, auth, invoices, items, mobile, ocr, orders, reports, settings_router
 from .tax_engine import TaxEngineError
 
 logging.basicConfig(level=logging.INFO)
@@ -99,6 +99,7 @@ app.include_router(ocr.router)
 app.include_router(reports.router)
 app.include_router(settings_router.router)
 app.include_router(invoices.router)
+app.include_router(mobile.router)
 
 
 def purge_stale_pos() -> int:
