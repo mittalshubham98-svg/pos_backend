@@ -4,11 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BannerCarousel } from '@/components/BannerCarousel';
 import { CartBar } from '@/components/CartBar';
 import { PromoBanner } from '@/components/PromoBanner';
 import { RegularsCard } from '@/components/RegularsCard';
 import { UnlistedBox } from '@/components/UnlistedBox';
-import { api, Catalog } from '@/lib/api';
+import { api, Banner, Catalog } from '@/lib/api';
 import { DEALS } from '@/lib/catalog';
 import { percentOff } from '@/lib/format';
 import { colors, radius, shadow } from '@/lib/theme';
@@ -20,16 +21,24 @@ export default function HomeScreen() {
   const auth = useAuth();
   const purchased = usePurchasedItems();
   const [catalog, setCatalog] = useState<Catalog | null>(null);
+  const [banners, setBanners] = useState<Banner[]>([]);
+  const [bannerWidth, setBannerWidth] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Only needed for the deals banner's numbers; a failure just hides the banner.
+  // Banners uploaded in the admin portal, plus the catalogue for the automatic deals
+  // banner shown when there are none. A failure just hides that part.
   const loadCatalog = useCallback(async () => {
-    try {
-      setCatalog(await api.catalog(auth.apiUrl));
-    } catch {
-      setCatalog(null);
-    }
+    const [cat, ban] = await Promise.allSettled([api.catalog(auth.apiUrl), api.banners(auth.apiUrl)]);
+    setCatalog(cat.status === 'fulfilled' ? cat.value : null);
+    setBanners(ban.status === 'fulfilled' ? ban.value : []);
   }, [auth.apiUrl]);
+
+  const openBanner = (b: Banner) => {
+    if (b.link === 'deals') router.navigate({ pathname: '/catalogue', params: { category: DEALS } });
+    else if (b.link === 'catalogue') router.navigate('/catalogue');
+    else if (b.link.startsWith('category:'))
+      router.navigate({ pathname: '/catalogue', params: { category: b.link.slice('category:'.length) } });
+  };
 
   useEffect(() => {
     loadCatalog();
@@ -67,13 +76,21 @@ export default function HomeScreen() {
           />
         }
       >
-        {catalog && (
+        {banners.length > 0 ? (
+          <View onLayout={(e) => setBannerWidth(e.nativeEvent.layout.width)}>
+            {bannerWidth > 0 && (
+              <BannerCarousel banners={banners} apiUrl={auth.apiUrl} width={bannerWidth} onPress={openBanner} />
+            )}
+          </View>
+        ) : (
+          catalog && (
           <PromoBanner
             offerCount={offers.length}
             promoText={offers.find((o) => o.promo_status)?.promo_status}
             bestOff={bestOff}
             onPress={() => router.navigate({ pathname: '/catalogue', params: { category: DEALS } })}
           />
+          )
         )}
 
         <RegularsCard

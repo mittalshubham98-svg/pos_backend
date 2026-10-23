@@ -251,3 +251,19 @@ class Setting(Base):
 
     key: Mapped[str] = mapped_column(String, primary_key=True)
     value: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+
+
+class Banner(Base):
+    """Additive: a promo graphic for the mobile app's home-screen banner carousel, uploaded
+    from the admin portal. `link` says what tapping it opens in the app: "" (nothing),
+    "deals", "catalogue", or "category:<category name>"."""
+
+    __tablename__ = "banners"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    image_path: Mapped[str] = mapped_column(String, nullable=False)
+    title: Mapped[str] = mapped_column(String, nullable=False, default="")
+    link: Mapped[str] = mapped_column(String, nullable=False, default="")
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    is_active: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    created_at: Mapped[str] = mapped_column(String, nullable=False, default=_now)

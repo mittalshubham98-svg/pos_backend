@@ -82,6 +82,7 @@ const state = {
   ocrFile: null, ocrFileName: "", ocrState: "idle", ocrError: "", ocrRows: [],
 
   settings: null, ledgerRows: [], ledgerBusy: false, qrImageOk: false,
+  banners: [], bannerCategories: [], bannerNewLink: "", bannerBusy: false, confirmDeleteBannerId: null,
   invPrefixDraft: "", invSeqDraft: "",
 };
 
@@ -201,6 +202,15 @@ async function loadLedger() {
   }));
   state.ledgerBusy = false;
 }
+async function loadBanners() {
+  const [banners, catalog] = await Promise.all([
+    authedApi("/api/admin/banners"),
+    // Only for the "tap opens category" choices — the same live category list the app uses.
+    api("/api/catalog").catch(() => ({ categories: [] })),
+  ]);
+  state.banners = banners;
+  state.bannerCategories = catalog.categories || [];
+}
 function checkQr() {
   if (!state.settings || !state.settings.upi_qr_path) { state.qrImageOk = false; return; }
   const img = new Image();
@@ -213,7 +223,7 @@ async function switchTab(tab, force) {
   state.tab = tab;
   render();
   try {
-    if (tab === "dash") await Promise.all([loadOrders(), loadWatchItems()]);
+    if (tab === "dash") await Promise.all([loadOrders(), loadWatchItems(), loadBanners()]);
     else if (tab === "orders" || tab === "invoices") await loadOrders();
     else if (tab === "customers") await loadCustomers();
     else if (tab === "catalog") await loadCatalog();
@@ -639,6 +649,61 @@ function pickQrFile() {
   inp.click();
 }
 
+function pickBannerFile() {
+  const inp = document.createElement("input");
+  inp.type = "file"; inp.accept = "image/*"; inp.style.display = "none";
+  inp.addEventListener("change", async () => {
+    const f = inp.files && inp.files[0];
+    inp.remove();
+    if (!f) return;
+    const fd = new FormData(); fd.append("file", f); fd.append("link", state.bannerNewLink);
+    setState({ bannerBusy: true });
+    try {
+      await authedApi("/api/admin/banners", { method: "POST", form: fd });
+      await loadBanners();
+      showToast("Banner added to the app home screen · " + f.name);
+    } catch (err) { showToast(errorMessage(err)); }
+    setState({ bannerBusy: false });
+  });
+  document.body.appendChild(inp);
+  inp.click();
+}
+async function patchBanner(id, patch) {
+  try {
+    await authedApi("/api/admin/banners/" + id, { method: "PATCH", json: patch });
+    await loadBanners();
+  } catch (err) { showToast(errorMessage(err)); }
+  render();
+}
+async function moveBanner(id, dir) {
+  const list = state.banners.slice();
+  const idx = list.findIndex(b => b.id === id);
+  const swapWith = dir === "up" ? idx - 1 : idx + 1;
+  if (idx < 0 || swapWith < 0 || swapWith >= list.length) return;
+  [list[idx], list[swapWith]] = [list[swapWith], list[idx]];
+  setState({ banners: list });
+  try {
+    state.banners = await authedApi("/api/admin/banners/reorder", { method: "POST", json: { banner_ids: list.map(b => b.id) } });
+  } catch (err) { showToast(errorMessage(err)); await loadBanners(); }
+  render();
+}
+async function deleteBanner(id) {
+  try {
+    await authedApi("/api/admin/banners/" + id, { method: "DELETE" });
+    state.confirmDeleteBannerId = null;
+    await loadBanners();
+    showToast("Banner removed from the app");
+  } catch (err) { showToast(errorMessage(err)); }
+  render();
+}
+function bannerLinkOptions(selected) {
+  const opts = [["", "Nothing (just a picture)"], ["deals", "Top deals"], ["catalogue", "Full catalogue"]]
+    .concat(state.bannerCategories.map(c => ["category:" + c, "Category · " + c]));
+  // Keep a saved category link selectable even if that category has since emptied out.
+  if (selected && !opts.some(o => o[0] === selected)) opts.push([selected, selected.replace("category:", "Category · ")]);
+  return opts.map(o => `<option value="${esc(o[0])}" ${o[0] === selected ? "selected" : ""}>${esc(o[1])}</option>`).join("");
+}
+
 /* ------------------------------------------------------------- selectors */
 
 function selectedFrom(list) {
@@ -835,7 +900,59 @@ function dashTpl() {
         </div>
       </div>
     </div>
+    ${bannersTpl()}
   </div>`;
+}
+
+/* Dashboard panel: the mobile app's home-screen banner carousel. */
+function bannersTpl() {
+  const st = state;
+  const live = st.banners.filter(b => b.is_active).length;
+  const SEL = "width:100%;min-height:30px;padding:4px 7px;font-size:12px;background:#eae9e9;border:1px solid rgba(32,30,29,.4);border-radius:0;color:#201e1d";
+  const BTN = "padding:5px 9px;font-size:11px;font-weight:800;background:transparent;color:#201e1d;border:1px solid rgba(32,30,29,.4);cursor:pointer";
+  return `
+    <div style="background:#f3f2f2;padding:24px 32px 32px;border-top:2px solid rgba(32,30,29,.4)">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:4px">
+        <div style="display:flex;align-items:baseline;gap:10px">
+          <div style="font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">App home banners</div>
+          <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55)">${live} live · ${st.banners.length - live} hidden</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <label class="mono" style="font-size:11px;color:rgba(32,30,29,.7)">Tap opens</label>
+          <select id="bannerNewLink" class="mono" style="${SEL};width:220px">${bannerLinkOptions(st.bannerNewLink)}</select>
+          <button data-action="uploadBanner" ${st.bannerBusy ? "disabled" : ""} style="padding:8px 14px;font-size:13px;font-weight:800;background:#ec3013;color:#f3f2f2;border:0;cursor:pointer">${st.bannerBusy ? "Uploading…" : "Upload banner photo"}</button>
+        </div>
+      </div>
+      <div class="mono" style="font-size:11px;color:rgba(32,30,29,.55);margin-bottom:14px">Shown as a swipeable carousel at the top of the customer app's Home screen, in this order. Wide photos work best (about 2:1, e.g. 1600×800). With no live banner, the app shows its automatic "Today's deals" banner instead.</div>
+      ${st.banners.length ? `
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+        ${st.banners.map((b, idx) => `
+        <div style="border:1px solid rgba(32,30,29,.4);background:#fff;${b.is_active ? "" : "opacity:.55;"}">
+          <div style="aspect-ratio:2/1;background:#eae9e9 url('${esc(b.image_url)}') center/cover no-repeat"></div>
+          <div style="padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+              <div class="mono" style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:${b.is_active ? "#ec3013" : "rgba(32,30,29,.55)"}">#${idx + 1} · ${b.is_active ? "Live in app" : "Hidden"}</div>
+              <div style="display:flex;gap:4px">
+                <button data-action="moveBanner" data-id="${b.id}" data-dir="up" ${idx === 0 ? "disabled" : ""} title="Show earlier" style="${BTN};${idx === 0 ? "color:rgba(32,30,29,.25);cursor:default;" : ""}">◀</button>
+                <button data-action="moveBanner" data-id="${b.id}" data-dir="down" ${idx === st.banners.length - 1 ? "disabled" : ""} title="Show later" style="${BTN};${idx === st.banners.length - 1 ? "color:rgba(32,30,29,.25);cursor:default;" : ""}">▶</button>
+              </div>
+            </div>
+            <div>
+              <label class="mono" style="display:block;font-size:10px;color:rgba(32,30,29,.7);margin-bottom:3px">Tap opens</label>
+              <select data-action="setBannerLink" data-id="${b.id}" class="mono" style="${SEL}">${bannerLinkOptions(b.link)}</select>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button data-action="toggleBanner" data-id="${b.id}" style="${BTN}">${b.is_active ? "Hide" : "Show in app"}</button>
+              ${st.confirmDeleteBannerId === b.id
+                ? `<button data-action="confirmDeleteBanner" data-id="${b.id}" style="${BTN};background:#ae1800;color:#f3f2f2;border-color:#ae1800">Delete for good</button>
+                   <button data-action="cancelDeleteBanner" style="${BTN}">Cancel</button>`
+                : `<button data-action="askDeleteBanner" data-id="${b.id}" style="${BTN};color:#ae1800">Delete</button>`}
+            </div>
+          </div>
+        </div>`).join("")}
+      </div>` : `
+      <div class="mono" style="font-size:12px;color:rgba(32,30,29,.55);padding:18px;border:1px dashed rgba(32,30,29,.4);text-align:center">No banners yet — upload a photo to replace the app's automatic deals banner.</div>`}
+    </div>`;
 }
 
 function poListItem(o, on) {
@@ -1596,6 +1713,8 @@ function wire() {
     else if (action === "setLineQty") patchOrderLines(el.getAttribute("data-po"), { update_lines: [{ line_id: Number(el.getAttribute("data-line")), qty: Math.max(num(el.value, 0), 0) }] });
     else if (action === "setLineRate") patchOrderLines(el.getAttribute("data-po"), { update_lines: [{ line_id: Number(el.getAttribute("data-line")), rate_override: num(el.value, 0) }] });
     else if (action === "setOcrQty") { const i = Number(el.getAttribute("data-idx")); state.ocrRows[i].qty = Math.max(num(el.value, 0), 0); render(); }
+    else if (action === "setBannerLink") patchBanner(Number(el.getAttribute("data-id")), { link: el.value });
+    else if (el.id === "bannerNewLink") state.bannerNewLink = el.value;
     else if (el.id === "customGst") state.customGst = el.value;
     else if (el.id === "newItemGst") state.newItemGst = el.value;
     else if (el.id === "newItemTaxType") state.newItemTaxType = el.value;
@@ -1654,6 +1773,12 @@ function wire() {
     else if (action === "deleteItem") armDeleteItem(id);
     else if (action === "confirmDeleteItem") confirmDeleteItem(id);
     else if (action === "uploadImage") pickImageFor(id);
+    else if (action === "uploadBanner") pickBannerFile();
+    else if (action === "moveBanner") moveBanner(Number(id), btn.getAttribute("data-dir"));
+    else if (action === "toggleBanner") { const b = state.banners.find(x => x.id === Number(id)); if (b) patchBanner(b.id, { is_active: !b.is_active }); }
+    else if (action === "askDeleteBanner") setState({ confirmDeleteBannerId: Number(id) });
+    else if (action === "cancelDeleteBanner") setState({ confirmDeleteBannerId: null });
+    else if (action === "confirmDeleteBanner") deleteBanner(Number(id));
     else if (action === "moveWatchItem") moveWatchItem(Number(id), btn.getAttribute("data-dir"));
     else if (action === "openOrder" || action === "openOrderFromHistory") {
       state.selectedPoId = Number(id);

@@ -31,6 +31,9 @@ export type PurchasedItem = CatalogItem & {
   last_ordered_at: string;
 };
 
+/** A home-screen banner uploaded in the admin portal. link: "" | "deals" | "catalogue" | "category:<name>". */
+export type Banner = { id: number; image_url: string; title: string; link: string };
+
 export type AuthResult = {
   token: string;
   role: string;
@@ -124,6 +127,8 @@ export const api = {
     request<AuthResult>(baseUrl, '/api/auth', { method: 'POST', body: { cust_code: custCode, password } }),
 
   catalog: (baseUrl: string) => request<Catalog>(baseUrl, '/api/catalog'),
+
+  banners: (baseUrl: string) => request<Banner[]>(baseUrl, '/api/banners'),
 
   placeOrder: (baseUrl: string, token: string, payload: OrderPayload) =>
     request<Order>(baseUrl, '/api/orders', { method: 'POST', token, body: payload }),
