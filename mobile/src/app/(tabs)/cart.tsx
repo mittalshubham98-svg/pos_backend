@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CartBar } from '@/components/CartBar';
 import { ProductImage } from '@/components/ProductImage';
 import { QtyStepper } from '@/components/QtyStepper';
+import { UnlistedBox } from '@/components/UnlistedBox';
 import { imageUrl } from '@/lib/api';
 import { rupees } from '@/lib/format';
 import { colors, radius, shadow } from '@/lib/theme';
@@ -20,7 +21,7 @@ export default function CartScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Your cart</Text>
-        {cart.lines.length > 0 && (
+        {cart.hasAnything && (
           <Pressable onPress={cart.clear} hitSlop={10}>
             <Text style={styles.clear}>Clear</Text>
           </Pressable>
@@ -31,23 +32,25 @@ export default function CartScreen() {
         data={cart.lines}
         keyExtractor={(l) => l.key}
         contentContainerStyle={styles.list}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons name="basket-outline" size={56} color={colors.inkFaint} />
-            <Text style={styles.emptyTitle}>Your cart is empty</Text>
-            <Text style={styles.emptyText}>
-              Add items from the catalogue, or go to checkout to send the store a list of anything not listed.
-            </Text>
+            <Text style={styles.emptyTitle}>No catalogue items yet</Text>
+            <Text style={styles.emptyText}>Add items from the catalogue, or write what you need in the box below.</Text>
             <Pressable onPress={() => router.navigate('/catalogue')} style={styles.primary}>
               <Text style={styles.primaryText}>Browse catalogue</Text>
-            </Pressable>
-            <Pressable onPress={() => router.push('/checkout')} hitSlop={8}>
-              <Text style={styles.link}>Order unlisted items only</Text>
             </Pressable>
           </View>
         }
         renderItem={({ item }) => <CartRow line={item} apiUrl={auth.apiUrl} />}
-        ListFooterComponent={cart.lines.length > 0 ? <BillSummary /> : undefined}
+        ListFooterComponent={
+          <View style={{ gap: 10, marginTop: 6 }}>
+            {cart.lines.length > 0 && <BillSummary />}
+            <UnlistedBox title="Items not in the list" />
+          </View>
+        }
       />
 
       <CartBar label="Checkout" onPress={() => router.push('/checkout')} />
@@ -139,10 +142,9 @@ const styles = StyleSheet.create({
   billBold: { fontSize: 15, fontWeight: '900', color: colors.ink },
   divider: { height: StyleSheet.hairlineWidth, backgroundColor: colors.line, marginVertical: 4 },
   note: { fontSize: 11, color: colors.inkFaint, marginTop: 4 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
+  empty: { alignItems: 'center', justifyContent: 'center', padding: 24, gap: 10 },
   emptyTitle: { fontSize: 18, fontWeight: '800', color: colors.ink },
   emptyText: { fontSize: 13, color: colors.inkMuted, textAlign: 'center' },
   primary: { marginTop: 8, backgroundColor: colors.brand, borderRadius: radius.sm, paddingHorizontal: 20, paddingVertical: 12 },
   primaryText: { color: '#fff', fontWeight: '800' },
-  link: { marginTop: 4, color: colors.brand, fontWeight: '700' },
 });

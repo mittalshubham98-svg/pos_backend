@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { CartBar } from '@/components/CartBar';
 import { PromoBanner } from '@/components/PromoBanner';
 import { RegularsCard } from '@/components/RegularsCard';
+import { UnlistedBox } from '@/components/UnlistedBox';
 import { api, Catalog } from '@/lib/api';
 import { DEALS } from '@/lib/catalog';
 import { percentOff } from '@/lib/format';
@@ -52,6 +53,8 @@ export default function HomeScreen() {
 
       <ScrollView
         contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -97,6 +100,8 @@ export default function HomeScreen() {
           </View>
           <Ionicons name="chevron-forward" size={20} color={colors.inkMuted} />
         </Pressable>
+
+        <UnlistedBox />
       </ScrollView>
 
       <CartBar label="View cart" onPress={() => router.navigate('/cart')} />

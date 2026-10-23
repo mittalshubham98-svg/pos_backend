@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { UnlistedBox } from '@/components/UnlistedBox';
 import { api, Order, upiQrUrl } from '@/lib/api';
 import { rupees } from '@/lib/format';
 import { colors, radius, shadow } from '@/lib/theme';
@@ -27,7 +28,6 @@ export default function CheckoutScreen() {
   const auth = useAuth();
   const cart = useCart();
   const insets = useSafeAreaInsets();
-  const [unlisted, setUnlisted] = useState('');
   const [payMode, setPayMode] = useState<PayMode>('upi');
   const [utr, setUtr] = useState('');
   const [qrFailed, setQrFailed] = useState(false);
@@ -36,9 +36,8 @@ export default function CheckoutScreen() {
   const [placed, setPlaced] = useState<Order | null>(null);
 
   const utrDigits = utr.replace(/\D/g, '');
-  const hasSomething = cart.lines.length > 0 || unlisted.trim().length > 0;
   const utrOk = payMode === 'account' || utrDigits.length === 12;
-  const canPlace = hasSomething && utrOk && !busy;
+  const canPlace = cart.hasAnything && utrOk && !busy;
 
   async function placeOrder() {
     if (!canPlace || !auth.session) return;
@@ -47,7 +46,7 @@ export default function CheckoutScreen() {
     try {
       const order = await api.placeOrder(auth.apiUrl, auth.session.token, {
         lines: cart.toOrderLines(),
-        unlisted_text: unlisted.trim(),
+        unlisted_text: cart.unlisted.trim(),
         utr: payMode === 'upi' ? utrDigits : null,
       });
       cart.clear();
@@ -112,17 +111,7 @@ export default function CheckoutScreen() {
           )}
         </Section>
 
-        <Section title="Anything not in the list?">
-          <TextInput
-            value={unlisted}
-            onChangeText={setUnlisted}
-            placeholder={'One item per line — brand, size, quantity\ne.g. Kabuli chana 1kg — 5 packets'}
-            placeholderTextColor={colors.inkFaint}
-            multiline
-            textAlignVertical="top"
-            style={[styles.input, styles.textarea]}
-          />
-        </Section>
+        <UnlistedBox title="Items not in the list" />
 
         <Section title="Payment">
           <View style={styles.segment}>
@@ -264,7 +253,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.ink,
   },
-  textarea: { minHeight: 96, paddingTop: 12, fontSize: 14 },
   segment: { flexDirection: 'row', gap: 8 },
   segBtn: {
     flex: 1,

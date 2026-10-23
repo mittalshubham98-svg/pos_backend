@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useMemo, useReducer } from 'react';
+import { createContext, ReactNode, useContext, useMemo, useReducer, useState } from 'react';
 
 import type { CatalogItem, OrderPayload, Uom } from '@/lib/api';
 
@@ -48,6 +48,11 @@ type CartState = {
   qtyOf: (itemId: number, uom: Uom) => number;
   add: (item: CatalogItem, uom?: Uom) => void;
   setQty: (key: string, qty: number) => void;
+  /** Free-text "items not in the list", sent with the order as unlisted_text. */
+  unlisted: string;
+  setUnlisted: (text: string) => void;
+  /** Something to order: catalogue lines and/or an unlisted request. */
+  hasAnything: boolean;
   clear: () => void;
   toOrderLines: () => OrderPayload['lines'];
 };
@@ -56,6 +61,7 @@ const CartContext = createContext<CartState | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [lines, dispatch] = useReducer(reducer, []);
+  const [unlisted, setUnlisted] = useState('');
 
   const value = useMemo<CartState>(() => {
     const total = lines.reduce((sum, l) => sum + lineTotal(l), 0);
@@ -69,10 +75,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
       qtyOf: (itemId, uom) => lines.find((l) => l.key === lineKey(itemId, uom))?.qty ?? 0,
       add: (item, uom = 'PCS') => dispatch({ type: 'add', item, uom }),
       setQty: (key, qty) => dispatch({ type: 'setQty', key, qty }),
-      clear: () => dispatch({ type: 'clear' }),
+      unlisted,
+      setUnlisted,
+      hasAnything: lines.length > 0 || unlisted.trim().length > 0,
+      clear: () => {
+        dispatch({ type: 'clear' });
+        setUnlisted('');
+      },
       toOrderLines: () => lines.map((l) => ({ item_id: l.item.id, qty: l.qty, uom: l.uom })),
     };
-  }, [lines]);
+  }, [lines, unlisted]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
