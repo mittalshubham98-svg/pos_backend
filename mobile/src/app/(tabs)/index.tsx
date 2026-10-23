@@ -4,16 +4,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Modal,
   Pressable,
   RefreshControl,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { CartBar } from '@/components/CartBar';
 import { ProductCard } from '@/components/ProductCard';
@@ -34,6 +34,7 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [category, setCategory] = useState(ALL);
   const [query, setQuery] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -77,6 +78,14 @@ export default function HomeScreen() {
     return items;
   }, [catalog, category, query]);
 
+  // Item count per dropdown option, so customers can see how big each category is.
+  const counts = useMemo(() => {
+    const map: Record<string, number> = { [ALL]: catalog?.items.length ?? 0 };
+    map[DEALS] = (catalog?.items ?? []).filter((i) => i.on_offer || percentOff(i.mrp, i.selling_price) > 0).length;
+    for (const i of catalog?.items ?? []) if (i.category) map[i.category] = (map[i.category] ?? 0) + 1;
+    return map;
+  }, [catalog]);
+
   const cardWidth = (width - GAP * 3) / 2;
   const chips = [ALL, DEALS, ...(catalog?.categories ?? [])];
   const firstName = (auth.session?.name ?? '').split(' ')[0];
@@ -107,25 +116,33 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-          {chips.map((c) => {
-            const active = c === category;
-            return (
-              <Pressable
-                key={c}
-                onPress={() => setCategory(c)}
-                style={[styles.chip, active && styles.chipActive]}
-                accessibilityRole="button"
-                accessibilityState={{ selected: active }}
-              >
-                {c === DEALS && <Ionicons name="pricetag" size={12} color={active ? '#fff' : colors.brand} />}
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>{titleCase(c)}</Text>
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+      <View style={styles.dropdownBar}>
+        <Pressable
+          onPress={() => setPickerOpen(true)}
+          style={({ pressed }) => [styles.dropdown, pressed && { opacity: 0.8 }]}
+          accessibilityRole="button"
+          accessibilityLabel={`Category: ${titleCase(category)}. Tap to change`}
+        >
+          <Ionicons name={category === DEALS ? 'pricetag' : 'grid-outline'} size={16} color={colors.brand} />
+          <Text style={styles.dropdownLabel}>Category</Text>
+          <Text style={styles.dropdownValue} numberOfLines={1}>
+            {titleCase(category)}
+          </Text>
+          <Ionicons name="chevron-down" size={18} color={colors.ink} />
+        </Pressable>
       </View>
+
+      <CategoryPicker
+        visible={pickerOpen}
+        options={chips}
+        selected={category}
+        counts={counts}
+        onSelect={(c) => {
+          setCategory(c);
+          setPickerOpen(false);
+        }}
+        onClose={() => setPickerOpen(false)}
+      />
 
       {!catalog && !error ? (
         <View style={styles.center}>
@@ -215,6 +232,65 @@ function PromoBanner({
   );
 }
 
+/** Bottom-sheet style dropdown listing every category with its item count. */
+function CategoryPicker({
+  visible,
+  options,
+  selected,
+  counts,
+  onSelect,
+  onClose,
+}: {
+  visible: boolean;
+  options: string[];
+  selected: string;
+  counts: Record<string, number>;
+  onSelect: (category: string) => void;
+  onClose: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close categories" />
+      <View style={[styles.sheet, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+        <View style={styles.sheetHandle} />
+        <View style={styles.sheetHeader}>
+          <Text style={styles.sheetTitle}>Choose a category</Text>
+          <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
+            <Ionicons name="close" size={22} color={colors.ink} />
+          </Pressable>
+        </View>
+        <FlatList
+          data={options}
+          keyExtractor={(c) => c}
+          renderItem={({ item: c }) => {
+            const active = c === selected;
+            return (
+              <Pressable
+                onPress={() => onSelect(c)}
+                style={({ pressed }) => [styles.option, active && styles.optionActive, pressed && { opacity: 0.7 }]}
+                accessibilityRole="button"
+                accessibilityState={{ selected: active }}
+              >
+                {c === DEALS && <Ionicons name="pricetag" size={14} color={colors.brand} />}
+                <Text style={[styles.optionText, active && styles.optionTextActive]} numberOfLines={1}>
+                  {titleCase(c)}
+                </Text>
+                <Text style={styles.optionCount}>{counts[c] ?? 0}</Text>
+                {active ? (
+                  <Ionicons name="checkmark-circle" size={20} color={colors.brand} />
+                ) : (
+                  <View style={{ width: 20 }} />
+                )}
+              </Pressable>
+            );
+          }}
+        />
+      </View>
+    </Modal>
+  );
+}
+
 function titleCase(s: string): string {
   if (s === ALL || s === DEALS) return s;
   return s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
@@ -238,21 +314,56 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   searchInput: { flex: 1, fontSize: 15, color: colors.ink, paddingVertical: 0 },
-  chips: { paddingHorizontal: 12, paddingVertical: 10, gap: 8, backgroundColor: colors.card },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 14,
-    height: 34,
-    borderRadius: 17,
+  dropdownBar: {
+    paddingHorizontal: 16,
+    paddingBottom: 12,
+    backgroundColor: colors.card,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.line,
+  },
+  dropdown: {
+    height: 44,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors.line,
     backgroundColor: colors.card,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    gap: 8,
   },
-  chipActive: { backgroundColor: colors.ink, borderColor: colors.ink },
-  chipText: { fontSize: 13, fontWeight: '700', color: colors.ink },
-  chipTextActive: { color: '#fff' },
+  dropdownLabel: { fontSize: 13, color: colors.inkMuted },
+  dropdownValue: { flex: 1, fontSize: 15, fontWeight: '800', color: colors.ink },
+  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
+  sheet: {
+    maxHeight: '75%',
+    backgroundColor: colors.card,
+    borderTopLeftRadius: radius.lg,
+    borderTopRightRadius: radius.lg,
+    paddingTop: 8,
+  },
+  sheetHandle: { alignSelf: 'center', width: 40, height: 4, borderRadius: 2, backgroundColor: colors.line },
+  sheetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  sheetTitle: { fontSize: 17, fontWeight: '900', color: colors.ink },
+  option: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors.line,
+  },
+  optionActive: { backgroundColor: colors.brandTint },
+  optionText: { flex: 1, fontSize: 15, color: colors.ink },
+  optionTextActive: { fontWeight: '800', color: colors.brand },
+  optionCount: { fontSize: 12, color: colors.inkFaint, fontWeight: '700' },
   grid: { padding: GAP, gap: GAP, paddingBottom: 96 },
   resultCount: { fontSize: 12, color: colors.inkMuted, fontWeight: '700' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
