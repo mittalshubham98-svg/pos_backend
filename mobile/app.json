@@ -20,7 +20,10 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "runtimeVersion": {
+        "policy": "appVersion"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -52,6 +55,9 @@
         "projectId": "0fa9c2b8-99d8-4b54-aaff-5930ef55790f"
       }
     },
-    "owner": "subhammittal"
+    "owner": "subhammittal",
+    "updates": {
+      "url": "https://u.expo.dev/0fa9c2b8-99d8-4b54-aaff-5930ef55790f"
+    }
   }
 }

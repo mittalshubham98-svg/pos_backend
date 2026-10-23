@@ -3,10 +3,12 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { colors } from '@/lib/theme';
+import { useAppUpdates } from '@/lib/useAppUpdates';
 import { AuthProvider } from '@/state/auth';
 import { CartProvider } from '@/state/cart';
 
 export default function RootLayout() {
+  useAppUpdates();
   return (
     <SafeAreaProvider>
       <AuthProvider>
