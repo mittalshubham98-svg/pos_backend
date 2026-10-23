@@ -1,6 +1,6 @@
 @echo off
 title Grocery Portal Server
-cd /d G:\pos_backend
-echo Starting Grocery Admin Portal...
-C:\Users\SANJAY\AppData\Local\Programs\Python\Python312\python.exe main.py
+cd /d "%~dp0"
+echo Starting Grocery Admin Portal on http://127.0.0.1:8000/admin ...
+".venv\Scripts\python.exe" -m uvicorn app.main:app --host 0.0.0.0 --port 8000
 pause
