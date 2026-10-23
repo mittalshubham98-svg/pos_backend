@@ -15,11 +15,12 @@ function ProductCardBase({ item, apiUrl, width }: Props) {
   const qty = cart.qtyOf(item.id, 'PCS');
   const caseQty = cart.qtyOf(item.id, 'CASE');
   const off = percentOff(item.mrp, item.selling_price);
-  const imageSize = width - 24;
+  // Capped so tablets / wide windows don't get poster-sized tiles.
+  const imageSize = Math.min(width - 24, 180);
 
   return (
     <View style={[styles.card, { width }]}>
-      <View>
+      <View style={{ alignSelf: 'center' }}>
         <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} size={imageSize} />
         {off > 0 && (
           <View style={styles.offBadge}>
@@ -43,8 +44,15 @@ function ProductCardBase({ item, apiUrl, width }: Props) {
 
       <View style={styles.footer}>
         <View style={{ flexShrink: 1 }}>
-          <Text style={styles.price}>{rupees(item.selling_price)}</Text>
-          {item.mrp > item.selling_price && <Text style={styles.mrp}>{rupees(item.mrp)}</Text>}
+          {item.selling_price > 0 ? (
+            <>
+              <Text style={styles.price}>{rupees(item.selling_price)}</Text>
+              {item.mrp > item.selling_price && <Text style={styles.mrp}>{rupees(item.mrp)}</Text>}
+            </>
+          ) : (
+            // No rate set in the catalogue yet — still orderable, the store prices it on the bill.
+            <Text style={styles.onRequest}>Price on{'\n'}request</Text>
+          )}
         </View>
         <QtyStepper
           compact
@@ -104,6 +112,7 @@ const styles = StyleSheet.create({
   footer: { marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 6 },
   price: { fontSize: 14, fontWeight: '800', color: colors.ink },
   mrp: { fontSize: 11, color: colors.inkFaint, textDecorationLine: 'line-through' },
+  onRequest: { fontSize: 11, fontWeight: '700', color: colors.amber, lineHeight: 14 },
   caseRow: {
     marginTop: 8,
     paddingTop: 8,
