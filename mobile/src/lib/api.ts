@@ -21,7 +21,8 @@ export type CatalogItem = {
   case_selling_price: number | null;
 };
 
-export type Catalog = { categories: string[]; items: CatalogItem[] };
+/** categories and brands are derived server-side from the live catalogue. */
+export type Catalog = { categories: string[]; brands: string[]; items: CatalogItem[] };
 
 /** A catalogue item this customer has ordered before, with how much of it they've bought. */
 export type PurchasedItem = CatalogItem & {

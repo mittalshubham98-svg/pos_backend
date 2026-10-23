@@ -37,6 +37,8 @@ export default function CatalogueScreen() {
   const [category, setCategory] = useState<string | null>(params.category ?? null);
   const [query, setQuery] = useState('');
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [brands, setBrands] = useState<string[]>([]);
   const [tilesWidth, setTilesWidth] = useState(0);
 
   useEffect(() => {
@@ -62,53 +64,82 @@ export default function CatalogueScreen() {
     setRefreshing(false);
   }, [load]);
 
-  const visible = useMemo(() => {
-    if (!catalog) return [];
-    let items: CatalogItem[] = catalog.items;
-    if (category === DEALS) {
-      items = items.filter(isDeal).sort(byBestDeal);
-    } else if (category !== null && category !== ALL) {
-      items = items.filter((i) => i.category === category);
-    }
+  // Each filter narrows independently, so the sheet can count "what you'd get" per option.
+  const byQuery = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (q) {
-      items = items.filter((i) => [i.name, i.brand, i.category].some((f) => f?.toLowerCase().includes(q)));
-    }
-    return items;
-  }, [catalog, category, query]);
+    const items = catalog?.items ?? [];
+    return q ? items.filter((i) => [i.name, i.brand, i.category].some((f) => f?.toLowerCase().includes(q))) : items;
+  }, [catalog, query]);
+  const inCategory = useCallback(
+    (items: CatalogItem[]) =>
+      category === DEALS
+        ? items.filter(isDeal).sort(byBestDeal)
+        : category !== null && category !== ALL
+          ? items.filter((i) => i.category === category)
+          : items,
+    [category],
+  );
+  const ofBrands = useCallback(
+    (items: CatalogItem[]) => (brands.length ? items.filter((i) => i.brand && brands.includes(i.brand)) : items),
+    [brands],
+  );
+  const visible = useMemo(() => ofBrands(inCategory(byQuery)), [byQuery, inCategory, ofBrands]);
 
-  // Item count per category, shown on the tiles and in the dropdown.
+  // Item count per category (within the chosen brands) for the tiles, dropdown and filter sheet.
   const counts = useMemo(() => {
-    const map: Record<string, number> = { [ALL]: catalog?.items.length ?? 0 };
-    map[DEALS] = (catalog?.items ?? []).filter(isDeal).length;
-    for (const i of catalog?.items ?? []) if (i.category) map[i.category] = (map[i.category] ?? 0) + 1;
+    const items = ofBrands(byQuery);
+    const map: Record<string, number> = { [ALL]: items.length, [DEALS]: items.filter(isDeal).length };
+    for (const i of items) if (i.category) map[i.category] = (map[i.category] ?? 0) + 1;
     return map;
-  }, [catalog]);
+  }, [byQuery, ofBrands]);
+
+  // Item count per brand within the chosen category.
+  const brandCounts = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const i of inCategory(byQuery)) if (i.brand) map[i.brand] = (map[i.brand] ?? 0) + 1;
+    return map;
+  }, [byQuery, inCategory]);
 
   const cardWidth = (width - GAP * 3) / 2;
   const options = [ALL, DEALS, ...(catalog?.categories ?? [])];
-  const showTiles = category === null && !query.trim();
+  const activeFilters = brands.length + (category ? 1 : 0);
+  const showTiles = category === null && !query.trim() && brands.length === 0;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.header}>
         <Text style={styles.title}>Catalogue</Text>
-        <View style={styles.search}>
-          <Ionicons name="search" size={18} color={colors.inkMuted} />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search atta, oil, dal…"
-            placeholderTextColor={colors.inkFaint}
-            style={styles.searchInput}
-            returnKeyType="search"
-            autoCorrect={false}
-          />
-          {query.length > 0 && (
-            <Pressable onPress={() => setQuery('')} hitSlop={10} accessibilityLabel="Clear search">
-              <Ionicons name="close-circle" size={18} color={colors.inkFaint} />
-            </Pressable>
-          )}
+        <View style={styles.searchRow}>
+          <View style={styles.search}>
+            <Ionicons name="search" size={18} color={colors.inkMuted} />
+            <TextInput
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Search atta, oil, dal…"
+              placeholderTextColor={colors.inkFaint}
+              style={styles.searchInput}
+              returnKeyType="search"
+              autoCorrect={false}
+            />
+            {query.length > 0 && (
+              <Pressable onPress={() => setQuery('')} hitSlop={10} accessibilityLabel="Clear search">
+                <Ionicons name="close-circle" size={18} color={colors.inkFaint} />
+              </Pressable>
+            )}
+          </View>
+          <Pressable
+            onPress={() => setFilterOpen(true)}
+            style={({ pressed }) => [styles.filterBtn, activeFilters > 0 && styles.filterBtnActive, pressed && { opacity: 0.8 }]}
+            accessibilityRole="button"
+            accessibilityLabel={activeFilters ? `Filters, ${activeFilters} active` : 'Filters'}
+          >
+            <Ionicons name="options-outline" size={22} color={activeFilters > 0 ? '#fff' : colors.ink} />
+            {activeFilters > 0 && (
+              <View style={styles.filterBadge}>
+                <Text style={styles.filterBadgeText}>{activeFilters}</Text>
+              </View>
+            )}
+          </Pressable>
         </View>
         <Pressable
           onPress={() => setPickerOpen(true)}
@@ -141,6 +172,24 @@ export default function CatalogueScreen() {
           setPickerOpen(false);
         }}
         onClose={() => setPickerOpen(false)}
+      />
+
+      <FilterSheet
+        visible={filterOpen}
+        categories={options}
+        category={category}
+        categoryCounts={counts}
+        onCategory={setCategory}
+        brands={catalog?.brands ?? []}
+        selectedBrands={brands}
+        brandCounts={brandCounts}
+        onBrands={setBrands}
+        resultCount={visible.length}
+        onClearAll={() => {
+          setCategory(null);
+          setBrands([]);
+        }}
+        onClose={() => setFilterOpen(false)}
       />
 
       {!catalog && !error ? (
@@ -203,10 +252,18 @@ export default function CatalogueScreen() {
           keyboardDismissMode="on-drag"
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
           ListHeaderComponent={
-            <Text style={styles.resultCount}>
-              {visible.length} item{visible.length === 1 ? '' : 's'}
-              {query.trim() ? ` for “${query.trim()}”` : ''}
-            </Text>
+            <View style={styles.resultRow}>
+              <Text style={styles.resultCount} numberOfLines={1}>
+                {visible.length} item{visible.length === 1 ? '' : 's'}
+                {query.trim() ? ` for “${query.trim()}”` : ''}
+                {brands.length ? ` · ${brands.map(titleCase).join(', ')}` : ''}
+              </Text>
+              {brands.length > 0 && (
+                <Pressable onPress={() => setBrands([])} hitSlop={8} accessibilityRole="button">
+                  <Text style={styles.clearLink}>Clear brands</Text>
+                </Pressable>
+              )}
+            </View>
           }
           ListEmptyComponent={
             <View style={styles.center}>
@@ -222,6 +279,126 @@ export default function CatalogueScreen() {
 
       <CartBar label="View cart" onPress={() => router.navigate('/cart')} />
     </SafeAreaView>
+  );
+}
+
+/** Filter sheet: one category (same choice as the dropdown) and any number of brands. Both
+ *  lists come from the live catalogue, so new brands/categories appear as items are imported. */
+function FilterSheet({
+  visible,
+  categories,
+  category,
+  categoryCounts,
+  onCategory,
+  brands,
+  selectedBrands,
+  brandCounts,
+  onBrands,
+  resultCount,
+  onClearAll,
+  onClose,
+}: {
+  visible: boolean;
+  categories: string[];
+  category: string | null;
+  categoryCounts: Record<string, number>;
+  onCategory: (c: string | null) => void;
+  brands: string[];
+  selectedBrands: string[];
+  brandCounts: Record<string, number>;
+  onBrands: (b: string[]) => void;
+  resultCount: number;
+  onClearAll: () => void;
+  onClose: () => void;
+}) {
+  const insets = useSafeAreaInsets();
+  const [brandQuery, setBrandQuery] = useState('');
+  const q = brandQuery.trim().toLowerCase();
+  // Selected brands stay listed even if the current category has none of them.
+  const shownBrands = brands.filter(
+    (b) => (!q || b.toLowerCase().includes(q)) && ((brandCounts[b] ?? 0) > 0 || selectedBrands.includes(b)),
+  );
+  const toggleBrand = (b: string) =>
+    onBrands(selectedBrands.includes(b) ? selectedBrands.filter((x) => x !== b) : [...selectedBrands, b]);
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      <Pressable style={styles.backdrop} onPress={onClose} accessibilityLabel="Close filters" />
+      <View style={[styles.sheet, styles.filterSheet, { paddingBottom: Math.max(insets.bottom, 12) }]}>
+        <View style={styles.sheetHandle} />
+        <View style={styles.sheetHeader}>
+          <Text style={styles.sheetTitle}>Filters</Text>
+          <Pressable onPress={onClearAll} hitSlop={10} accessibilityRole="button">
+            <Text style={styles.clearLink}>Clear all</Text>
+          </Pressable>
+        </View>
+
+        <ScrollView contentContainerStyle={styles.filterBody} keyboardShouldPersistTaps="handled">
+          <Text style={styles.filterLabel}>Category</Text>
+          <View style={styles.chipWrap}>
+            {categories.map((c) => {
+              const active = c === category;
+              // Hide categories the chosen brands don't sell in (keep the current pick visible).
+              if (!active && (categoryCounts[c] ?? 0) === 0) return null;
+              return (
+                <Pressable
+                  key={c}
+                  onPress={() => onCategory(active ? null : c)}
+                  style={[styles.chip, active && styles.chipActive]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
+                >
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                    {titleCase(c)} <Text style={active ? styles.chipTextActive : styles.chipCount}>{categoryCounts[c] ?? 0}</Text>
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          <Text style={[styles.filterLabel, { marginTop: 18 }]}>
+            Brand{selectedBrands.length ? ` · ${selectedBrands.length} selected` : ''}
+          </Text>
+          <View style={styles.brandSearch}>
+            <Ionicons name="search" size={16} color={colors.inkMuted} />
+            <TextInput
+              value={brandQuery}
+              onChangeText={setBrandQuery}
+              placeholder={`Search ${brands.length} brands`}
+              placeholderTextColor={colors.inkFaint}
+              style={styles.searchInput}
+              autoCorrect={false}
+            />
+          </View>
+          <View style={styles.chipWrap}>
+            {shownBrands.map((b) => {
+              const active = selectedBrands.includes(b);
+              return (
+                <Pressable
+                  key={b}
+                  onPress={() => toggleBrand(b)}
+                  style={[styles.chip, active && styles.chipActive]}
+                  accessibilityRole="checkbox"
+                  accessibilityState={{ checked: active }}
+                >
+                  {active && <Ionicons name="checkmark" size={14} color="#fff" />}
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                    {titleCase(b)} <Text style={active ? styles.chipTextActive : styles.chipCount}>{brandCounts[b] ?? 0}</Text>
+                  </Text>
+                </Pressable>
+              );
+            })}
+            {shownBrands.length === 0 && <Text style={styles.chipCount}>No brands match.</Text>}
+          </View>
+        </ScrollView>
+
+        <Pressable onPress={onClose} style={styles.applyBtn} accessibilityRole="button">
+          <Text style={styles.applyText}>
+            Show {resultCount} item{resultCount === 1 ? '' : 's'}
+          </Text>
+        </Pressable>
+      </View>
+    </Modal>
   );
 }
 
@@ -296,7 +473,76 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.line,
   },
   title: { fontSize: 20, fontWeight: '900', color: colors.ink },
+  searchRow: { flexDirection: 'row', gap: 8 },
+  filterBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterBtnActive: { backgroundColor: colors.ink, borderColor: colors.ink },
+  filterBadge: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    minWidth: 20,
+    height: 20,
+    borderRadius: 10,
+    paddingHorizontal: 5,
+    backgroundColor: colors.brand,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterBadgeText: { color: '#fff', fontSize: 11, fontWeight: '900' },
+  filterSheet: { maxHeight: '85%' },
+  filterBody: { paddingHorizontal: 16, paddingBottom: 12 },
+  filterLabel: { fontSize: 13, fontWeight: '900', color: colors.ink, marginBottom: 8, letterSpacing: 0.3 },
+  chipWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.line,
+    backgroundColor: colors.card,
+  },
+  chipActive: { backgroundColor: colors.ink, borderColor: colors.ink },
+  chipText: { fontSize: 13, fontWeight: '700', color: colors.ink },
+  chipTextActive: { color: '#fff' },
+  chipCount: { fontSize: 11, fontWeight: '700', color: colors.inkFaint },
+  brandSearch: {
+    height: 40,
+    borderRadius: radius.sm,
+    backgroundColor: colors.bg,
+    borderWidth: 1,
+    borderColor: colors.line,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    gap: 6,
+    marginBottom: 10,
+  },
+  applyBtn: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    height: 48,
+    borderRadius: radius.sm,
+    backgroundColor: colors.green,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  applyText: { color: '#fff', fontSize: 15, fontWeight: '800' },
+  resultRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  clearLink: { fontSize: 13, fontWeight: '800', color: colors.brand },
   search: {
+    flex: 1,
     height: 44,
     borderRadius: radius.md,
     backgroundColor: colors.bg,
@@ -375,7 +621,7 @@ const styles = StyleSheet.create({
   optionTextActive: { fontWeight: '800', color: colors.brand },
   optionCount: { fontSize: 12, color: colors.inkFaint, fontWeight: '700' },
   grid: { padding: GAP, gap: GAP, paddingBottom: 96 },
-  resultCount: { fontSize: 12, color: colors.inkMuted, fontWeight: '700' },
+  resultCount: { flex: 1, fontSize: 12, color: colors.inkMuted, fontWeight: '700' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
   errorText: { textAlign: 'center', color: colors.inkMuted, fontSize: 14 },
   retry: { marginTop: 6, paddingHorizontal: 18, paddingVertical: 10, borderRadius: radius.sm, backgroundColor: colors.brand },

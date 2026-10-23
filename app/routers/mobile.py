@@ -48,8 +48,9 @@ def get_catalog(
     category: Optional[str] = Query(default=None),
     db: Session = Depends(get_db),
 ):
-    """Active items with MRP, selling price and promo status, plus the category list for
-    the app's category strip."""
+    """Active items with MRP, selling price and promo status, plus the category and brand
+    lists for the app's filters — both derived from the live catalogue, so they follow
+    whatever has been imported."""
     query = db.query(Item).filter(Item.is_active == 1)
     if q:
         like = f"%{q.strip()}%"
@@ -61,7 +62,8 @@ def get_catalog(
     categories = [
         c for (c,) in db.query(Item.category).filter(Item.is_active == 1).distinct().order_by(Item.category.asc()) if c
     ]
-    return {"categories": categories, "items": [_catalog_item(i) for i in items]}
+    brands = [b for (b,) in db.query(Item.brand).filter(Item.is_active == 1).distinct().order_by(Item.brand.asc()) if b]
+    return {"categories": categories, "brands": brands, "items": [_catalog_item(i) for i in items]}
 
 
 @router.get("/customer/purchased-items")

@@ -4,13 +4,14 @@ from tests.test_scenarios import _create_customer, _create_item
 
 
 def test_catalog_prices_through_tax_engine_and_lists_categories(client, admin_headers):
-    atta = _create_item(client, admin_headers, case_taxable_value=228)
+    atta = _create_item(client, admin_headers, case_taxable_value=228, brand="Aashirvaad")
     _create_item(client, admin_headers, item_name="Toor Dal 1 kg", category="Rice & Pulses", discount_rate=0, case_size=1)
 
     r = client.get("/api/catalog")
     assert r.status_code == 200, r.text
     body = r.json()
     assert body["categories"] == ["Atta & Flour", "Rice & Pulses"]
+    assert body["brands"] == ["Aashirvaad"]  # unbranded items add no entry
 
     row = next(i for i in body["items"] if i["id"] == atta["id"])
     assert row["mrp"] == 285
