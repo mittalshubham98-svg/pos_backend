@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, radius } from '@/lib/theme';
+import { colors, radius, shadow } from '@/lib/theme';
 import { useAuth } from '@/state/auth';
 
 export default function LoginScreen() {
@@ -139,22 +139,22 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.yellow },
   scroll: { flexGrow: 1, padding: 20, justifyContent: 'center' },
   hero: { alignItems: 'center', marginBottom: 28 },
   logo: {
     width: 72,
     height: 72,
     borderRadius: 20,
-    backgroundColor: colors.brand,
+    backgroundColor: colors.ink,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 14,
   },
-  logoText: { color: '#fff', fontSize: 28, fontWeight: '900' },
-  title: { fontSize: 26, fontWeight: '900', color: colors.ink },
-  subtitle: { marginTop: 6, fontSize: 14, color: colors.inkMuted, textAlign: 'center' },
-  form: { backgroundColor: colors.card, borderRadius: radius.lg, padding: 20 },
+  logoText: { color: colors.yellow, fontSize: 28, fontWeight: '900' },
+  title: { fontSize: 28, fontWeight: '900', color: colors.ink, letterSpacing: -0.4 },
+  subtitle: { marginTop: 6, fontSize: 14, color: '#3D3200', textAlign: 'center' },
+  form: { backgroundColor: colors.card, borderRadius: radius.xl, padding: 20, ...shadow },
   label: { fontSize: 12, fontWeight: '700', color: colors.inkMuted, marginBottom: 6, letterSpacing: 0.3 },
   input: {
     height: 48,
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.sm,
   },
   eye: { paddingHorizontal: 12 },
-  error: { marginTop: 12, color: colors.brandDark, fontSize: 13, fontWeight: '600' },
+  error: { marginTop: 12, color: colors.danger, fontSize: 13, fontWeight: '600' },
   button: {
     marginTop: 20,
     height: 50,

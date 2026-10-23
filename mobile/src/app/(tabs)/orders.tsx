@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 8 },
   emptyTitle: { fontSize: 17, fontWeight: '800', color: colors.ink },
   emptyText: { fontSize: 13, color: colors.inkMuted },
-  error: { color: colors.brandDark, fontWeight: '700', textAlign: 'center', marginBottom: 8 },
+  error: { color: colors.danger, fontWeight: '700', textAlign: 'center', marginBottom: 8 },
   card: { backgroundColor: colors.card, borderRadius: radius.md, padding: 14, gap: 8, ...shadow },
   cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
   po: { fontSize: 15, fontWeight: '800', color: colors.ink },

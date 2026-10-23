@@ -1,4 +1,4 @@
-"""Generates the app's icon set (brand red, white "PS" monogram) into mobile/assets.
+"""Generates the app's icon set (yellow, dark "PS" monogram) into mobile/assets.
 Run from the repo root with the backend venv, which already has Pillow:
     .venv\\Scripts\\python.exe mobile\\scripts\\make-icons.py
 """
@@ -7,9 +7,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
-RED = (236, 48, 19, 255)
-INK = (32, 30, 29, 255)
-WHITE = (255, 255, 255, 255)
+YELLOW = (248, 203, 70, 255)
+INK = (28, 28, 28, 255)
 FONT = "C:/Windows/Fonts/segoeuib.ttf"
 
 
@@ -27,13 +26,12 @@ def monogram(size: int, fill, bg, scale: float) -> Image.Image:
     return img
 
 
-# Launcher icon (iOS + legacy Android): full-bleed red square.
-monogram(1024, WHITE, RED, 0.42).save(ASSETS / "icon.png")
+# Launcher icon (iOS + legacy Android): full-bleed yellow square, dark mark.
+monogram(1024, INK, YELLOW, 0.42).save(ASSETS / "icon.png")
 # Android adaptive icon: the launcher crops to the centre ~66%, so the mark stays small.
-monogram(1024, WHITE, (0, 0, 0, 0), 0.30).save(ASSETS / "android-icon-foreground.png")
-Image.new("RGBA", (1024, 1024), RED).save(ASSETS / "android-icon-background.png")
-monogram(1024, WHITE, (0, 0, 0, 0), 0.30).save(ASSETS / "android-icon-monochrome.png")
-# Splash: red mark on the white splash background.
-monogram(1024, RED, (0, 0, 0, 0), 0.42).save(ASSETS / "splash-icon.png")
-monogram(48, WHITE, RED, 0.42).save(ASSETS / "favicon.png")
+monogram(1024, INK, (0, 0, 0, 0), 0.30).save(ASSETS / "android-icon-foreground.png")
+Image.new("RGBA", (1024, 1024), YELLOW).save(ASSETS / "android-icon-background.png")
+monogram(1024, INK, (0, 0, 0, 0), 0.30).save(ASSETS / "android-icon-monochrome.png")
+monogram(1024, INK, (0, 0, 0, 0), 0.42).save(ASSETS / "splash-icon.png")
+monogram(48, INK, YELLOW, 0.42).save(ASSETS / "favicon.png")
 print("icons written to", ASSETS)

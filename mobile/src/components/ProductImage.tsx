@@ -2,36 +2,42 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+import { categoryIcon } from '@/lib/categoryIcon';
 import { colors } from '@/lib/theme';
 
-/** Item photo, or a tinted monogram tile when the catalogue has no image for it yet. */
-export function ProductImage({ uri, name, size }: { uri: string | null; name: string; size: number }) {
+/** Item photo on a soft grey plate, or the category's icon when there's no photo yet. */
+export function ProductImage({
+  uri,
+  name,
+  category,
+  size,
+}: {
+  uri: string | null;
+  name: string;
+  category?: string | null;
+  size: number;
+}) {
   const [failed, setFailed] = useState(false);
-  if (uri && !failed) {
-    return (
-      <Image
-        source={{ uri }}
-        style={{ width: size, height: size, borderRadius: 10 }}
-        contentFit="contain"
-        transition={150}
-        onError={() => setFailed(true)}
-      />
-    );
-  }
-  const initials = name
-    .split(/\s+/)
-    .filter((w) => /^[A-Za-z]/.test(w))
-    .slice(0, 2)
-    .map((w) => w[0].toUpperCase())
-    .join('');
   return (
-    <View style={[styles.tile, { width: size, height: size }]}>
-      <Text style={[styles.initials, { fontSize: size * 0.3 }]}>{initials || '•'}</Text>
+    <View style={[styles.plate, { width: size, height: size }]}>
+      {uri && !failed ? (
+        <Image
+          source={{ uri }}
+          style={{ width: size * 0.86, height: size * 0.86 }}
+          contentFit="contain"
+          transition={150}
+          onError={() => setFailed(true)}
+          accessibilityLabel={name}
+        />
+      ) : (
+        <Text style={{ fontSize: size * 0.42 }} accessibilityLabel={name}>
+          {categoryIcon(category)}
+        </Text>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  tile: { borderRadius: 10, backgroundColor: colors.brandTint, alignItems: 'center', justifyContent: 'center' },
-  initials: { color: colors.brand, fontWeight: '800' },
+  plate: { borderRadius: 12, backgroundColor: colors.imageBg, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
 });

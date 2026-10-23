@@ -15,7 +15,7 @@
       "package": "pro.speedbuy.pilanisupply",
       "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#EC3013",
+        "backgroundColor": "#F8CB46",
         "foregroundImage": "./assets/android-icon-foreground.png",
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"

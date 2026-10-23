@@ -76,7 +76,7 @@ function RegularRow({ item, rank, apiUrl }: { item: PurchasedItem; rank: number;
   return (
     <View style={styles.row}>
       <Text style={styles.rank}>{rank}</Text>
-      <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} size={56} />
+      <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} category={item.category} size={56} />
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={styles.name} numberOfLines={2}>
           {item.name}
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   list: { padding: 12, gap: 10, paddingBottom: 100, flexGrow: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 8 },
   caption: { fontSize: 12, color: colors.inkMuted, marginBottom: 2 },
-  error: { color: colors.brandDark, fontWeight: '700', textAlign: 'center' },
+  error: { color: colors.danger, fontWeight: '700', textAlign: 'center' },
   emptyTitle: { fontSize: 17, fontWeight: '800', color: colors.ink },
   emptyText: { fontSize: 13, color: colors.inkMuted, textAlign: 'center' },
   row: {

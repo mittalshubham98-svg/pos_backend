@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   qrMissing: { width: 220, height: 160, alignItems: 'center', justifyContent: 'center', gap: 8 },
   qrAmount: { fontSize: 18, fontWeight: '900', color: colors.ink },
   warn: { fontSize: 12, color: colors.amber, fontWeight: '600' },
-  error: { color: colors.brandDark, fontWeight: '700', textAlign: 'center', paddingHorizontal: 12 },
+  error: { color: colors.danger, fontWeight: '700', textAlign: 'center', paddingHorizontal: 12 },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',

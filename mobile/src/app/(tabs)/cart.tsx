@@ -64,7 +64,7 @@ function CartRow({ line, apiUrl }: { line: CartLine; apiUrl: string }) {
   const unit = line.uom === 'CASE' ? `Case of ${item.case_size} · ${rupees(item.case_selling_price ?? item.selling_price)}/pc` : rupees(item.selling_price);
   return (
     <View style={styles.row}>
-      <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} size={56} />
+      <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} category={item.category} size={56} />
       <View style={{ flex: 1 }}>
         <Text style={styles.rowName} numberOfLines={2}>
           {item.name}

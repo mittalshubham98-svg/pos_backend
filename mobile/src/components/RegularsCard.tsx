@@ -70,7 +70,7 @@ export function RegularsCard({
         {items.slice(0, 4).map((item, rank) => (
           <View key={item.id} style={styles.item}>
             <View>
-              <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} size={64} />
+              <ProductImage uri={imageUrl(apiUrl, item.image_url)} name={item.name} category={item.category} size={64} />
               <View style={styles.rankBadge}>
                 <Text style={styles.rankText}>{rank + 1}</Text>
               </View>

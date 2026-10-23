@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ComponentRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -20,6 +20,7 @@ import { CartBar } from '@/components/CartBar';
 import { ProductCard } from '@/components/ProductCard';
 import { api, Catalog, CatalogItem } from '@/lib/api';
 import { ALL, byBestDeal, DEALS, isDeal, titleCase } from '@/lib/catalog';
+import { categoryIcon } from '@/lib/categoryIcon';
 import { colors, radius, shadow } from '@/lib/theme';
 import { useAuth } from '@/state/auth';
 
@@ -28,8 +29,9 @@ const GAP = 12;
 export default function CatalogueScreen() {
   const auth = useAuth();
   const { width } = useWindowDimensions();
-  // Home's deals banner opens this tab with ?category=Top deals.
-  const params = useLocalSearchParams<{ category?: string }>();
+  // Home opens this tab with ?category=<name> (banner, category strip) or ?focus=<ts> (search bar).
+  const params = useLocalSearchParams<{ category?: string; focus?: string }>();
+  const searchRef = useRef<ComponentRef<typeof TextInput>>(null);
   const [catalog, setCatalog] = useState<Catalog | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,6 +46,11 @@ export default function CatalogueScreen() {
   useEffect(() => {
     if (params.category) setCategory(params.category);
   }, [params.category]);
+
+  // A fresh timestamp each time Home's search bar is tapped, so it re-focuses every time.
+  useEffect(() => {
+    if (params.focus) setTimeout(() => searchRef.current?.focus(), 250);
+  }, [params.focus]);
 
   const load = useCallback(async () => {
     try {
@@ -113,6 +120,7 @@ export default function CatalogueScreen() {
           <View style={styles.search}>
             <Ionicons name="search" size={18} color={colors.inkMuted} />
             <TextInput
+              ref={searchRef}
               value={query}
               onChangeText={setQuery}
               placeholder="Search atta, oil, dal…"
@@ -206,6 +214,7 @@ export default function CatalogueScreen() {
         </View>
       ) : showTiles ? (
         <ScrollView
+          style={styles.canvas}
           contentContainerStyle={styles.tilesWrap}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
         >
@@ -225,14 +234,8 @@ export default function CatalogueScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={`${titleCase(c)}, ${counts[c] ?? 0} items`}
               >
-                <View style={styles.tileIcon}>
-                  {c === ALL ? (
-                    <Ionicons name="apps" size={22} color={colors.brand} />
-                  ) : c === DEALS ? (
-                    <Ionicons name="pricetag" size={20} color={colors.brand} />
-                  ) : (
-                    <Text style={styles.tileInitial}>{c.trim()[0]?.toUpperCase()}</Text>
-                  )}
+                <View style={[styles.tileIcon, c === DEALS && { backgroundColor: '#E8F0FF' }]}>
+                  <Text style={styles.tileEmoji}>{categoryIcon(c)}</Text>
                 </View>
                 <Text style={styles.tileName} numberOfLines={2}>
                   {titleCase(c)}
@@ -248,6 +251,7 @@ export default function CatalogueScreen() {
           keyExtractor={(i) => String(i.id)}
           numColumns={2}
           columnWrapperStyle={{ gap: GAP }}
+          style={styles.canvas}
           contentContainerStyle={styles.grid}
           keyboardDismissMode="on-drag"
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.brand} />}
@@ -462,17 +466,15 @@ function CategoryPicker({
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.bg },
+  safe: { flex: 1, backgroundColor: colors.yellow },
   header: {
     paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 12,
+    paddingTop: 6,
+    paddingBottom: 14,
     gap: 10,
-    backgroundColor: colors.card,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.line,
+    backgroundColor: colors.yellow,
   },
-  title: { fontSize: 20, fontWeight: '900', color: colors.ink },
+  title: { fontSize: 22, fontWeight: '900', color: colors.ink, letterSpacing: -0.3 },
   searchRow: { flexDirection: 'row', gap: 8 },
   filterBtn: {
     width: 44,
@@ -543,11 +545,11 @@ const styles = StyleSheet.create({
   clearLink: { fontSize: 13, fontWeight: '800', color: colors.brand },
   search: {
     flex: 1,
-    height: 44,
+    height: 46,
     borderRadius: radius.md,
-    backgroundColor: colors.bg,
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: colors.line,
+    borderColor: 'transparent',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 12,
@@ -580,14 +582,14 @@ const styles = StyleSheet.create({
     ...shadow,
   },
   tileIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: colors.brandTint,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.yellowTint,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tileInitial: { fontSize: 20, fontWeight: '900', color: colors.brand },
+  tileEmoji: { fontSize: 28 },
   tileName: { fontSize: 12, fontWeight: '700', color: colors.ink, textAlign: 'center', minHeight: 30 },
   tileCount: { fontSize: 10, color: colors.inkFaint, fontWeight: '700' },
   backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.4)' },
@@ -622,7 +624,8 @@ const styles = StyleSheet.create({
   optionCount: { fontSize: 12, color: colors.inkFaint, fontWeight: '700' },
   grid: { padding: GAP, gap: GAP, paddingBottom: 96 },
   resultCount: { flex: 1, fontSize: 12, color: colors.inkMuted, fontWeight: '700' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10 },
+  canvas: { backgroundColor: colors.bg },
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 32, gap: 10, backgroundColor: colors.bg },
   errorText: { textAlign: 'center', color: colors.inkMuted, fontSize: 14 },
   retry: { marginTop: 6, paddingHorizontal: 18, paddingVertical: 10, borderRadius: radius.sm, backgroundColor: colors.brand },
   retryText: { color: '#fff', fontWeight: '800' },
