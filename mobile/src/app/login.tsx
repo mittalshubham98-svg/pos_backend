@@ -122,7 +122,7 @@ export default function LoginScreen() {
               <TextInput
                 value={server}
                 onChangeText={setServer}
-                placeholder="http://192.168.0.154:8000"
+                placeholder="http://192.168.29.75:8000"
                 placeholderTextColor={colors.inkFaint}
                 autoCapitalize="none"
                 autoCorrect={false}
