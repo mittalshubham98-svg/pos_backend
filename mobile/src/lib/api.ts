@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 /** Server address baked in at build time (app.json -> extra.apiUrl). The login screen can
  *  override it, so one APK works against the shop PC on Wi-Fi or a hosted domain later. */
 export const DEFAULT_API_URL: string =
-  (Constants.expoConfig?.extra?.apiUrl as string | undefined) ?? 'http://192.168.0.154:8000';
+  (Constants.expoConfig?.extra?.apiUrl as string | undefined) ?? 'http://192.168.29.75:8000';
 
 export type CatalogItem = {
   id: number;
